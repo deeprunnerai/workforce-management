@@ -134,9 +134,7 @@
                 <field name="installation_id"/>
                 <field name="partner_id"/>
                 <separator/>
-                <filter string="My Visits" name="my_visits" domain="[('partner_id.user_ids', 'in', uid)]"/>
                 <filter string="Unassigned" name="unassigned" domain="[('partner_id', '=', False)]"/>
-                <separator/>
                 <filter string="Draft" name="filter_draft" domain="[('state', '=', 'draft')]"/>
                 <filter string="Assigned" name="filter_assigned" domain="[('state', '=', 'assigned')]"/>
                 <filter string="In Progress" name="filter_in_progress" domain="[('state', '=', 'in_progress')]"/>
@@ -147,7 +145,6 @@
                     <filter string="Partner" name="groupby_partner" context="{'group_by': 'partner_id'}"/>
                     <filter string="Stage" name="groupby_stage" context="{'group_by': 'stage_id'}"/>
                     <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
-                    <filter string="Visit Date" name="groupby_date" context="{'group_by': 'visit_date:month'}"/>
                 </group>
             </search>
         </field>
