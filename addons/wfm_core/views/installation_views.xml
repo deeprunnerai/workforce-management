@@ -10,7 +10,7 @@
                     <div class="oe_button_box" name="button_box">
                         <button name="%(wfm_core.action_wfm_visits)d" type="action"
                                 class="oe_stat_button" icon="fa-calendar"
-                                context="{'search_default_installation_id': active_id}">
+                                context="{'search_default_installation_id': id}">
                             <field name="visit_count" widget="statinfo" string="Visits"/>
                         </button>
                     </div>
