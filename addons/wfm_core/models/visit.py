@@ -124,10 +124,9 @@ class WfmVisit(models.Model):
         """Get the first stage by sequence."""
         return self.env['wfm.visit.stage'].search([], limit=1, order='sequence')
 
-    @api.model
-    def _read_group_stage_ids(self, stages, domain, order):
-        """Always display all stages in Kanban view."""
-        return self.env['wfm.visit.stage'].search([], order=order)
+    def _read_group_stage_ids(self, stages, domain):
+        """Always display all stages in Kanban view (Odoo 19 compatible)."""
+        return self.env['wfm.visit.stage'].search([], order='sequence')
 
     @api.depends('start_time', 'end_time')
     def _compute_duration(self):
