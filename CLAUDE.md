@@ -52,6 +52,8 @@ Client (Company)
 
 **ALWAYS use Odoo 19 syntax.** Key differences from older versions:
 
+### View Syntax Changes
+
 | Old (Odoo 17/18) | New (Odoo 19) |
 |------------------|---------------|
 | `<tree>` | `<list>` |
@@ -62,11 +64,21 @@ Client (Company)
 | `attrs="{'required': [...]}"` | `required="condition"` |
 | `states="draft,confirmed"` | `invisible="state not in ('draft', 'confirmed')"` |
 
+### Python API Changes
+
+| Old | New (Odoo 19) |
+|-----|---------------|
+| `@api.model` on `_read_group_*` | No decorator needed |
+| `_read_group_stage_ids(self, stages, domain, order)` | `_read_group_stage_ids(self, stages, domain)` |
+| `context.get('active_id')` in XML | Use `id` field directly |
+| `uid` in XML domains | Not available - use different approach |
+
 ### View Rules
 - Use `<list>` instead of `<tree>` for list/tree views
 - Use `invisible="expression"` directly on elements
 - Avoid complex Python expressions in XML domains
 - Load XML files in dependency order (actions before views that reference them)
+- Button context: use `id` not `active_id`
 
 ### Deployment
 ```bash
@@ -76,12 +88,12 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 
 ### Custom Addons (use `wfm_*` prefix)
 
-| Module | Purpose |
-|--------|---------|
-| `wfm_core` | Data models, business logic |
-| `wfm_fsm` | Field Service Management (Kanban, dashboard) |
-| `wfm_portal` | Partner self-service portal |
-| `wfm_whatsapp` | Twilio WhatsApp integration |
+| Module | Purpose | Status |
+|--------|---------|--------|
+| `wfm_core` | Data models, business logic | ✅ Deployed |
+| `wfm_fsm` | Field Service Management (Kanban, dashboard) | 📋 Planned |
+| `wfm_portal` | Partner self-service portal | 📋 Planned |
+| `wfm_whatsapp` | Twilio WhatsApp integration | 📋 Planned |
 
 ---
 
@@ -263,12 +275,28 @@ Use Greek test data (company names, addresses, partner names).
 
 ---
 
-## Workflow Summary (Key Steps)
+## Workflow Phases
 
-1. Client signs contract
-2. Admin stores contract & facility data
-3. Coordinator assigns partner to visit
-4. **Agent** sends WhatsApp notification automatically
-5. Partner accepts/confirms schedule
-6. Partner conducts visit & submits report
-7. Admin submits to SEPE & triggers billing
+### Phase 1: Contract & Setup
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│      1      │    │      2      │    │      3      │    │      4      │
+│   Client    │ -> │  GEP Admin  │ -> │  GEP Admin  │ -> │   System    │
+│   signs     │    │   stores    │    │  calculates │    │    syncs    │
+│  contract   │    │   data in   │    │   hours per │    │  Softone →  │
+│             │    │  Softone    │    │    SEPE     │    │   ERPx10    │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+    CLIENT           Softone ERP        SEPE Rules         AUTO SYNC
+```
+
+### Phase 2: Visit Assignment & Execution
+1. Coordinator assigns partner to visit
+2. **Agent** sends WhatsApp notification automatically
+3. Partner accepts/confirms schedule
+4. Partner conducts visit & submits report
+5. Admin submits to SEPE & triggers billing
+
+### Phase 3: Reporting & Compliance (Future)
+- SEPE export automation
+- Billing integration
+- Partner payments
