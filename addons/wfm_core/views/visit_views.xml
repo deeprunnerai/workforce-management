@@ -133,19 +133,6 @@
                 <field name="client_id"/>
                 <field name="installation_id"/>
                 <field name="partner_id"/>
-                <separator/>
-                <filter string="Unassigned" name="unassigned" domain="[('partner_id', '=', False)]"/>
-                <filter string="Draft" name="filter_draft" domain="[('state', '=', 'draft')]"/>
-                <filter string="Assigned" name="filter_assigned" domain="[('state', '=', 'assigned')]"/>
-                <filter string="In Progress" name="filter_in_progress" domain="[('state', '=', 'in_progress')]"/>
-                <filter string="Completed" name="filter_done" domain="[('state', '=', 'done')]"/>
-                <separator/>
-                <group expand="0" string="Group By">
-                    <filter string="Client" name="groupby_client" context="{'group_by': 'client_id'}"/>
-                    <filter string="Partner" name="groupby_partner" context="{'group_by': 'partner_id'}"/>
-                    <filter string="Stage" name="groupby_stage" context="{'group_by': 'stage_id'}"/>
-                    <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
-                </group>
             </search>
         </field>
     </record>
