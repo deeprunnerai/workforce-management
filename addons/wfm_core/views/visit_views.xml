@@ -143,7 +143,7 @@
                 <filter string="In Progress" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
                 <filter string="Completed" name="done" domain="[('state', '=', 'done')]"/>
                 <separator/>
-                <group expand="0" string="Group By">
+                <group string="Group By">
                     <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
                     <filter string="Installation" name="group_installation" context="{'group_by': 'installation_id'}"/>
                     <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>

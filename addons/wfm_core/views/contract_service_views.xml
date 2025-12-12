@@ -112,7 +112,7 @@
                 <filter string="Physician" name="physician" domain="[('service_type', '=', 'physician')]"/>
                 <filter string="Safety Engineer" name="safety_engineer" domain="[('service_type', '=', 'safety_engineer')]"/>
                 <separator/>
-                <group expand="0" string="Group By">
+                <group string="Group By">
                     <filter string="Contract" name="group_contract" context="{'group_by': 'contract_id'}"/>
                     <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
                     <filter string="Service Type" name="group_service_type" context="{'group_by': 'service_type'}"/>
