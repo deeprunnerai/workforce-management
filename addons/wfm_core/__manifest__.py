@@ -27,8 +27,8 @@
         'security/ir.model.access.csv',
         'data/visit_stages.xml',
         'views/partner_views.xml',
-        'views/installation_views.xml',
         'views/visit_views.xml',
+        'views/installation_views.xml',
         'views/menu.xml',
     ],
     'demo': [
