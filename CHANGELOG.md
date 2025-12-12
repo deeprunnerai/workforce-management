@@ -16,19 +16,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `STATUS.md` - Progress tracking template
 - Git branches: `main`, `dev-a`, `dev-b`, `dev-c`
 
-### Dev A (Core Models) - In Progress
+### @gauravdr (Core Models) - In Progress
 - [ ] `res.partner` extension (client/partner flags)
 - [ ] `wfm.installation` model
 - [ ] `wfm.visit.stage` model
 - [ ] `wfm.visit` model
 - [ ] Seed data (10 clients, 50 installations, 100 partners, 200 visits)
 
-### Dev B (Kanban/Dashboard) - Pending
+### @riya-2098 (Kanban/Dashboard) - Pending
 - [ ] Kanban pipeline view
 - [ ] Dashboard with 4 color cards
 - [ ] Stage drag-drop functionality
 
-### Dev C (Portal/WhatsApp) - Pending
+### @PanosAndr (Portal/WhatsApp) - Pending
 - [ ] Partner portal (view-only)
 - [ ] WhatsApp notification agent
 - [ ] Twilio integration
@@ -56,6 +56,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Contributors
 
-- **Dev A** - Core models, seed data
-- **Dev B** - Kanban, dashboard
-- **Dev C** - Portal, WhatsApp
+| Dev | GitHub | Email | Scope |
+|-----|--------|-------|-------|
+| **Dev A** | [@gauravdr](https://github.com/gauravdr) | gaurav@deeprunner.ai | Core models, seed data |
+| **Dev B** | [@riya-2098](https://github.com/riya-2098) | r.verma@deeprunner.ai | Kanban, dashboard |
+| **Dev C** | [@PanosAndr](https://github.com/PanosAndr) | p.andrikopoulos@deeprunner.ai | Portal, WhatsApp |

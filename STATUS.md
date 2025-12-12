@@ -4,7 +4,7 @@
 
 | Metric | Value |
 |--------|-------|
-| **Developer** | Dev A |
+| **Developer** | Gaurav ([@gauravdr](https://github.com/gauravdr)) <gaurav@deeprunner.ai> |
 | **Branch** | `dev-a` |
 | **Start Time** | - |
 | **Current Phase** | Planning Complete |
@@ -68,12 +68,12 @@ _None_
 
 ## Integration Handoffs
 
-### To Dev B
+### To @riya-2098 (Dev B)
 - [ ] `wfm.visit` model ready with `stage_id`
 - [ ] `_read_group_stage_ids` implemented
 - [ ] `_compute_color` implemented
 
-### To Dev C
+### To @PanosAndr (Dev C)
 - [ ] `wfm.visit.write()` hook ready
 - [ ] Partner phone field accessible
 

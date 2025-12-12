@@ -2,7 +2,7 @@
 
 ## Assignment Overview
 
-**Developer:** Dev A
+**Developer:** Gaurav ([@gauravdr](https://github.com/gauravdr)) <gaurav@deeprunner.ai>
 **Branch:** `dev-a`
 **Time Budget:** 4 hours
 **Deliverables:** Core Models + Seed Data
@@ -23,10 +23,10 @@
 5. **Views:** Basic form/tree views for data entry
 
 ### Out of Scope (Other Devs)
-- Kanban pipeline UI (Dev B)
-- Dashboard widgets (Dev B)
-- Partner portal (Dev C)
-- WhatsApp integration (Dev C)
+- Kanban pipeline UI (@riya-2098)
+- Dashboard widgets (@riya-2098)
+- Partner portal (@PanosAndr)
+- WhatsApp integration (@PanosAndr)
 
 ---
 
@@ -122,12 +122,12 @@ addons/wfm_core/
 
 ## Integration Points
 
-### For Dev B (Kanban/Dashboard)
+### For @riya-2098 (Kanban/Dashboard)
 - `wfm.visit` model with `stage_id` for Kanban grouping
 - `_read_group_stage_ids` method for stage expansion
 - Color computation method `_compute_color`
 
-### For Dev C (Portal/WhatsApp)
+### For @PanosAndr (Portal/WhatsApp)
 - `wfm.visit.write()` hook for notification trigger
 - Partner model with `phone` field for WhatsApp
 

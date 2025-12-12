@@ -1,5 +1,10 @@
 # Dev A Tasks
 
+**Developer:** Gaurav ([@gauravdr](https://github.com/gauravdr)) <gaurav@deeprunner.ai>
+**Branch:** `dev-a`
+
+---
+
 ## Task Breakdown
 
 ### Phase 1: Module Scaffold (30 min)
@@ -120,5 +125,5 @@ T1.x (Scaffold) → T2.x (Partner) → T3.x (Installation)
 - [ ] 200 visits in various stages
 
 ### Integration
-- [ ] Visit model has hooks for Dev C notifications
-- [ ] Stage grouping works for Dev B Kanban
+- [ ] Visit model has hooks for @PanosAndr notifications
+- [ ] Stage grouping works for @riya-2098 Kanban
