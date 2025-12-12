@@ -142,9 +142,9 @@
                 <filter string="In Progress" name="filter_in_progress" domain="[('state', '=', 'in_progress')]"/>
                 <filter string="Completed" name="filter_done" domain="[('state', '=', 'done')]"/>
                 <separator/>
-                <filter string="Today" name="filter_today" domain="[('visit_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="This Week" name="filter_week" domain="[('visit_date', '>=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d')), ('visit_date', '&lt;=', (context_today() + relativedelta(days=6-context_today().weekday())).strftime('%Y-%m-%d'))]"/>
-                <filter string="This Month" name="filter_month" domain="[('visit_date', '>=', context_today().strftime('%Y-%m-01'))]"/>
+                <filter string="Today" name="filter_today" date="visit_date" default_period="today"/>
+                <filter string="This Week" name="filter_week" date="visit_date" default_period="this_week"/>
+                <filter string="This Month" name="filter_month" date="visit_date" default_period="this_month"/>
                 <separator/>
                 <group expand="0" string="Group By">
                     <filter string="Client" name="groupby_client" context="{'group_by': 'client_id'}"/>
