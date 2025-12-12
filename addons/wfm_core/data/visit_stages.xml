@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Visit Reference Sequence -->
+        <record id="seq_wfm_visit" model="ir.sequence">
+            <field name="name">WFM Visit Sequence</field>
+            <field name="code">wfm.visit</field>
+            <field name="prefix">VISIT/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Default Visit Stages -->
+        <record id="stage_draft" model="wfm.visit.stage">
+            <field name="name">Draft</field>
+            <field name="sequence">10</field>
+            <field name="fold">False</field>
+            <field name="description">Visit created but not yet assigned to a partner</field>
+            <field name="is_completed">False</field>
+        </record>
+
+        <record id="stage_assigned" model="wfm.visit.stage">
+            <field name="name">Assigned</field>
+            <field name="sequence">20</field>
+            <field name="fold">False</field>
+            <field name="description">Visit assigned to a partner, waiting for confirmation</field>
+            <field name="is_completed">False</field>
+        </record>
+
+        <record id="stage_confirmed" model="wfm.visit.stage">
+            <field name="name">Confirmed</field>
+            <field name="sequence">30</field>
+            <field name="fold">False</field>
+            <field name="description">Visit confirmed by partner</field>
+            <field name="is_completed">False</field>
+        </record>
+
+        <record id="stage_in_progress" model="wfm.visit.stage">
+            <field name="name">In Progress</field>
+            <field name="sequence">40</field>
+            <field name="fold">False</field>
+            <field name="description">Visit is currently being conducted</field>
+            <field name="is_completed">False</field>
+        </record>
+
+        <record id="stage_completed" model="wfm.visit.stage">
+            <field name="name">Completed</field>
+            <field name="sequence">50</field>
+            <field name="fold">True</field>
+            <field name="description">Visit successfully completed</field>
+            <field name="is_completed">True</field>
+        </record>
+    </data>
+</odoo>

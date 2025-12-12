@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Installation Form View -->
+    <record id="view_wfm_installation_form" model="ir.ui.view">
+        <field name="name">wfm.installation.form</field>
+        <field name="model">wfm.installation</field>
+        <field name="arch" type="xml">
+            <form string="Installation">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(wfm_core.action_wfm_visits)d" type="action"
+                                class="oe_stat_button" icon="fa-calendar"
+                                context="{'search_default_installation_id': active_id}">
+                            <field name="visit_count" widget="statinfo" string="Visits"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Installation Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Client Info">
+                            <field name="client_id"/>
+                            <field name="installation_type"/>
+                            <field name="employee_count"/>
+                        </group>
+                        <group string="Address">
+                            <field name="street"/>
+                            <field name="street2"/>
+                            <field name="city"/>
+                            <field name="postal_code"/>
+                            <field name="state_id"/>
+                            <field name="country_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Installation Tree View -->
+    <record id="view_wfm_installation_tree" model="ir.ui.view">
+        <field name="name">wfm.installation.tree</field>
+        <field name="model">wfm.installation</field>
+        <field name="arch" type="xml">
+            <tree string="Installations">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="city"/>
+                <field name="installation_type"/>
+                <field name="employee_count"/>
+                <field name="visit_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Installation Search View -->
+    <record id="view_wfm_installation_search" model="ir.ui.view">
+        <field name="name">wfm.installation.search</field>
+        <field name="model">wfm.installation</field>
+        <field name="arch" type="xml">
+            <search string="Search Installations">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="city"/>
+                <separator/>
+                <filter string="Office" name="filter_office" domain="[('installation_type', '=', 'office')]"/>
+                <filter string="Warehouse" name="filter_warehouse" domain="[('installation_type', '=', 'warehouse')]"/>
+                <filter string="Factory" name="filter_factory" domain="[('installation_type', '=', 'factory')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Client" name="groupby_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Type" name="groupby_type" context="{'group_by': 'installation_type'}"/>
+                    <filter string="City" name="groupby_city" context="{'group_by': 'city'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Installation Action -->
+    <record id="action_wfm_installations" model="ir.actions.act_window">
+        <field name="name">Installations</field>
+        <field name="res_model">wfm.installation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Installation
+            </p>
+            <p>
+                Installations are physical locations/branches where OHS visits are conducted.
+            </p>
+        </field>
+    </record>
+</odoo>

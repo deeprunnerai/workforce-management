@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Visit Form View -->
+    <record id="view_wfm_visit_form" model="ir.ui.view">
+        <field name="name">wfm.visit.form</field>
+        <field name="model">wfm.visit</field>
+        <field name="arch" type="xml">
+            <form string="Visit">
+                <header>
+                    <button name="action_assign" string="Assign" type="object"
+                            invisible="state != 'draft'" class="btn-primary"/>
+                    <button name="action_confirm" string="Confirm" type="object"
+                            invisible="state != 'assigned'" class="btn-primary"/>
+                    <button name="action_start" string="Start" type="object"
+                            invisible="state != 'confirmed'" class="btn-primary"/>
+                    <button name="action_complete" string="Complete" type="object"
+                            invisible="state != 'in_progress'" class="btn-primary"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('done', 'cancelled')"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" type="object"
+                            invisible="state not in ('cancelled',)"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,assigned,confirmed,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Visit Details">
+                            <field name="client_id"/>
+                            <field name="installation_id" domain="[('client_id', '=', client_id)]"/>
+                            <field name="installation_address"/>
+                            <field name="visit_type"/>
+                        </group>
+                        <group string="Assignment">
+                            <field name="partner_id"/>
+                            <field name="partner_specialty"/>
+                            <field name="partner_phone"/>
+                            <field name="stage_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Schedule">
+                            <field name="visit_date"/>
+                            <field name="start_time" widget="float_time"/>
+                            <field name="end_time" widget="float_time"/>
+                            <field name="duration"/>
+                        </group>
+                        <group string="Status">
+                            <field name="kanban_state" widget="kanban_state_selection"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Add notes about this visit..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Visit Tree View -->
+    <record id="view_wfm_visit_tree" model="ir.ui.view">
+        <field name="name">wfm.visit.tree</field>
+        <field name="model">wfm.visit</field>
+        <field name="arch" type="xml">
+            <tree string="Visits" decoration-danger="state == 'draft' and visit_date &lt; current_date"
+                  decoration-success="state == 'done'" decoration-warning="state == 'in_progress'">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="partner_id"/>
+                <field name="visit_date"/>
+                <field name="duration"/>
+                <field name="stage_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Visit Kanban View (basic - Dev B will enhance) -->
+    <record id="view_wfm_visit_kanban" model="ir.ui.view">
+        <field name="name">wfm.visit.kanban</field>
+        <field name="model">wfm.visit</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column">
+                <field name="color"/>
+                <field name="stage_id"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <field name="name" class="fw-bold"/>
+                        <field name="client_id"/>
+                        <field name="installation_id"/>
+                        <div class="d-flex justify-content-between">
+                            <field name="visit_date"/>
+                            <field name="partner_id" widget="many2one_avatar"/>
+                        </div>
+                        <field name="state" widget="badge"
+                               decoration-success="state == 'done'"
+                               decoration-warning="state == 'in_progress'"
+                               decoration-info="state in ('assigned', 'confirmed')"/>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Visit Calendar View -->
+    <record id="view_wfm_visit_calendar" model="ir.ui.view">
+        <field name="name">wfm.visit.calendar</field>
+        <field name="model">wfm.visit</field>
+        <field name="arch" type="xml">
+            <calendar string="Visits" date_start="visit_date" color="partner_id" mode="month">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="partner_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Visit Search View -->
+    <record id="view_wfm_visit_search" model="ir.ui.view">
+        <field name="name">wfm.visit.search</field>
+        <field name="model">wfm.visit</field>
+        <field name="arch" type="xml">
+            <search string="Search Visits">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="partner_id"/>
+                <separator/>
+                <filter string="My Visits" name="my_visits" domain="[('partner_id.user_ids', 'in', uid)]"/>
+                <filter string="Unassigned" name="unassigned" domain="[('partner_id', '=', False)]"/>
+                <separator/>
+                <filter string="Draft" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Assigned" name="filter_assigned" domain="[('state', '=', 'assigned')]"/>
+                <filter string="In Progress" name="filter_in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Completed" name="filter_done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Today" name="filter_today" domain="[('visit_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="This Week" name="filter_week" domain="[('visit_date', '>=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d')), ('visit_date', '&lt;=', (context_today() + relativedelta(days=6-context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter string="This Month" name="filter_month" domain="[('visit_date', '>=', context_today().strftime('%Y-%m-01'))]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Client" name="groupby_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Partner" name="groupby_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Stage" name="groupby_stage" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Visit Date" name="groupby_date" context="{'group_by': 'visit_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Visit Action -->
+    <record id="action_wfm_visits" model="ir.actions.act_window">
+        <field name="name">Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">kanban,tree,form,calendar</field>
+        <field name="search_view_id" ref="view_wfm_visit_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Schedule your first OHS Visit
+            </p>
+            <p>
+                Visits are scheduled OHS service appointments at client installations.
+            </p>
+        </field>
+    </record>
+
+    <!-- Visit Stage Tree View -->
+    <record id="view_wfm_visit_stage_tree" model="ir.ui.view">
+        <field name="name">wfm.visit.stage.tree</field>
+        <field name="model">wfm.visit.stage</field>
+        <field name="arch" type="xml">
+            <tree string="Visit Stages" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="fold"/>
+                <field name="is_completed"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Visit Stage Action -->
+    <record id="action_wfm_visit_stages" model="ir.actions.act_window">
+        <field name="name">Visit Stages</field>
+        <field name="res_model">wfm.visit.stage</field>
+        <field name="view_mode">tree</field>
+    </record>
+</odoo>

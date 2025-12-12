@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_wfm_root"
+              name="Workforce Management"
+              sequence="50"
+              web_icon="wfm_core,static/description/icon.png"/>
+
+    <!-- Operations Menu -->
+    <menuitem id="menu_wfm_operations"
+              name="Operations"
+              parent="menu_wfm_root"
+              sequence="10"/>
+
+    <menuitem id="menu_wfm_visits"
+              name="Visits"
+              parent="menu_wfm_operations"
+              action="action_wfm_visits"
+              sequence="10"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_wfm_configuration"
+              name="Configuration"
+              parent="menu_wfm_root"
+              sequence="90"/>
+
+    <menuitem id="menu_wfm_clients"
+              name="Clients"
+              parent="menu_wfm_configuration"
+              action="action_wfm_clients"
+              sequence="10"/>
+
+    <menuitem id="menu_wfm_installations"
+              name="Installations"
+              parent="menu_wfm_configuration"
+              action="action_wfm_installations"
+              sequence="20"/>
+
+    <menuitem id="menu_wfm_partners"
+              name="Partners"
+              parent="menu_wfm_configuration"
+              action="action_wfm_partners"
+              sequence="30"/>
+
+    <menuitem id="menu_wfm_visit_stages"
+              name="Visit Stages"
+              parent="menu_wfm_configuration"
+              action="action_wfm_visit_stages"
+              sequence="40"/>
+</odoo>

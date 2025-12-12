@@ -6,9 +6,9 @@
 |--------|-------|
 | **Developer** | Gaurav ([@gauravdr](https://github.com/gauravdr)) <gaurav@deeprunner.ai> |
 | **Branch** | `dev-a` |
-| **Start Time** | - |
-| **Current Phase** | Planning Complete |
-| **Overall Progress** | 0% |
+| **Start Time** | 2025-12-13 |
+| **Current Phase** | Core Models Complete |
+| **Overall Progress** | 75% |
 
 ---
 
@@ -16,26 +16,34 @@
 
 | Phase | Status | Progress |
 |-------|--------|----------|
-| 1. Module Scaffold | Not Started | 0/4 |
-| 2. Partner Extension | Not Started | 0/6 |
-| 3. Installation Model | Not Started | 0/5 |
-| 4. Visit Stage Model | Not Started | 0/2 |
-| 5. Visit Model | Not Started | 0/9 |
-| 6. Menu Structure | Not Started | 0/2 |
-| 7. Seed Data | Not Started | 0/5 |
+| 1. Module Scaffold | Complete | 4/4 |
+| 2. Partner Extension | Complete | 6/6 |
+| 3. Installation Model | Complete | 5/5 |
+| 4. Visit Stage Model | Complete | 2/2 |
+| 5. Visit Model | Complete | 9/9 |
+| 6. Menu Structure | Complete | 2/2 |
+| 7. Seed Data | Partial | 1/5 |
 | 8. Testing | Not Started | 0/6 |
 
 ---
 
 ## Completed Tasks
 
-_None yet_
+- [x] T1.1 Create `__manifest__.py`
+- [x] T1.2 Create `__init__.py` files
+- [x] T2.1-T2.6 Partner extension with all fields
+- [x] T3.1-T3.5 Installation model with views
+- [x] T4.1-T4.2 Visit stage model + default data
+- [x] T5.1-T5.9 Visit model with full functionality
+- [x] T6.1-T6.2 Menu structure
+- [x] Basic demo data (3 clients, 3 partners, 4 installations, 5 visits)
 
 ---
 
 ## In Progress
 
-_None yet_
+- [ ] Full seed data (10 clients, 100 partners, 50 installations, 200 visits)
+- [ ] Testing module installation
 
 ---
 
@@ -51,6 +59,8 @@ _None_
 - Greek test data for authenticity
 - Visit stages match Confluence specification
 - Notification hook prepared for Dev C integration
+- Basic Kanban view included (Dev B can enhance)
+- Calendar view included
 
 ---
 
@@ -58,24 +68,36 @@ _None_
 
 | File | Status | Description |
 |------|--------|-------------|
-| `CLAUDE.md` | Done | Project context |
-| `PLAN.md` | Done | Implementation plan |
-| `TASKS.md` | Done | Task breakdown |
-| `STATUS.md` | Done | This file |
-| `addons/wfm_core/` | Created | Directory structure |
+| `__manifest__.py` | Done | Module metadata |
+| `__init__.py` | Done | Package imports |
+| `models/partner.py` | Done | Client/Partner extensions |
+| `models/installation.py` | Done | Installation model |
+| `models/visit_stage.py` | Done | Visit stages |
+| `models/visit.py` | Done | Visit model with hooks |
+| `security/ir.model.access.csv` | Done | Access rules |
+| `data/visit_stages.xml` | Done | Default stages |
+| `views/partner_views.xml` | Done | Partner views |
+| `views/installation_views.xml` | Done | Installation views |
+| `views/visit_views.xml` | Done | Visit views + Kanban |
+| `views/menu.xml` | Done | Menu structure |
+| `demo/demo_data.xml` | Done | Demo data |
 
 ---
 
 ## Integration Handoffs
 
-### To @riya-2098 (Dev B)
-- [ ] `wfm.visit` model ready with `stage_id`
-- [ ] `_read_group_stage_ids` implemented
-- [ ] `_compute_color` implemented
+### To @riya-2098 (Dev B) - READY
+- [x] `wfm.visit` model ready with `stage_id`
+- [x] `_read_group_stage_ids` implemented
+- [x] `_compute_color` implemented
+- [x] Basic Kanban view (can be enhanced)
+- [x] Calendar view included
 
-### To @PanosAndr (Dev C)
-- [ ] `wfm.visit.write()` hook ready
-- [ ] Partner phone field accessible
+### To @PanosAndr (Dev C) - READY
+- [x] `wfm.visit.write()` hook ready
+- [x] Partner phone field accessible
+- [x] `_trigger_notification_agent()` method ready for override
+- [x] In-app notification via `message_notify()` implemented
 
 ---
 
@@ -83,8 +105,8 @@ _None_
 
 | Milestone | Target | Actual | Status |
 |-----------|--------|--------|--------|
-| Models complete | T+2h | - | Pending |
-| Seed data loaded | T+4h | - | Pending |
+| Models complete | T+2h | T+1h | Done |
+| Seed data loaded | T+4h | - | In Progress |
 
 ---
 

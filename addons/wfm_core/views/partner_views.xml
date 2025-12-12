@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend Partner Form View for WFM Client Fields -->
+    <record id="view_partner_form_wfm_client" model="ir.ui.view">
+        <field name="name">res.partner.form.wfm.client</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="is_wfm_client"/>
+                <field name="is_wfm_partner"/>
+            </xpath>
+            <xpath expr="//page[@name='sales_purchases']" position="after">
+                <page string="WFM Partner" name="wfm_partner" invisible="not is_wfm_partner">
+                    <group>
+                        <group string="Professional Info">
+                            <field name="specialty"/>
+                            <field name="hourly_rate"/>
+                        </group>
+                        <group string="Statistics">
+                            <field name="visit_count"/>
+                        </group>
+                    </group>
+                </page>
+                <page string="WFM Client" name="wfm_client" invisible="not is_wfm_client">
+                    <group>
+                        <group string="Statistics">
+                            <field name="installation_count"/>
+                        </group>
+                    </group>
+                    <field name="installation_ids" invisible="not is_wfm_client">
+                        <tree>
+                            <field name="name"/>
+                            <field name="city"/>
+                            <field name="installation_type"/>
+                            <field name="employee_count"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- WFM Clients Tree View -->
+    <record id="view_wfm_client_tree" model="ir.ui.view">
+        <field name="name">res.partner.tree.wfm.client</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <tree string="WFM Clients">
+                <field name="name"/>
+                <field name="city"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="installation_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- WFM Partners Tree View -->
+    <record id="view_wfm_partner_tree" model="ir.ui.view">
+        <field name="name">res.partner.tree.wfm.partner</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <tree string="WFM Partners">
+                <field name="name"/>
+                <field name="specialty"/>
+                <field name="city"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="hourly_rate"/>
+                <field name="visit_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- WFM Clients Action -->
+    <record id="action_wfm_clients" model="ir.actions.act_window">
+        <field name="name">Clients</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('is_wfm_client', '=', True)]</field>
+        <field name="context">{'default_is_wfm_client': True, 'default_is_company': True}</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('view_wfm_client_tree')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first WFM Client
+            </p>
+            <p>
+                Clients are companies that purchase OHS services from GEP.
+            </p>
+        </field>
+    </record>
+
+    <!-- WFM Partners Action -->
+    <record id="action_wfm_partners" model="ir.actions.act_window">
+        <field name="name">Partners</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('is_wfm_partner', '=', True)]</field>
+        <field name="context">{'default_is_wfm_partner': True}</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('view_wfm_partner_tree')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first WFM Partner
+            </p>
+            <p>
+                Partners are OHS professionals (physicians, safety engineers) who conduct visits.
+            </p>
+        </field>
+    </record>
+</odoo>
