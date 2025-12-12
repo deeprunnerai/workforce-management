@@ -109,10 +109,8 @@
                 <filter string="Draft" name="draft_contracts" domain="[('state', '=', 'draft')]"/>
                 <filter string="Indefinite" name="indefinite" domain="[('is_indefinite', '=', True)]"/>
                 <separator/>
-                <group string="Group By">
-                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
-                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
-                </group>
+                <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
             </search>
         </field>
     </record>

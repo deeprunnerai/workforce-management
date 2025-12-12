@@ -158,13 +158,11 @@
                 <filter string="Physician" name="physician" domain="[('service_type', '=', 'physician')]"/>
                 <filter string="Safety Engineer" name="safety_engineer" domain="[('service_type', '=', 'safety_engineer')]"/>
                 <separator/>
-                <group string="Group By">
-                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
-                    <filter string="Installation" name="group_installation" context="{'group_by': 'installation_id'}"/>
-                    <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
-                    <filter string="Service Type" name="group_service_type" context="{'group_by': 'service_type'}"/>
-                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
-                </group>
+                <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                <filter string="Installation" name="group_installation" context="{'group_by': 'installation_id'}"/>
+                <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                <filter string="Service Type" name="group_service_type" context="{'group_by': 'service_type'}"/>
+                <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
             </search>
         </field>
     </record>
