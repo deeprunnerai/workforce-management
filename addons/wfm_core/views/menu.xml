@@ -18,6 +18,24 @@
               action="action_wfm_visits"
               sequence="10"/>
 
+    <menuitem id="menu_wfm_contracts"
+              name="Contracts"
+              parent="menu_wfm_operations"
+              action="action_wfm_contracts"
+              sequence="20"/>
+
+    <menuitem id="menu_wfm_contract_services"
+              name="Contract Services"
+              parent="menu_wfm_operations"
+              action="action_wfm_contract_services"
+              sequence="30"/>
+
+    <menuitem id="menu_wfm_installation_services"
+              name="Installation Services"
+              parent="menu_wfm_operations"
+              action="action_wfm_installation_services"
+              sequence="40"/>
+
     <!-- Configuration Menu -->
     <menuitem id="menu_wfm_configuration"
               name="Configuration"

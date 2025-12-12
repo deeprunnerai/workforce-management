@@ -31,6 +31,8 @@
                         <group string="Visit Details">
                             <field name="client_id"/>
                             <field name="installation_id" domain="[('client_id', '=', client_id)]"/>
+                            <field name="installation_service_id"
+                                   domain="[('installation_id', '=', installation_id), ('state', 'in', ('assigned', 'in_progress'))]"/>
                             <field name="installation_address"/>
                             <field name="visit_type"/>
                         </group>
@@ -132,7 +134,22 @@
                 <field name="name"/>
                 <field name="client_id"/>
                 <field name="installation_id"/>
+                <field name="installation_service_id"/>
                 <field name="partner_id"/>
+                <filter string="Today" name="today" domain="[('visit_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="This Week" name="this_week" domain="[('visit_date', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d')), ('visit_date', '&lt;=', (context_today() + relativedelta(days=6-context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="In Progress" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Completed" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Installation" name="group_installation" context="{'group_by': 'installation_id'}"/>
+                    <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Visit Date" name="group_date" context="{'group_by': 'visit_date'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
             </search>
         </field>
     </record>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Contract Sequence -->
+    <record id="seq_wfm_contract" model="ir.sequence">
+        <field name="name">WFM Contract Sequence</field>
+        <field name="code">wfm.contract</field>
+        <field name="prefix">CON</field>
+        <field name="padding">6</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <!-- Contract Service Sequence -->
+    <record id="seq_wfm_contract_service" model="ir.sequence">
+        <field name="name">WFM Contract Service Sequence</field>
+        <field name="code">wfm.contract.service</field>
+        <field name="prefix">SVC</field>
+        <field name="padding">6</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <!-- Installation Service Sequence -->
+    <record id="seq_wfm_installation_service" model="ir.sequence">
+        <field name="name">WFM Installation Service Sequence</field>
+        <field name="code">wfm.installation.service</field>
+        <field name="prefix">ISVC</field>
+        <field name="padding">6</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+</odoo>

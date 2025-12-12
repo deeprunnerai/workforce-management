@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Contract Form View -->
+    <record id="view_wfm_contract_form" model="ir.ui.view">
+        <field name="name">wfm.contract.form</field>
+        <field name="model">wfm.contract</field>
+        <field name="arch" type="xml">
+            <form string="Contract">
+                <header>
+                    <button name="action_activate" string="Activate" type="object"
+                            invisible="state != 'draft'" class="btn-primary"/>
+                    <button name="action_expire" string="Mark Expired" type="object"
+                            invisible="state != 'active'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('expired', 'cancelled')"/>
+                    <button name="action_reset_draft" string="Reset to Draft" type="object"
+                            invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,expired"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(wfm_core.action_wfm_contract_services)d" type="action"
+                                class="oe_stat_button" icon="fa-list"
+                                context="{'search_default_contract_id': id}">
+                            <field name="service_count" widget="statinfo" string="Services"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="code"/>
+                        <h1>
+                            <field name="code" readonly="1"/>
+                        </h1>
+                        <label for="name"/>
+                        <h2>
+                            <field name="name" placeholder="Contract Name"/>
+                        </h2>
+                    </div>
+                    <group>
+                        <group string="Client">
+                            <field name="client_id"/>
+                            <field name="characterization"/>
+                        </group>
+                        <group string="Dates">
+                            <field name="start_date"/>
+                            <field name="is_indefinite"/>
+                            <field name="end_date" invisible="is_indefinite"/>
+                            <field name="signed_date_aade"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Financial">
+                            <field name="contract_value"/>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Services" name="services">
+                            <field name="service_ids">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="service_type"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="assigned_hours"/>
+                                    <field name="price_per_hour"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Contract Tree View -->
+    <record id="view_wfm_contract_tree" model="ir.ui.view">
+        <field name="name">wfm.contract.tree</field>
+        <field name="model">wfm.contract</field>
+        <field name="arch" type="xml">
+            <list string="Contracts" decoration-muted="state == 'cancelled'"
+                  decoration-danger="state == 'expired'">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="is_indefinite"/>
+                <field name="contract_value"/>
+                <field name="service_count"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'active'"
+                       decoration-info="state == 'draft'"
+                       decoration-danger="state == 'expired'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Contract Search View -->
+    <record id="view_wfm_contract_search" model="ir.ui.view">
+        <field name="name">wfm.contract.search</field>
+        <field name="model">wfm.contract</field>
+        <field name="arch" type="xml">
+            <search string="Search Contracts">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="client_id"/>
+                <filter string="Active" name="active_contracts" domain="[('state', '=', 'active')]"/>
+                <filter string="Draft" name="draft_contracts" domain="[('state', '=', 'draft')]"/>
+                <filter string="Indefinite" name="indefinite" domain="[('is_indefinite', '=', True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Contract Action -->
+    <record id="action_wfm_contracts" model="ir.actions.act_window">
+        <field name="name">Contracts</field>
+        <field name="res_model">wfm.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_active_contracts': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Contract
+            </p>
+            <p>
+                Contracts define the agreement between GEP and clients for OHS services.
+            </p>
+        </field>
+    </record>
+</odoo>

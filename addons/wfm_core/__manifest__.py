@@ -25,8 +25,12 @@
     ],
     'data': [
         'security/ir.model.access.csv',
+        'data/sequences.xml',
         'data/visit_stages.xml',
         'views/partner_views.xml',
+        'views/contract_views.xml',
+        'views/contract_service_views.xml',
+        'views/installation_service_views.xml',
         'views/visit_views.xml',
         'views/installation_views.xml',
         'views/menu.xml',

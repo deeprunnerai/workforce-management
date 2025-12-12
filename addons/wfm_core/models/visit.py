@@ -30,6 +30,12 @@ class WfmVisit(models.Model):
         required=True,
         tracking=True
     )
+    installation_service_id = fields.Many2one(
+        'wfm.installation.service',
+        string='Installation Service',
+        tracking=True,
+        help='Link to the specific service assignment for this installation'
+    )
     partner_id = fields.Many2one(
         'res.partner',
         string='Assigned Partner',
