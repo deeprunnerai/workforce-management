@@ -46,6 +46,34 @@ Client (Company)
 | **Server** | gaurav-vm |
 | **Local Dev** | Docker Compose |
 
+---
+
+## Odoo 19 Compatibility (IMPORTANT)
+
+**ALWAYS use Odoo 19 syntax.** Key differences from older versions:
+
+| Old (Odoo 17/18) | New (Odoo 19) |
+|------------------|---------------|
+| `<tree>` | `<list>` |
+| `</tree>` | `</list>` |
+| `view_mode="tree,form"` | `view_mode="list,form"` |
+| `attrs="{'invisible': [...]}"` | `invisible="condition"` |
+| `attrs="{'readonly': [...]}"` | `readonly="condition"` |
+| `attrs="{'required': [...]}"` | `required="condition"` |
+| `states="draft,confirmed"` | `invisible="state not in ('draft', 'confirmed')"` |
+
+### View Rules
+- Use `<list>` instead of `<tree>` for list/tree views
+- Use `invisible="expression"` directly on elements
+- Avoid complex Python expressions in XML domains
+- Load XML files in dependency order (actions before views that reference them)
+
+### Deployment
+```bash
+# Deploy to production
+ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp -r addons/wfm_core /opt/odoo/addons/ && docker restart odoo"
+```
+
 ### Custom Addons (use `wfm_*` prefix)
 
 | Module | Purpose |
