@@ -45,13 +45,13 @@
         <field name="name">res.partner.tree.wfm.client</field>
         <field name="model">res.partner</field>
         <field name="arch" type="xml">
-            <tree string="WFM Clients">
+            <list string="WFM Clients">
                 <field name="name"/>
                 <field name="city"/>
                 <field name="phone"/>
                 <field name="email"/>
                 <field name="installation_count"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -60,7 +60,7 @@
         <field name="name">res.partner.tree.wfm.partner</field>
         <field name="model">res.partner</field>
         <field name="arch" type="xml">
-            <tree string="WFM Partners">
+            <list string="WFM Partners">
                 <field name="name"/>
                 <field name="specialty"/>
                 <field name="city"/>
@@ -68,7 +68,7 @@
                 <field name="email"/>
                 <field name="hourly_rate"/>
                 <field name="visit_count"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -76,10 +76,10 @@
     <record id="action_wfm_clients" model="ir.actions.act_window">
         <field name="name">Clients</field>
         <field name="res_model">res.partner</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[('is_wfm_client', '=', True)]</field>
         <field name="context">{'default_is_wfm_client': True, 'default_is_company': True}</field>
-        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('view_wfm_client_tree')})]"/>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_wfm_client_tree')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first WFM Client
@@ -94,10 +94,10 @@
     <record id="action_wfm_partners" model="ir.actions.act_window">
         <field name="name">Partners</field>
         <field name="res_model">res.partner</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[('is_wfm_partner', '=', True)]</field>
         <field name="context">{'default_is_wfm_partner': True}</field>
-        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('view_wfm_partner_tree')})]"/>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_wfm_partner_tree')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first WFM Partner

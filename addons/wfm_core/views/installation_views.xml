@@ -45,14 +45,14 @@
         <field name="name">wfm.installation.tree</field>
         <field name="model">wfm.installation</field>
         <field name="arch" type="xml">
-            <tree string="Installations">
+            <list string="Installations">
                 <field name="name"/>
                 <field name="client_id"/>
                 <field name="city"/>
                 <field name="installation_type"/>
                 <field name="employee_count"/>
                 <field name="visit_count"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -83,7 +83,7 @@
     <record id="action_wfm_installations" model="ir.actions.act_window">
         <field name="name">Installations</field>
         <field name="res_model">wfm.installation</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first Installation

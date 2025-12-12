@@ -68,7 +68,7 @@
         <field name="name">wfm.visit.tree</field>
         <field name="model">wfm.visit</field>
         <field name="arch" type="xml">
-            <tree string="Visits" decoration-danger="state == 'draft' and visit_date &lt; current_date"
+            <list string="Visits" decoration-danger="state == 'draft' and visit_date &lt; current_date"
                   decoration-success="state == 'done'" decoration-warning="state == 'in_progress'">
                 <field name="name"/>
                 <field name="client_id"/>
@@ -78,7 +78,7 @@
                 <field name="duration"/>
                 <field name="stage_id"/>
                 <field name="state"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -161,7 +161,7 @@
     <record id="action_wfm_visits" model="ir.actions.act_window">
         <field name="name">Visits</field>
         <field name="res_model">wfm.visit</field>
-        <field name="view_mode">kanban,tree,form,calendar</field>
+        <field name="view_mode">kanban,list,form,calendar</field>
         <field name="search_view_id" ref="view_wfm_visit_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -178,12 +178,12 @@
         <field name="name">wfm.visit.stage.tree</field>
         <field name="model">wfm.visit.stage</field>
         <field name="arch" type="xml">
-            <tree string="Visit Stages" editable="bottom">
+            <list string="Visit Stages" editable="bottom">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="fold"/>
                 <field name="is_completed"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -191,6 +191,6 @@
     <record id="action_wfm_visit_stages" model="ir.actions.act_window">
         <field name="name">Visit Stages</field>
         <field name="res_model">wfm.visit.stage</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">list</field>
     </record>
 </odoo>
