@@ -29,12 +29,11 @@
                         </group>
                     </group>
                     <field name="installation_ids" invisible="not is_wfm_client">
-                        <tree>
+                        <list>
                             <field name="name"/>
                             <field name="city"/>
-                            <field name="installation_type"/>
                             <field name="employee_count"/>
-                        </tree>
+                        </list>
                     </field>
                 </page>
             </xpath>
