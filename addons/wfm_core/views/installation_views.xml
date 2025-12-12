@@ -65,16 +65,6 @@
                 <field name="name"/>
                 <field name="client_id"/>
                 <field name="city"/>
-                <separator/>
-                <filter string="Office" name="filter_office" domain="[('installation_type', '=', 'office')]"/>
-                <filter string="Warehouse" name="filter_warehouse" domain="[('installation_type', '=', 'warehouse')]"/>
-                <filter string="Factory" name="filter_factory" domain="[('installation_type', '=', 'factory')]"/>
-                <separator/>
-                <group expand="0" string="Group By">
-                    <filter string="Client" name="groupby_client" context="{'group_by': 'client_id'}"/>
-                    <filter string="Type" name="groupby_type" context="{'group_by': 'installation_type'}"/>
-                    <filter string="City" name="groupby_city" context="{'group_by': 'city'}"/>
-                </group>
             </search>
         </field>
     </record>
