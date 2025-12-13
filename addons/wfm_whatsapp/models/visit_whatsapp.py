@@ -1,4 +1,5 @@
 import logging
+import urllib.parse
 from datetime import timedelta
 
 from odoo import models, fields, api, _
@@ -124,83 +125,212 @@ class WfmVisitWhatsApp(models.Model):
             visit_id=self
         )
 
+    def _get_google_maps_url(self):
+        """Generate Google Maps URL for the installation address."""
+        self.ensure_one()
+        if not self.installation_id:
+            return None
+
+        # Build address string
+        address_parts = []
+        if self.installation_id.street:
+            address_parts.append(self.installation_id.street)
+        if self.installation_id.city:
+            address_parts.append(self.installation_id.city)
+        if self.installation_id.postal_code:
+            address_parts.append(self.installation_id.postal_code)
+        if self.installation_id.country_id:
+            address_parts.append(self.installation_id.country_id.name)
+
+        if not address_parts:
+            return None
+
+        address = ', '.join(address_parts)
+        encoded_address = urllib.parse.quote(address)
+        return f"https://www.google.com/maps/search/?api=1&query={encoded_address}"
+
+    def _format_time(self, time_float):
+        """Format float time to HH:MM string."""
+        if not time_float:
+            return "TBD"
+        hours = int(time_float)
+        minutes = int((time_float % 1) * 60)
+        return f"{hours:02d}:{minutes:02d}"
+
     def _get_assignment_message(self):
-        """Build assignment notification message."""
+        """Build assignment notification message with full details."""
         self.ensure_one()
 
-        # Format time
-        start_time = f"{int(self.start_time):02d}:{int((self.start_time % 1) * 60):02d}" if self.start_time else "TBD"
-        end_time = f"{int(self.end_time):02d}:{int((self.end_time % 1) * 60):02d}" if self.end_time else "TBD"
+        start_time = self._format_time(self.start_time)
+        end_time = self._format_time(self.end_time)
+        maps_url = self._get_google_maps_url()
 
-        return f"""🏥 GEP OHS - New Visit Assignment
+        # Build full address
+        address_lines = []
+        if self.installation_id.name:
+            address_lines.append(self.installation_id.name)
+        if self.installation_id.street:
+            address_lines.append(self.installation_id.street)
+        if self.installation_id.city:
+            city_line = self.installation_id.city
+            if self.installation_id.postal_code:
+                city_line = f"{self.installation_id.postal_code} {city_line}"
+            address_lines.append(city_line)
+
+        address_text = '\n   '.join(address_lines) if address_lines else 'Address not specified'
+
+        message = f"""🏥 *GEP OHS - New Visit Assignment*
 
 Hello {self.partner_id.name},
 
-You have been assigned to a new visit:
+You have been assigned to a new OHS visit. Please review the details below:
 
-📅 Date: {self.visit_date.strftime('%A, %d %B %Y') if self.visit_date else 'TBD'}
-⏰ Time: {start_time} - {end_time}
-🏢 Client: {self.client_id.name or 'N/A'}
-📍 Location: {self.installation_id.name or 'N/A'}
-   {self.installation_id.address or ''}, {self.installation_id.city or ''}
+━━━━━━━━━━━━━━━━━━━━━
+📋 *VISIT DETAILS*
+━━━━━━━━━━━━━━━━━━━━━
 
-Please confirm your availability in the Partner Portal.
+🔖 *Reference:* {self.name}
+📅 *Date:* {self.visit_date.strftime('%A, %d %B %Y') if self.visit_date else 'TBD'}
+⏰ *Time:* {start_time} - {end_time}
+⏱️ *Duration:* {self.duration:.1f} hours
 
-Reference: {self.name}"""
+━━━━━━━━━━━━━━━━━━━━━
+🏢 *CLIENT INFORMATION*
+━━━━━━━━━━━━━━━━━━━━━
+
+🏛️ *Client:* {self.client_id.name or 'N/A'}
+📍 *Location:*
+   {address_text}"""
+
+        if maps_url:
+            message += f"""
+
+🗺️ *Google Maps:*
+{maps_url}"""
+
+        message += f"""
+
+━━━━━━━━━━━━━━━━━━━━━
+✅ *CONFIRM YOUR AVAILABILITY*
+━━━━━━━━━━━━━━━━━━━━━
+
+Please reply with:
+👍 *ACCEPT* - To confirm this visit
+👎 *DENY* - If you cannot attend
+
+Or contact your coordinator for any questions."""
+
+        return message
 
     def _get_confirmed_message(self):
         """Build confirmation acknowledgment message."""
         self.ensure_one()
 
-        start_time = f"{int(self.start_time):02d}:{int((self.start_time % 1) * 60):02d}" if self.start_time else "TBD"
-        end_time = f"{int(self.end_time):02d}:{int((self.end_time % 1) * 60):02d}" if self.end_time else "TBD"
+        start_time = self._format_time(self.start_time)
+        end_time = self._format_time(self.end_time)
+        maps_url = self._get_google_maps_url()
 
-        return f"""✅ Visit Confirmed
+        # Build address
+        address_parts = []
+        if self.installation_id.street:
+            address_parts.append(self.installation_id.street)
+        if self.installation_id.city:
+            address_parts.append(self.installation_id.city)
+        address_text = ', '.join(address_parts) if address_parts else 'See details below'
 
-Your visit on {self.visit_date.strftime('%d/%m/%Y') if self.visit_date else 'TBD'} at {self.client_id.name or 'N/A'} has been confirmed.
+        message = f"""✅ *Visit Confirmed*
 
-📍 {self.installation_id.address or ''}, {self.installation_id.city or ''}
-⏰ {start_time} - {end_time}
+Thank you! Your visit has been confirmed.
 
-Reference: {self.name}
+━━━━━━━━━━━━━━━━━━━━━
+📋 *CONFIRMED VISIT*
+━━━━━━━━━━━━━━━━━━━━━
 
-See you there!"""
+🔖 *Reference:* {self.name}
+📅 *Date:* {self.visit_date.strftime('%A, %d %B %Y') if self.visit_date else 'TBD'}
+⏰ *Time:* {start_time} - {end_time}
+🏛️ *Client:* {self.client_id.name or 'N/A'}
+📍 *Location:* {address_text}"""
+
+        if maps_url:
+            message += f"""
+
+🗺️ *Navigate:*
+{maps_url}"""
+
+        message += """
+
+━━━━━━━━━━━━━━━━━━━━━
+See you there! Safe travels. 🚗"""
+
+        return message
 
     def _get_cancelled_message(self):
         """Build cancellation notice message."""
         self.ensure_one()
 
-        return f"""❌ Visit Cancelled
+        return f"""❌ *Visit Cancelled*
 
 The following visit has been cancelled:
 
-📅 {self.visit_date.strftime('%d/%m/%Y') if self.visit_date else 'TBD'}
-🏢 {self.client_id.name or 'N/A'}
+━━━━━━━━━━━━━━━━━━━━━
+📋 *CANCELLED VISIT*
+━━━━━━━━━━━━━━━━━━━━━
 
-Reference: {self.name}
+🔖 *Reference:* {self.name}
+📅 *Date:* {self.visit_date.strftime('%A, %d %B %Y') if self.visit_date else 'TBD'}
+🏛️ *Client:* {self.client_id.name or 'N/A'}
 
-Please check the Portal for your updated schedule."""
+━━━━━━━━━━━━━━━━━━━━━
+
+Please check the Partner Portal for your updated schedule.
+
+If you have questions, contact your coordinator."""
 
     def _get_reminder_message(self):
         """Build 24-hour reminder message."""
         self.ensure_one()
 
-        start_time = f"{int(self.start_time):02d}:{int((self.start_time % 1) * 60):02d}" if self.start_time else "TBD"
+        start_time = self._format_time(self.start_time)
+        end_time = self._format_time(self.end_time)
+        maps_url = self._get_google_maps_url()
 
-        return f"""⏰ Reminder: Visit Tomorrow
+        # Build address
+        address_parts = []
+        if self.installation_id.street:
+            address_parts.append(self.installation_id.street)
+        if self.installation_id.city:
+            address_parts.append(self.installation_id.city)
+        address_text = ', '.join(address_parts) if address_parts else 'See navigation link'
+
+        message = f"""⏰ *Reminder: Visit Tomorrow*
 
 Hello {self.partner_id.name},
 
-Reminder of your scheduled visit:
+This is a friendly reminder about your scheduled visit tomorrow.
 
-📅 Tomorrow, {self.visit_date.strftime('%A %d/%m/%Y') if self.visit_date else 'TBD'}
-⏰ {start_time}
-🏢 {self.client_id.name or 'N/A'}
-📍 {self.installation_id.address or ''}, {self.installation_id.city or ''}
+━━━━━━━━━━━━━━━━━━━━━
+📋 *VISIT DETAILS*
+━━━━━━━━━━━━━━━━━━━━━
 
-Reference: {self.name}
+🔖 *Reference:* {self.name}
+📅 *Date:* Tomorrow, {self.visit_date.strftime('%A %d %B %Y') if self.visit_date else 'TBD'}
+⏰ *Time:* {start_time} - {end_time}
+🏛️ *Client:* {self.client_id.name or 'N/A'}
+📍 *Location:* {address_text}"""
 
-Safe travels!"""
+        if maps_url:
+            message += f"""
+
+🗺️ *Navigate:*
+{maps_url}"""
+
+        message += """
+
+━━━━━━━━━━━━━━━━━━━━━
+Safe travels! 🚗"""
+
+        return message
 
     def action_open_whatsapp_composer(self):
         """Open WhatsApp compose wizard."""
