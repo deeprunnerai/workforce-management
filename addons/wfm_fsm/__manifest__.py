@@ -22,6 +22,7 @@
     'depends': [
         'wfm_core',
         'board',
+        'web_timeline',
     ],
     'data': [
         'security/ir.model.access.csv',

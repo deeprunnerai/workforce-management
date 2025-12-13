@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- ============================================ -->
-    <!-- INSTALLATION SERVICE TIMELINE CALENDAR VIEW -->
+    <!-- INSTALLATION SERVICE TIMELINE VIEW          -->
     <!-- ============================================ -->
 
-    <record id="view_wfm_installation_service_timeline_calendar" model="ir.ui.view">
-        <field name="name">wfm.installation.service.timeline.calendar</field>
+    <record id="view_wfm_installation_service_timeline" model="ir.ui.view">
+        <field name="name">wfm.installation.service.timeline</field>
         <field name="model">wfm.installation.service</field>
+        <field name="type">timeline</field>
         <field name="arch" type="xml">
-            <calendar string="Services Timeline"
-                      date_start="start_date"
+            <timeline date_start="start_date"
                       date_stop="end_date"
-                      color="partner_id"
-                      mode="month"
+                      default_group_by="partner_id"
                       event_open_popup="true"
-                      quick_create="false">
+                      colors="#1E88E5:state=='active';#FFA726:state=='draft';#78909C:state=='expired'">
                 <field name="code"/>
                 <field name="client_id"/>
                 <field name="installation_id"/>
@@ -22,7 +21,7 @@
                 <field name="service_type"/>
                 <field name="assigned_hours"/>
                 <field name="state"/>
-            </calendar>
+            </timeline>
         </field>
     </record>
 
@@ -30,7 +29,7 @@
     <record id="action_wfm_installation_service_timeline" model="ir.actions.act_window">
         <field name="name">Services Timeline</field>
         <field name="res_model">wfm.installation.service</field>
-        <field name="view_mode">calendar,list,kanban,form</field>
+        <field name="view_mode">timeline,list,kanban,form</field>
         <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -43,26 +42,25 @@
     </record>
 
     <!-- ============================================ -->
-    <!-- CONTRACT TIMELINE CALENDAR VIEW             -->
+    <!-- CONTRACT TIMELINE VIEW                      -->
     <!-- ============================================ -->
 
-    <record id="view_wfm_contract_timeline_calendar" model="ir.ui.view">
-        <field name="name">wfm.contract.timeline.calendar</field>
+    <record id="view_wfm_contract_timeline" model="ir.ui.view">
+        <field name="name">wfm.contract.timeline</field>
         <field name="model">wfm.contract</field>
+        <field name="type">timeline</field>
         <field name="arch" type="xml">
-            <calendar string="Contracts Timeline"
-                      date_start="start_date"
+            <timeline date_start="start_date"
                       date_stop="end_date"
-                      color="client_id"
-                      mode="month"
+                      default_group_by="client_id"
                       event_open_popup="true"
-                      quick_create="false">
+                      colors="#4CAF50:state=='active';#FFA726:state=='draft';#78909C:state=='expired';#EF5350:state=='cancelled'">
                 <field name="code"/>
                 <field name="name"/>
                 <field name="client_id"/>
                 <field name="contract_value"/>
                 <field name="state"/>
-            </calendar>
+            </timeline>
         </field>
     </record>
 
@@ -70,14 +68,14 @@
     <record id="action_wfm_contract_timeline" model="ir.actions.act_window">
         <field name="name">Contracts Timeline</field>
         <field name="res_model">wfm.contract</field>
-        <field name="view_mode">calendar,list,form</field>
+        <field name="view_mode">timeline,list,form</field>
         <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No contracts found
             </p>
             <p>
-                View all contracts on a calendar by client.
+                View all contracts on a timeline by client.
             </p>
         </field>
     </record>
