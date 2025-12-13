@@ -51,6 +51,12 @@ class WfmVisit(models.Model):
         tracking=True,
         default=fields.Date.context_today
     )
+    date_deadline = fields.Date(
+        string='Date Deadline',
+        compute='_compute_date_deadline',
+        store=True,
+        help='Used for Gantt view display'
+    )
     start_time = fields.Float(
         string='Start Time',
         default=9.0,
@@ -141,6 +147,11 @@ class WfmVisit(models.Model):
                 visit.duration = visit.end_time - visit.start_time
             else:
                 visit.duration = 0.0
+
+    @api.depends('visit_date')
+    def _compute_date_deadline(self):
+        for visit in self:
+            visit.date_deadline = visit.visit_date
 
     @api.depends('state', 'visit_date')
     def _compute_color(self):

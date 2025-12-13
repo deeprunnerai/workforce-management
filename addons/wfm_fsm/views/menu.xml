@@ -53,4 +53,31 @@
               parent="menu_coordinator"
               action="action_visits_overdue"
               sequence="60"/>
+
+    <!-- Timeline Menu (Parent) -->
+    <menuitem id="menu_timeline"
+              name="Timeline"
+              parent="menu_coordinator"
+              sequence="70"/>
+
+    <!-- Visits Timeline -->
+    <menuitem id="menu_visits_timeline"
+              name="Visits"
+              parent="menu_timeline"
+              action="action_wfm_visit_timeline"
+              sequence="10"/>
+
+    <!-- Services Timeline -->
+    <menuitem id="menu_services_timeline"
+              name="Services"
+              parent="menu_timeline"
+              action="action_wfm_installation_service_timeline"
+              sequence="20"/>
+
+    <!-- Contracts Timeline -->
+    <menuitem id="menu_contracts_timeline"
+              name="Contracts"
+              parent="menu_timeline"
+              action="action_wfm_contract_timeline"
+              sequence="30"/>
 </odoo>

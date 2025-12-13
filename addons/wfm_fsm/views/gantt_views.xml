@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================ -->
+    <!-- VISIT TIMELINE (GANTT) VIEW                  -->
+    <!-- ============================================ -->
+
+    <record id="view_wfm_visit_gantt" model="ir.ui.view">
+        <field name="name">wfm.visit.gantt</field>
+        <field name="model">wfm.visit</field>
+        <field name="arch" type="xml">
+            <gantt string="Visits Timeline"
+                   date_start="visit_date"
+                   date_stop="date_deadline"
+                   default_group_by="partner_id"
+                   color="state"
+                   decoration-danger="state == 'draft'"
+                   decoration-warning="state == 'in_progress'"
+                   decoration-success="state == 'done'"
+                   decoration-info="state in ('assigned', 'confirmed')"
+                   sample="1">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="partner_id"/>
+                <field name="state"/>
+                <field name="duration"/>
+                <templates>
+                    <t t-name="gantt-popover">
+                        <div class="o_gantt_popover">
+                            <div class="mb-2"><strong><t t-out="name"/></strong></div>
+                            <div><i class="fa fa-building me-1"/> <t t-out="client_id[1]"/></div>
+                            <div><i class="fa fa-map-marker me-1"/> <t t-out="installation_id[1]"/></div>
+                            <div><i class="fa fa-user-md me-1"/> <t t-out="partner_id[1] or 'Unassigned'"/></div>
+                            <div><i class="fa fa-clock-o me-1"/> <t t-out="duration"/>h</div>
+                        </div>
+                    </t>
+                </templates>
+            </gantt>
+        </field>
+    </record>
+
+    <!-- Visit Timeline Action -->
+    <record id="action_wfm_visit_timeline" model="ir.actions.act_window">
+        <field name="name">Visits Timeline</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">gantt,list,form,calendar</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Schedule your first OHS Visit
+            </p>
+            <p>
+                View all visits on a timeline. Drag and drop to reschedule.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+    <!-- INSTALLATION SERVICE TIMELINE (GANTT) VIEW  -->
+    <!-- ============================================ -->
+
+    <record id="view_wfm_installation_service_gantt" model="ir.ui.view">
+        <field name="name">wfm.installation.service.gantt</field>
+        <field name="model">wfm.installation.service</field>
+        <field name="arch" type="xml">
+            <gantt string="Installation Services Timeline"
+                   date_start="start_date"
+                   date_stop="end_date"
+                   default_group_by="partner_id"
+                   color="state"
+                   decoration-danger="state == 'draft'"
+                   decoration-warning="state == 'in_progress'"
+                   decoration-success="state == 'completed'"
+                   decoration-info="state == 'assigned'"
+                   sample="1">
+                <field name="code"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="partner_id"/>
+                <field name="service_type"/>
+                <field name="assigned_hours"/>
+                <field name="remaining_hours"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="gantt-popover">
+                        <div class="o_gantt_popover">
+                            <div class="mb-2"><strong><t t-out="code"/></strong></div>
+                            <div><i class="fa fa-building me-1"/> <t t-out="client_id[1]"/></div>
+                            <div><i class="fa fa-map-marker me-1"/> <t t-out="installation_id[1]"/></div>
+                            <div><i class="fa fa-user-md me-1"/> <t t-out="partner_id[1] or 'Unassigned'"/></div>
+                            <div><i class="fa fa-clock-o me-1"/> <t t-out="assigned_hours"/>h assigned</div>
+                            <div><i class="fa fa-hourglass-half me-1"/> <t t-out="remaining_hours"/>h remaining</div>
+                        </div>
+                    </t>
+                </templates>
+            </gantt>
+        </field>
+    </record>
+
+    <!-- Installation Service Timeline Action -->
+    <record id="action_wfm_installation_service_timeline" model="ir.actions.act_window">
+        <field name="name">Services Timeline</field>
+        <field name="res_model">wfm.installation.service</field>
+        <field name="view_mode">gantt,list,kanban,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No installation services found
+            </p>
+            <p>
+                View partner assignments to installations over time.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+    <!-- CONTRACT TIMELINE (GANTT) VIEW              -->
+    <!-- ============================================ -->
+
+    <record id="view_wfm_contract_gantt" model="ir.ui.view">
+        <field name="name">wfm.contract.gantt</field>
+        <field name="model">wfm.contract</field>
+        <field name="arch" type="xml">
+            <gantt string="Contracts Timeline"
+                   date_start="start_date"
+                   date_stop="end_date"
+                   default_group_by="client_id"
+                   color="state"
+                   decoration-danger="state == 'cancelled'"
+                   decoration-warning="state == 'expired'"
+                   decoration-success="state == 'active'"
+                   decoration-info="state == 'draft'"
+                   sample="1">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="contract_value"/>
+                <field name="state"/>
+                <field name="is_indefinite"/>
+                <templates>
+                    <t t-name="gantt-popover">
+                        <div class="o_gantt_popover">
+                            <div class="mb-2"><strong><t t-out="code"/> - <t t-out="name"/></strong></div>
+                            <div><i class="fa fa-building me-1"/> <t t-out="client_id[1]"/></div>
+                            <div><i class="fa fa-euro me-1"/> <t t-out="contract_value"/></div>
+                            <t t-if="is_indefinite">
+                                <div><i class="fa fa-infinity me-1"/> Indefinite Contract</div>
+                            </t>
+                        </div>
+                    </t>
+                </templates>
+            </gantt>
+        </field>
+    </record>
+
+    <!-- Contract Timeline Action -->
+    <record id="action_wfm_contract_timeline" model="ir.actions.act_window">
+        <field name="name">Contracts Timeline</field>
+        <field name="res_model">wfm.contract</field>
+        <field name="view_mode">gantt,list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No contracts found
+            </p>
+            <p>
+                View all contracts on a timeline by client.
+            </p>
+        </field>
+    </record>
+</odoo>

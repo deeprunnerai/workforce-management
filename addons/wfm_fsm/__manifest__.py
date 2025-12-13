@@ -27,6 +27,7 @@
         'security/ir.model.access.csv',
         'wizard/visit_assign_wizard_views.xml',
         'views/visit_fsm_views.xml',
+        'views/gantt_views.xml',
         'views/dashboard_views.xml',
         'views/menu.xml',
     ],
