@@ -60,17 +60,24 @@
               parent="menu_coordinator"
               sequence="70"/>
 
+    <!-- Visits Timeline -->
+    <menuitem id="menu_visits_timeline"
+              name="Visits"
+              parent="menu_timeline"
+              action="action_wfm_visit_timeline"
+              sequence="10"/>
+
     <!-- Services Timeline -->
     <menuitem id="menu_services_timeline"
               name="Services"
               parent="menu_timeline"
               action="action_wfm_installation_service_timeline"
-              sequence="10"/>
+              sequence="20"/>
 
     <!-- Contracts Timeline -->
     <menuitem id="menu_contracts_timeline"
               name="Contracts"
               parent="menu_timeline"
               action="action_wfm_contract_timeline"
-              sequence="20"/>
+              sequence="30"/>
 </odoo>

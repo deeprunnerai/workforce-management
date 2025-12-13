@@ -1,6 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- ============================================ -->
+    <!-- VISIT TIMELINE VIEW                         -->
+    <!-- ============================================ -->
+
+    <record id="view_wfm_visit_timeline" model="ir.ui.view">
+        <field name="name">wfm.visit.timeline</field>
+        <field name="model">wfm.visit</field>
+        <field name="type">timeline</field>
+        <field name="arch" type="xml">
+            <timeline date_start="visit_date"
+                      date_stop="visit_date"
+                      default_group_by="partner_id"
+                      event_open_popup="true"
+                      colors="#4CAF50:state=='done';#FFA726:state=='assigned';#FF9800:state=='confirmed';#2196F3:state=='in_progress';#F44336:state=='draft';#9E9E9E:state=='cancelled'">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="partner_id"/>
+                <field name="visit_type"/>
+                <field name="state"/>
+            </timeline>
+        </field>
+    </record>
+
+    <!-- Visit Timeline Action -->
+    <record id="action_wfm_visit_timeline" model="ir.actions.act_window">
+        <field name="name">Visits Timeline</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">timeline,list,kanban,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No visits found
+            </p>
+            <p>
+                View all visits on a timeline by partner.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
     <!-- INSTALLATION SERVICE TIMELINE VIEW          -->
     <!-- ============================================ -->
 
