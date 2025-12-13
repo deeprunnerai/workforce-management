@@ -18,11 +18,187 @@ class AIRetentionEngine(models.Model):
     - Personalized retention strategies
     - Ready-to-send WhatsApp messages
     - Specific action recommendations with reasoning
+    - Smart partner recommendations for visits
     """
     _name = 'wfm.ai.retention.engine'
     _description = 'AI Retention Engine'
 
     name = fields.Char(default='AI Retention Engine')
+
+    def get_ai_partner_recommendation(self, visit_id, candidates):
+        """
+        Use Claude to analyze candidates and recommend the best partner for a visit.
+
+        Args:
+            visit_id: The visit record ID
+            candidates: List of dicts with partner info and scores from the rule-based engine
+
+        Returns:
+            dict with AI analysis and recommendation
+        """
+        visit = self.env['wfm.visit'].browse(visit_id)
+        if not visit.exists():
+            return {'error': 'Visit not found'}
+
+        # Build context about the visit
+        visit_context = {
+            'client': visit.client_id.name if visit.client_id else 'Unknown',
+            'installation': visit.installation_id.name if visit.installation_id else 'Unknown',
+            'city': visit.installation_id.city if visit.installation_id else 'Unknown',
+            'date': str(visit.visit_date),
+            'service_type': visit.service_type if hasattr(visit, 'service_type') else 'OHS Visit',
+        }
+
+        # Build candidate profiles
+        candidate_profiles = []
+        for c in candidates[:5]:  # Limit to top 5
+            partner = self.env['res.partner'].browse(c['partner_id'])
+
+            # Get health status if exists
+            health = self.env['wfm.partner.health'].search([
+                ('partner_id', '=', c['partner_id']),
+                ('ticket_state', 'in', ['open', 'in_progress']),
+            ], limit=1)
+
+            health_info = None
+            if health:
+                health_info = {
+                    'risk_level': health.risk_level,
+                    'risk_score': health.churn_risk_score,
+                    'days_inactive': health.days_since_last_visit,
+                }
+
+            candidate_profiles.append({
+                'name': c['partner_name'],
+                'specialty': c.get('partner_specialty', 'Unknown'),
+                'score': c['total_score'],
+                'relationship_score': c.get('relationship_score', 0),
+                'availability_score': c.get('availability_score', 0),
+                'performance_score': c.get('performance_score', 0),
+                'proximity_score': c.get('proximity_score', 0),
+                'workload_score': c.get('workload_score', 0),
+                'relationship_details': c.get('relationship_details', ''),
+                'health_status': health_info,
+            })
+
+        # Call Claude for analysis
+        prompt = self._build_recommendation_prompt(visit_context, candidate_profiles)
+
+        client = self._get_claude_client()
+        if not client:
+            return {'error': 'Could not initialize AI client'}
+
+        try:
+            response = client.chat.completions.create(
+                model=CLAUDE_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are an expert OHS coordinator for GEP Group, Greece's largest Occupational Health & Safety provider.
+
+Your task: Analyze partner candidates and recommend the BEST one for a client visit.
+
+DECISION FACTORS (in order of importance):
+1. CLIENT RELATIONSHIP (35%) - Has the partner worked with this client before? Continuity is CRITICAL
+2. AVAILABILITY (25%) - Is the partner free on this date?
+3. PERFORMANCE (20%) - Track record, completion rate, ratings
+4. PROXIMITY (10%) - Geographic distance to the installation
+5. WORKLOAD (10%) - Current assignment balance
+
+HEALTH STATUS CONSIDERATION:
+- Partners marked "At Risk" or "Watch" may need extra support
+- This is informational only - don't disqualify them, but note any concerns
+
+OUTPUT FORMAT - Respond with ONLY valid JSON (no markdown, no explanation outside JSON):
+{
+  "recommended_partner": "Exact partner name from the list",
+  "confidence": "high" or "medium" or "low",
+  "reasoning": "2-3 sentences explaining WHY this partner is the best choice. Be specific about their strengths.",
+  "concerns": "Any issues to watch out for, or null if none",
+  "summary": "One-line summary for the coordinator"
+}"""
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.5,
+                max_tokens=800
+            )
+
+            ai_response = response.choices[0].message.content
+            _logger.info(f"Claude AI response: {ai_response[:500]}...")
+
+            # Parse JSON response
+            try:
+                json_str = ai_response
+                # Extract JSON from markdown code blocks
+                if '```json' in ai_response:
+                    json_str = ai_response.split('```json')[1].split('```')[0]
+                elif '```' in ai_response:
+                    json_str = ai_response.split('```')[1].split('```')[0]
+
+                result = json.loads(json_str.strip())
+                result['success'] = True
+                _logger.info(f"Parsed AI result: {result}")
+                return result
+            except json.JSONDecodeError as je:
+                _logger.warning(f"JSON parse failed: {je}. Raw response: {ai_response}")
+                # Try to extract info from raw text response
+                return {
+                    'success': True,
+                    'raw_response': ai_response,
+                    'recommended_partner': candidates[0]['partner_name'] if candidates else None,
+                    'reasoning': ai_response[:300] if ai_response else 'AI analysis completed',
+                    'confidence': 'medium',
+                }
+
+        except Exception as e:
+            _logger.error(f"AI recommendation failed: {str(e)}")
+            return {'error': str(e), 'success': False}
+
+    def _build_recommendation_prompt(self, visit, candidates):
+        """Build prompt for partner recommendation"""
+        prompt = f"""VISIT TO ASSIGN:
+- Client: {visit['client']}
+- Location: {visit['installation']} in {visit['city']}
+- Date: {visit['date']}
+- Service: {visit['service_type']}
+
+CANDIDATE PARTNERS (with rule-based scores):
+"""
+        for i, c in enumerate(candidates, 1):
+            relationship_info = c['relationship_details'] if c['relationship_details'] else 'NO PRIOR VISITS with this client'
+
+            prompt += f"""
+{i}. {c['name']} — Total Score: {c['score']}/100
+   • Specialty: {c['specialty']}
+   • Client History: {c['relationship_score']}/35 pts — {relationship_info}
+   • Availability: {c['availability_score']}/25 pts
+   • Performance: {c['performance_score']}/20 pts
+   • Proximity: {c['proximity_score']}/10 pts
+   • Workload: {c['workload_score']}/10 pts"""
+
+            if c['health_status']:
+                h = c['health_status']
+                status_label = "AT RISK" if h['risk_level'] == 'critical' else "WATCH"
+                prompt += f"""
+   • ⚠️ HEALTH STATUS: {status_label} — {h['days_inactive']} days since last visit"""
+
+            prompt += "\n"
+
+        prompt += """
+QUESTION: Which partner should be assigned to this visit?
+
+Remember:
+- If a partner has prior history with this client, strongly prefer them (continuity matters!)
+- If no one has history, recommend the best available based on other factors
+- Note any health concerns but don't automatically disqualify at-risk partners
+
+Respond with JSON only."""
+
+        return prompt
 
     def _get_claude_client(self):
         """Initialize OpenAI client for Claude via LiteLLM"""

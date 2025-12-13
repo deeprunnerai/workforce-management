@@ -83,17 +83,18 @@ Client (Company)
 ### Deployment
 ```bash
 # Deploy to production
-ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp -r addons/wfm_core /opt/odoo/addons/ && docker restart odoo"
+ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp -r addons/* /opt/odoo/addons/ && docker restart odoo"
 ```
 
 ### Custom Addons (use `wfm_*` prefix)
 
 | Module | Purpose | Status |
 |--------|---------|--------|
-| `wfm_core` | Data models, business logic | ✅ Deployed |
-| `wfm_fsm` | Field Service Management (Kanban, dashboard, Smart Assignment) | ✅ In Development |
-| `wfm_portal` | Partner self-service portal | 📋 Planned |
-| `wfm_whatsapp` | Twilio WhatsApp integration | 📋 Planned |
+| `wfm_core` | Data models, SEPE, billing, workflows | ✅ Deployed |
+| `wfm_fsm` | Dashboard, Smart Assignment, Churn Analysis | ✅ Deployed |
+| `wfm_portal` | Partner self-service portal | ✅ Deployed |
+| `wfm_whatsapp` | Twilio WhatsApp integration | ✅ Deployed |
+| `wfm_ai_chat` | AI Chat with LLM tools | ✅ Deployed |
 
 ---
 
@@ -131,7 +132,7 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 4. In Progress (sequence=40)
 5. Completed (sequence=50)
 
-### wfm.partner.client.relationship (NEW - wfm_fsm)
+### wfm.partner.client.relationship (wfm_fsm)
 - `partner_id` - Many2one to partner
 - `client_id` - Many2one to client
 - `total_visits`, `completed_visits` - Visit statistics
@@ -139,10 +140,26 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 - `relationship_score` - Computed (0-100) based on history
 - `first_visit_date`, `last_visit_date` - Timeline
 
-### wfm.assignment.engine (NEW - wfm_fsm)
-- Scoring algorithm for partner recommendations
-- Weights: Relationship 35%, Availability 25%, Performance 20%, Proximity 10%, Workload 10%
-- Methods: `get_recommended_partners()`, `assign_partner_to_visit()`
+### wfm.partner.health (wfm_fsm)
+- `partner_id` - Many2one to partner
+- `health_score` - Float (0-100)
+- `risk_level` - Selection (low/medium/high/critical)
+- `decline_rate`, `volume_change`, `inactivity_days` - Risk factors
+- `ticket_state` - Selection (open/in_progress/resolved/closed)
+
+### wfm.workflow (wfm_core)
+- `name` - Workflow name
+- `trigger_model` - Model to watch
+- `trigger_field` - Field to monitor
+- `trigger_value` - Value that triggers
+- `action_type` - Selection (whatsapp/update_field/webhook)
+- `is_active` - Boolean
+
+### wfm.sepe.export (wfm_core)
+- `name` - Export name
+- `date_from`, `date_to` - Date range
+- `state` - Selection (draft/done)
+- `file_data` - Binary export file
 
 ---
 
@@ -168,6 +185,38 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 
 ---
 
+## Churn Analysis (wfm_fsm)
+
+**Purpose:** Identify partners at risk of leaving and enable proactive retention.
+
+### Health Scoring Factors
+| Factor | Weight | Description |
+|--------|--------|-------------|
+| Decline Rate | 25% | Ratio of declined visits |
+| Volume Change | 25% | Month-over-month visit changes |
+| Inactivity | 20% | Days since last visit |
+| Cancellations | 15% | Cancellation ratio |
+| Rating Trend | 15% | Performance rating changes |
+
+### Risk Levels
+- **Low** (70-100): Healthy engagement
+- **Medium** (50-69): Monitor closely
+- **High** (30-49): Intervention needed
+- **Critical** (<30): Immediate action required
+
+### AI Chat Tools for Churn
+```
+wfm_list_at_risk_partners    - Query at-risk partners
+wfm_get_partner_health       - Detailed health analysis
+wfm_log_retention_action     - Log intervention
+wfm_resolve_retention_ticket - Close retention case
+wfm_churn_dashboard_stats    - Dashboard statistics
+wfm_get_ai_retention_strategy - AI recommendations
+wfm_run_churn_computation    - Trigger health calculation
+```
+
+---
+
 ## Autonomous Notification Agent
 
 **Trigger:** Visit assigned to Partner (state change)
@@ -177,15 +226,6 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 2. Create in-app notification
 3. Log action in audit trail
 
-```python
-def write(self, vals):
-    result = super().write(vals)
-    if 'partner_id' in vals and vals['partner_id']:
-        self._send_whatsapp_notification()
-        self._send_inapp_notification()
-    return result
-```
-
 ### Notification Triggers
 
 | Event | WhatsApp | In-app | Email |
@@ -194,6 +234,25 @@ def write(self, vals):
 | Schedule confirmed | Yes | Yes | Yes |
 | Change request | Yes | Yes | No |
 | 24h reminder | Yes | No | No |
+
+---
+
+## Autonomous Workflow Engine (wfm_core)
+
+**Purpose:** Trigger-based automation for business processes.
+
+### Workflow Types
+| Action Type | Description |
+|-------------|-------------|
+| `whatsapp` | Send WhatsApp message |
+| `update_field` | Update record field |
+| `webhook` | POST to external URL |
+
+### Usage
+1. Create workflow with trigger conditions
+2. System monitors specified model/field
+3. When trigger fires, action executes
+4. Execution logged for audit
 
 ---
 
@@ -217,10 +276,52 @@ def write(self, vals):
 ### GEP Coordinator
 - Assign partners to visits, handle change requests
 - Drag-drop assignment, async communication
+- Churn analysis and retention actions
 
 ### GEP Partner (External)
 - Conduct OHS visits, submit reports, get paid
 - Self-service portal, instant notifications
+
+---
+
+## Menu Structure
+
+```
+Workforce Management
+├── Dashboard
+├── Visits
+│   ├── Kanban
+│   ├── Calendar
+│   ├── Timeline
+│   └── By Client
+├── Partners
+│   ├── All
+│   ├── Physicians
+│   └── Engineers
+├── Clients
+│   ├── All
+│   ├── Installations
+│   ├── Contracts
+│   └── Contract Services
+├── Reporting
+│   └── SEPE
+│       ├── Create Export
+│       └── Export History
+├── Billing
+│   ├── Overview
+│   ├── Not Billed
+│   ├── Invoiced
+│   ├── Client Paid
+│   └── Settled
+├── Analysis
+│   ├── Partner Retention
+│   └── Churn Analytics
+├── Automation
+│   ├── Workflows
+│   └── Execution Logs
+└── Config
+    └── Stages
+```
 
 ---
 
@@ -229,16 +330,19 @@ def write(self, vals):
 ```
 workforce-management/
 ├── addons/
-│   ├── wfm_core/           # Core models
+│   ├── wfm_core/           # Core models, SEPE, billing, workflows
 │   │   ├── models/
 │   │   ├── views/
+│   │   ├── wizard/
 │   │   ├── security/
 │   │   └── data/
-│   ├── wfm_fsm/            # Kanban & dashboard
+│   ├── wfm_fsm/            # Dashboard, assignment, churn
 │   ├── wfm_portal/         # Partner portal
-│   └── wfm_whatsapp/       # Twilio integration
-├── scripts/
+│   ├── wfm_whatsapp/       # Twilio integration
+│   ├── wfm_ai_chat/        # AI Chat with LLM tools
+│   └── web_timeline/       # OCA timeline view
 ├── docker/
+├── docs/
 └── README.md
 ```
 
@@ -250,6 +354,8 @@ workforce-management/
 TWILIO_ACCOUNT_SID=xxx
 TWILIO_AUTH_TOKEN=xxx
 TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+OPENAI_API_KEY=xxx
+LLM_API_BASE=https://api.openai.com/v1
 ```
 
 ---
@@ -270,6 +376,10 @@ visit.write({'partner_id': 5})
 
 # Get dashboard counts
 env['wfm.visit']._get_dashboard_data()
+
+# Check partner health
+health = env['wfm.partner.health'].search([('partner_id', '=', 5)])
+health.health_score, health.risk_level
 ```
 
 ### MCP Commands
@@ -300,16 +410,6 @@ Use Greek test data (company names, addresses, partner names).
 
 ---
 
-## Out of Scope (Phase 1)
-
-- SEPE export automation
-- ~~AI assignment suggestions~~ ✅ Implemented in wfm_fsm
-- Availability calendar
-- Visit report submission
-- Payment/accounting integration
-
----
-
 ## Workflow Phases
 
 ### Phase 1: Contract & Setup
@@ -331,7 +431,7 @@ Use Greek test data (company names, addresses, partner names).
 4. Partner conducts visit & submits report
 5. Admin submits to SEPE & triggers billing
 
-### Phase 3: Reporting & Compliance (Future)
-- SEPE export automation
-- Billing integration
-- Partner payments
+### Phase 3: Reporting & Compliance
+- SEPE export automation ✅
+- Billing dashboard ✅
+- Partner payments (future)

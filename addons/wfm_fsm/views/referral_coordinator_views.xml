@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================ -->
+    <!-- COORDINATOR VIEW - REFERRAL MANAGEMENT      -->
+    <!-- (For coordinators to review/accept/reject)  -->
+    <!-- ============================================ -->
+
+    <!-- Referral Form View (Coordinator) -->
+    <record id="view_referral_coordinator_form" model="ir.ui.view">
+        <field name="name">wfm.partner.referral.coordinator.form</field>
+        <field name="model">wfm.partner.referral</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <form string="Referral Review">
+                <header>
+                    <button name="action_start_review"
+                            string="Start Review"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'submitted'"/>
+                    <button name="action_accept"
+                            string="Accept &amp; Send Invitation"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'under_review'"/>
+                    <button name="action_reject"
+                            string="Reject"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state != 'under_review'"/>
+                    <button name="action_mark_meeting_scheduled"
+                            string="Meeting Confirmed"
+                            type="object"
+                            class="btn-info"
+                            invisible="state != 'accepted'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="submitted,under_review,accepted,meeting_scheduled"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-envelope"
+                                name="action_send_meeting_invitation"
+                                type="object"
+                                invisible="state != 'accepted'"
+                                help="Resend meeting invitation email">
+                            <span>Resend Email</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Submitted" bg_color="text-bg-info"
+                            invisible="state != 'submitted'"/>
+                    <widget name="web_ribbon" title="Under Review" bg_color="text-bg-warning"
+                            invisible="state != 'under_review'"/>
+                    <widget name="web_ribbon" title="Accepted" bg_color="text-bg-success"
+                            invisible="state != 'accepted'"/>
+                    <widget name="web_ribbon" title="Rejected" bg_color="text-bg-danger"
+                            invisible="state != 'rejected'"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Candidate Information">
+                            <field name="candidate_name"/>
+                            <field name="candidate_email" widget="email"/>
+                            <field name="candidate_phone" widget="phone"/>
+                            <field name="candidate_specialty"/>
+                            <field name="candidate_city"/>
+                            <field name="candidate_resume" filename="candidate_resume_filename"/>
+                            <field name="candidate_resume_filename" invisible="1"/>
+                        </group>
+                        <group string="Referral Info">
+                            <field name="referring_partner_id" readonly="1"/>
+                            <field name="submitted_date" readonly="1"/>
+                            <field name="coordinator_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Education" name="education">
+                            <group>
+                                <group string="Academic Background">
+                                    <field name="candidate_bachelors" placeholder="e.g., Medicine, Engineering"/>
+                                    <field name="candidate_masters" placeholder="e.g., Occupational Health"/>
+                                    <field name="candidate_phd" placeholder="e.g., Safety Engineering"/>
+                                </group>
+                                <group string="Certifications">
+                                    <field name="candidate_certifications" placeholder="List relevant certifications..."/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Experience" name="experience">
+                            <group>
+                                <field name="candidate_experience" placeholder="Describe work history and relevant experience..."/>
+                            </group>
+                            <group>
+                                <field name="referral_reason" placeholder="Why would this candidate be a great fit for GEP?"/>
+                            </group>
+                        </page>
+                        <page string="Meeting Setup" name="meeting"
+                              invisible="state not in ('under_review', 'accepted', 'meeting_scheduled')">
+                            <group>
+                                <group>
+                                    <field name="meeting_date"/>
+                                    <field name="meeting_location"
+                                           placeholder="Office address or video call link"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-info" role="alert"
+                                 invisible="state != 'under_review'">
+                                <strong>Set meeting details</strong> before accepting.
+                                An email invitation will be sent to the candidate automatically.
+                            </div>
+                        </page>
+                        <page string="Review Notes" name="review">
+                            <group>
+                                <field name="review_notes"
+                                       placeholder="Internal notes about this referral..."/>
+                            </group>
+                            <group invisible="state != 'rejected'">
+                                <field name="rejection_reason"
+                                       placeholder="Reason for rejection (will not be shared with partner)"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Referral List View (Coordinator) -->
+    <record id="view_referral_coordinator_list" model="ir.ui.view">
+        <field name="name">wfm.partner.referral.coordinator.list</field>
+        <field name="model">wfm.partner.referral</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <list string="Referrals" decoration-success="state == 'accepted'"
+                  decoration-warning="state == 'under_review'"
+                  decoration-danger="state == 'rejected'"
+                  decoration-info="state == 'submitted'">
+                <field name="name"/>
+                <field name="candidate_name"/>
+                <field name="candidate_specialty"/>
+                <field name="candidate_city"/>
+                <field name="referring_partner_id"/>
+                <field name="submitted_date"/>
+                <field name="coordinator_id"/>
+                <field name="meeting_date" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state in ('accepted', 'meeting_scheduled')"
+                       decoration-warning="state == 'under_review'"
+                       decoration-danger="state == 'rejected'"
+                       decoration-info="state == 'submitted'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Referral Kanban View (Coordinator) -->
+    <record id="view_referral_coordinator_kanban" model="ir.ui.view">
+        <field name="name">wfm.partner.referral.coordinator.kanban</field>
+        <field name="model">wfm.partner.referral</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="candidate_name"/>
+                <field name="candidate_email"/>
+                <field name="candidate_specialty"/>
+                <field name="referring_partner_id"/>
+                <field name="state"/>
+                <field name="coordinator_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong><field name="name"/></strong>
+                            <field name="state" widget="badge"/>
+                        </div>
+                        <div class="mb-1">
+                            <strong><field name="candidate_name"/></strong>
+                            <span class="badge bg-secondary ms-2">
+                                <field name="candidate_specialty"/>
+                            </span>
+                        </div>
+                        <div class="text-muted small mb-2">
+                            <field name="candidate_email"/>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="text-muted small">
+                                Referred by: <field name="referring_partner_id"/>
+                            </span>
+                            <field name="coordinator_id" widget="many2one_avatar_user"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Referral Search View -->
+    <record id="view_referral_coordinator_search" model="ir.ui.view">
+        <field name="name">wfm.partner.referral.coordinator.search</field>
+        <field name="model">wfm.partner.referral</field>
+        <field name="arch" type="xml">
+            <search string="Search Referrals">
+                <field name="name"/>
+                <field name="candidate_name"/>
+                <field name="candidate_email"/>
+                <field name="referring_partner_id"/>
+                <field name="coordinator_id"/>
+                <separator/>
+                <filter string="Pending Review" name="pending"
+                        domain="[('state', '=', 'submitted')]"/>
+                <filter string="Under Review" name="under_review"
+                        domain="[('state', '=', 'under_review')]"/>
+                <filter string="Accepted" name="accepted"
+                        domain="[('state', 'in', ('accepted', 'meeting_scheduled'))]"/>
+                <filter string="Rejected" name="rejected"
+                        domain="[('state', '=', 'rejected')]"/>
+                <separator/>
+                <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                <filter string="Coordinator" name="group_coordinator" context="{'group_by': 'coordinator_id'}"/>
+                <filter string="Specialty" name="group_specialty" context="{'group_by': 'candidate_specialty'}"/>
+                <filter string="Referring Partner" name="group_partner" context="{'group_by': 'referring_partner_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Coordinator Action - All Referrals -->
+    <record id="action_referral_coordinator" model="ir.actions.act_window">
+        <field name="name">Partner Referrals</field>
+        <field name="res_model">wfm.partner.referral</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_referral_coordinator_search"/>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No referrals to review
+            </p>
+            <p>
+                Partners can submit referrals for new candidates through the Partner Portal.
+            </p>
+        </field>
+    </record>
+
+    <!-- Coordinator Action - Pending Referrals (for dashboard) -->
+    <record id="action_referral_pending" model="ir.actions.act_window">
+        <field name="name">Pending Referrals</field>
+        <field name="res_model">wfm.partner.referral</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('state', '=', 'submitted')]</field>
+        <field name="search_view_id" ref="view_referral_coordinator_search"/>
+    </record>
+</odoo>

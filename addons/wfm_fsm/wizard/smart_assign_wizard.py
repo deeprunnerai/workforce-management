@@ -86,6 +86,22 @@ class WfmSmartAssignWizard(models.TransientModel):
         sanitize=False
     )
 
+    # AI recommendation fields
+    ai_recommended_partner_id = fields.Many2one(
+        'res.partner',
+        string='AI Recommended Partner',
+        help='Partner recommended by Claude AI'
+    )
+    ai_recommendation_html = fields.Html(
+        string='AI Recommendation',
+        sanitize=False
+    )
+    ai_confidence = fields.Selection([
+        ('high', 'High'),
+        ('medium', 'Medium'),
+        ('low', 'Low'),
+    ], string='AI Confidence')
+
     def _default_visit_id(self):
         """Get visit from context."""
         active_id = self.env.context.get('active_id')
@@ -187,8 +203,8 @@ class WfmSmartAssignWizard(models.TransientModel):
             elif work_score < 5:
                 reasons.append("Heavy workload")
 
-            # Get retention status one-liner (if any)
-            retention_alert = self._get_retention_one_liner(rec['partner_id'])
+            # Get health status one-liner (if any concerns)
+            health_alert = self._get_health_alert(rec['partner_id'])
 
             # Determine card style based on rank
             if i == 1:
@@ -216,8 +232,8 @@ class WfmSmartAssignWizard(models.TransientModel):
                     </div>
                 </div>
                 <div class="card-body py-2">
-                    <!-- Retention Alert (if any) -->
-                    {retention_alert}
+                    <!-- Health Alert (if any) -->
+                    {health_alert}
 
                     <!-- AI Reasoning Summary -->
                     <div class="alert alert-light py-1 px-2 mb-2 small">
@@ -266,6 +282,86 @@ class WfmSmartAssignWizard(models.TransientModel):
         html += '</div>'
         return html
 
+    def action_get_ai_recommendation(self):
+        """Get AI-powered recommendation from Claude."""
+        self.ensure_one()
+
+        if not self.visit_id:
+            raise UserError(_('No visit selected.'))
+
+        # Get rule-based candidates first
+        engine = self.env['wfm.assignment.engine']
+        candidates = engine.get_recommended_partners(self.visit_id.id, limit=5)
+
+        if not candidates:
+            raise UserError(_('No available partners found for this visit.'))
+
+        # Get AI analysis from Claude
+        ai_engine = self.env['wfm.ai.retention.engine'].create({})
+        result = ai_engine.get_ai_partner_recommendation(self.visit_id.id, candidates)
+
+        if result.get('success'):
+            # Find the recommended partner by name
+            recommended_name = result.get('recommended_partner', '')
+            recommended_partner = None
+
+            for c in candidates:
+                if c['partner_name'] == recommended_name:
+                    recommended_partner = self.env['res.partner'].browse(c['partner_id'])
+                    break
+
+            # If not found by exact name, use the first candidate
+            if not recommended_partner:
+                recommended_partner = self.env['res.partner'].browse(candidates[0]['partner_id'])
+
+            confidence = result.get('confidence', 'medium')
+            confidence_color = {
+                'high': 'success',
+                'medium': 'warning',
+                'low': 'danger'
+            }.get(confidence, 'secondary')
+
+            reasoning = result.get('reasoning', 'No reasoning provided')
+            concerns = result.get('concerns')
+
+            ai_html = f'''
+            <div class="alert alert-{confidence_color} mb-3" style="border-left: 4px solid;">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="h4 mb-0 me-2">🤖</span>
+                    <strong class="h5 mb-0">Claude Recommends: {recommended_partner.name}</strong>
+                    <span class="badge bg-{confidence_color} ms-2">{confidence.upper()}</span>
+                </div>
+                <p class="mb-2">{reasoning}</p>
+                {f'<div class="alert alert-light py-2 px-3 mb-0"><strong>⚠️ Note:</strong> {concerns}</div>' if concerns else ''}
+            </div>
+            '''
+
+            self.write({
+                'ai_recommended_partner_id': recommended_partner.id,
+                'ai_recommendation_html': ai_html,
+                'ai_confidence': confidence,
+            })
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': '🤖 AI Analysis Complete',
+                    'message': f'Claude recommends: {recommended_partner.name}',
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+        else:
+            raise UserError(_(f'AI Analysis Failed: {result.get("error", "Unknown error")}'))
+
+    def action_assign_ai_recommendation(self):
+        """Assign the AI-recommended partner."""
+        self.ensure_one()
+        if not self.ai_recommended_partner_id:
+            raise UserError(_('No AI recommendation available. Click "Ask AI" first.'))
+        return self._assign_partner(self.ai_recommended_partner_id)
+
     def action_assign_recommendation_1(self):
         """Assign the top recommended partner."""
         self.ensure_one()
@@ -308,15 +404,15 @@ class WfmSmartAssignWizard(models.TransientModel):
             }
         }
 
-    def _get_retention_one_liner(self, partner_id):
-        """Get a one-liner retention status for a partner (if any open ticket exists).
+    def _get_health_alert(self, partner_id):
+        """Get health alert for a partner (if any concerns exist).
 
         This doesn't affect the scoring, just provides coordinator awareness.
 
         Returns:
-            HTML string with alert (or empty string if no issue)
+            HTML string with alert (or empty string if healthy)
         """
-        # Look for any open/in_progress retention tickets for this partner
+        # Look for any open/in_progress health tickets for this partner
         health = self.env['wfm.partner.health'].search([
             ('partner_id', '=', partner_id),
             ('ticket_state', 'in', ['open', 'in_progress']),
@@ -326,29 +422,37 @@ class WfmSmartAssignWizard(models.TransientModel):
         if not health:
             return ''
 
-        # Build one-liner based on risk level and status
-        risk_emoji = '🔴' if health.risk_level == 'critical' else '🟠'
-        risk_label = 'Critical Risk' if health.risk_level == 'critical' else 'High Risk'
+        # Build one-liner based on risk level
+        if health.risk_level == 'critical':
+            risk_emoji = '🔴'
+            risk_label = 'At Risk'
+        else:
+            risk_emoji = '🟠'
+            risk_label = 'Watch'
 
         # Build reason based on highest score component
         reason = ''
         if health.decline_rate_score >= 15:
             reason = f"declined {health.visits_declined_30d} recent visits"
         elif health.inactivity_score >= 10:
-            reason = f"inactive for {health.days_since_last_visit} days"
+            days = health.days_since_last_visit
+            if days >= 60:
+                reason = "long inactive"
+            else:
+                reason = f"inactive for {days} days"
         elif health.volume_change_score >= 15:
-            reason = "significant drop in activity"
+            reason = "drop in activity"
         elif health.payment_issue_score >= 5:
-            reason = "payment-related concerns"
+            reason = "payment concerns"
         else:
-            reason = f"risk score: {health.churn_risk_score:.0f}/100"
+            reason = "needs attention"
 
         # Build the alert HTML - informational only, not blocking
         alert_html = f'''
         <div class="alert alert-warning py-1 px-2 mb-2 small d-flex align-items-center">
             <span class="me-2">{risk_emoji}</span>
-            <span><strong>Retention Note:</strong> {risk_label} partner - {reason}.
-            <em class="text-muted">(This client may have good relations regardless)</em></span>
+            <span><strong>{risk_label}:</strong> {reason}
+            <em class="text-muted ms-1">(FYI only - doesn't affect score)</em></span>
         </div>
         '''
 

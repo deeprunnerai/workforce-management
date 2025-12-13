@@ -43,6 +43,7 @@
     'license': 'LGPL-3',
     'depends': [
         'wfm_core',
+        'wfm_portal',
         'board',
         'web_timeline',
     ],
@@ -56,6 +57,7 @@
         'views/visit_form_extension.xml',
         'views/dashboard_views.xml',
         'views/churn_dashboard_views.xml',
+        'views/referral_coordinator_views.xml',
         'views/menu.xml',
         'data/cron_jobs.xml',
     ],

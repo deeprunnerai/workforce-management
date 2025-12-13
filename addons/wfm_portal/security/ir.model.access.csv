@@ -4,3 +4,6 @@ access_wfm_installation_partner,wfm.installation.partner,wfm_core.model_wfm_inst
 access_wfm_visit_stage_partner,wfm.visit.stage.partner,wfm_core.model_wfm_visit_stage,wfm_portal.group_wfm_partner,1,0,0,0
 access_wfm_partner_availability,wfm.partner.availability.partner,wfm_portal.model_wfm_partner_availability,wfm_portal.group_wfm_partner,1,1,1,1
 access_res_partner_wfm_partner,res.partner.wfm.partner,base.model_res_partner,wfm_portal.group_wfm_partner,1,1,0,0
+access_wfm_referral_partner,wfm.partner.referral.partner,wfm_portal.model_wfm_partner_referral,wfm_portal.group_wfm_partner,1,1,1,0
+access_wfm_referral_coordinator,wfm.partner.referral.coordinator,wfm_portal.model_wfm_partner_referral,wfm_portal.group_wfm_coordinator,1,1,1,1
+access_wfm_referral_user,wfm.partner.referral.user,wfm_portal.model_wfm_partner_referral,base.group_user,1,1,1,1

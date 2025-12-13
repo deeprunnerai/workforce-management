@@ -5,8 +5,7 @@
         id="menu_wfm_partner_root"
         name="Partner Portal"
         sequence="5"
-        web_icon="wfm_portal,static/description/icon.png"
-        groups="wfm_portal.group_wfm_partner"/>
+        web_icon="wfm_portal,static/description/icon.png"/>
 
     <!-- My Visits Menu -->
     <menuitem
@@ -14,8 +13,7 @@
         name="My Visits"
         parent="menu_wfm_partner_root"
         action="action_wfm_visit_partner"
-        sequence="10"
-        groups="wfm_portal.group_wfm_partner"/>
+        sequence="10"/>
 
     <!-- My Availability Menu -->
     <menuitem
@@ -23,8 +21,7 @@
         name="My Availability"
         parent="menu_wfm_partner_root"
         action="action_wfm_partner_availability"
-        sequence="20"
-        groups="wfm_portal.group_wfm_partner"/>
+        sequence="20"/>
 
     <!-- My Profile Menu -->
     <menuitem
@@ -32,6 +29,13 @@
         name="My Profile"
         parent="menu_wfm_partner_root"
         action="action_wfm_partner_profile"
-        sequence="30"
-        groups="wfm_portal.group_wfm_partner"/>
+        sequence="30"/>
+
+    <!-- Referrals Menu -->
+    <menuitem
+        id="menu_wfm_partner_referrals"
+        name="Referrals"
+        parent="menu_wfm_partner_root"
+        action="action_partner_referrals"
+        sequence="40"/>
 </odoo>
