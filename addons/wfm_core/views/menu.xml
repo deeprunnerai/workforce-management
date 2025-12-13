@@ -66,6 +66,12 @@
               action="action_wfm_contracts"
               sequence="30"/>
 
+    <menuitem id="menu_wfm_contract_services"
+              name="Contract Services"
+              parent="menu_wfm_clients_parent"
+              action="action_wfm_contract_services"
+              sequence="35"/>
+
     <!-- ============================================ -->
     <!-- CONFIG DROPDOWN (sequence 90)               -->
     <!-- ============================================ -->
@@ -79,10 +85,4 @@
               parent="menu_wfm_config"
               action="action_wfm_visit_stages"
               sequence="10"/>
-
-    <menuitem id="menu_wfm_types"
-              name="Types"
-              parent="menu_wfm_config"
-              action="action_wfm_contract_services"
-              sequence="20"/>
 </odoo>
