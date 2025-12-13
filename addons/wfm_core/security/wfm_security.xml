@@ -5,31 +5,21 @@
         <!-- WFM Security Groups                          -->
         <!-- ============================================ -->
 
-        <!-- Category for WFM groups -->
-        <record id="module_category_wfm" model="ir.module.category">
-            <field name="name">Workforce Management</field>
-            <field name="description">Access rights for GEP Workforce Management system</field>
-            <field name="sequence">100</field>
-        </record>
-
         <!-- GEP Admin - Full access to all WFM features -->
         <record id="group_wfm_admin" model="res.groups">
             <field name="name">GEP Admin</field>
-            <field name="category_id" ref="module_category_wfm"/>
             <field name="comment">Full access to all WFM features including clients, contracts, SEPE exports, billing, and configuration.</field>
         </record>
 
         <!-- GEP Coordinator - Manages partner assignments and schedules -->
         <record id="group_wfm_coordinator" model="res.groups">
             <field name="name">GEP Coordinator</field>
-            <field name="category_id" ref="module_category_wfm"/>
             <field name="comment">Manages partner assignments, visit scheduling, referral reviews, and partner engagement.</field>
         </record>
 
         <!-- GEP Partner - External OHS professionals (portal access) -->
         <record id="group_wfm_partner" model="res.groups">
             <field name="name">GEP Partner</field>
-            <field name="category_id" ref="module_category_wfm"/>
             <field name="comment">External OHS partners who can view their own assigned visits via portal.</field>
         </record>
     </data>
