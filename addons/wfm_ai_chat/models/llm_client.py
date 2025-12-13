@@ -73,6 +73,17 @@ You have access to these tools to interact with the WFM system:
 - wfm_churn_dashboard_stats: Get churn analysis dashboard statistics
 - wfm_get_ai_retention_strategy: Get AI-powered retention strategy for a partner
 - wfm_run_churn_computation: Trigger churn risk computation for all partners
+- wfm_list_sepe_exports: List SEPE export batches
+- wfm_create_sepe_export: Create a new SEPE export for a date range
+- wfm_get_sepe_export: Get details of a specific SEPE export
+- wfm_submit_sepe_export: Mark SEPE export as submitted to government
+- wfm_billing_stats: Get billing dashboard statistics
+- wfm_update_billing_status: Update billing status of visits
+- wfm_list_unbilled_visits: List visits pending billing
+- wfm_list_referrals: List partner referrals
+- wfm_get_referral: Get details of a specific referral
+- wfm_update_referral: Update referral status (start_review, accept, reject)
+- wfm_referral_stats: Get referral program statistics
 
 Guidelines:
 1. Always be helpful and concise
@@ -640,6 +651,285 @@ When responding:
                 "function": {
                     "name": "wfm_run_churn_computation",
                     "description": "Trigger churn risk computation for all partners. Updates health records with new risk scores.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {}
+                    }
+                }
+            },
+            # SEPE Export Tools
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_list_sepe_exports",
+                    "description": "List SEPE export batches with optional filters",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "state": {
+                                "type": "string",
+                                "enum": ["draft", "exported", "submitted"],
+                                "description": "Filter by export state"
+                            },
+                            "date_from": {
+                                "type": "string",
+                                "description": "Filter exports from this date (YYYY-MM-DD)"
+                            },
+                            "date_to": {
+                                "type": "string",
+                                "description": "Filter exports until this date (YYYY-MM-DD)"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of exports to return (default 10)"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_create_sepe_export",
+                    "description": "Create a new SEPE export batch for completed visits in a date range. Automatically generates Excel file.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "date_from": {
+                                "type": "string",
+                                "description": "Start date for visits to include (YYYY-MM-DD)"
+                            },
+                            "date_to": {
+                                "type": "string",
+                                "description": "End date for visits to include (YYYY-MM-DD)"
+                            },
+                            "include_exported": {
+                                "type": "boolean",
+                                "description": "Include visits that were already exported (default false)"
+                            },
+                            "generate_excel": {
+                                "type": "boolean",
+                                "description": "Generate Excel file immediately (default true)"
+                            }
+                        },
+                        "required": ["date_from", "date_to"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_get_sepe_export",
+                    "description": "Get detailed information about a specific SEPE export",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "export_id": {
+                                "type": "integer",
+                                "description": "SEPE export ID"
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "SEPE export reference (e.g., SEPE/2025/0001)"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_submit_sepe_export",
+                    "description": "Mark a SEPE export as submitted to the government. Updates visit billing status to 'invoiced'.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "export_id": {
+                                "type": "integer",
+                                "description": "SEPE export ID to mark as submitted"
+                            }
+                        },
+                        "required": ["export_id"]
+                    }
+                }
+            },
+            # Billing Tools
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_billing_stats",
+                    "description": "Get billing dashboard statistics: visits by billing status, amounts, and SEPE export counts",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {}
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_update_billing_status",
+                    "description": "Update billing status of one or more visits",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "visit_id": {
+                                "type": "integer",
+                                "description": "Single visit ID to update"
+                            },
+                            "visit_ids": {
+                                "type": "array",
+                                "items": {"type": "integer"},
+                                "description": "Multiple visit IDs to update"
+                            },
+                            "billing_status": {
+                                "type": "string",
+                                "enum": ["not_billed", "invoiced", "client_paid", "settled"],
+                                "description": "New billing status"
+                            },
+                            "invoice_reference": {
+                                "type": "string",
+                                "description": "Optional invoice reference number"
+                            }
+                        },
+                        "required": ["billing_status"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_list_unbilled_visits",
+                    "description": "List completed visits that haven't been billed yet",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "client_id": {
+                                "type": "integer",
+                                "description": "Filter by client ID"
+                            },
+                            "partner_id": {
+                                "type": "integer",
+                                "description": "Filter by partner ID"
+                            },
+                            "date_from": {
+                                "type": "string",
+                                "description": "Filter visits from this date (YYYY-MM-DD)"
+                            },
+                            "date_to": {
+                                "type": "string",
+                                "description": "Filter visits until this date (YYYY-MM-DD)"
+                            },
+                            "not_exported": {
+                                "type": "boolean",
+                                "description": "Only show visits not yet exported to SEPE"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of visits to return (default 20)"
+                            }
+                        }
+                    }
+                }
+            },
+            # Partner Referral Tools
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_list_referrals",
+                    "description": "List partner referrals with optional filters",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "state": {
+                                "type": "string",
+                                "enum": ["draft", "submitted", "under_review", "accepted", "rejected", "meeting_scheduled"],
+                                "description": "Filter by referral state"
+                            },
+                            "referring_partner_id": {
+                                "type": "integer",
+                                "description": "Filter by referring partner ID"
+                            },
+                            "coordinator_id": {
+                                "type": "integer",
+                                "description": "Filter by assigned coordinator ID"
+                            },
+                            "specialty": {
+                                "type": "string",
+                                "enum": ["physician", "safety_engineer", "health_scientist", "other"],
+                                "description": "Filter by candidate specialty"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of referrals to return (default 10)"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_get_referral",
+                    "description": "Get detailed information about a specific referral including candidate details",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "referral_id": {
+                                "type": "integer",
+                                "description": "Referral ID"
+                            },
+                            "reference": {
+                                "type": "string",
+                                "description": "Referral reference number"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_update_referral",
+                    "description": "Update referral status or details. Actions: start_review, accept (requires meeting_date), reject",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "referral_id": {
+                                "type": "integer",
+                                "description": "Referral ID to update"
+                            },
+                            "action": {
+                                "type": "string",
+                                "enum": ["start_review", "accept", "reject"],
+                                "description": "Action to perform on the referral"
+                            },
+                            "meeting_date": {
+                                "type": "string",
+                                "description": "Meeting date for acceptance (YYYY-MM-DD HH:MM:SS)"
+                            },
+                            "meeting_location": {
+                                "type": "string",
+                                "description": "Meeting location or video link"
+                            },
+                            "rejection_reason": {
+                                "type": "string",
+                                "description": "Reason for rejection"
+                            },
+                            "review_notes": {
+                                "type": "string",
+                                "description": "Internal coordinator notes"
+                            }
+                        },
+                        "required": ["referral_id"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_referral_stats",
+                    "description": "Get referral program statistics: counts by state, specialty, and top referrers",
                     "parameters": {
                         "type": "object",
                         "properties": {}
