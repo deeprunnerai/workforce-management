@@ -1,46 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- ============================================ -->
-    <!-- VISIT TIMELINE CALENDAR VIEW                 -->
-    <!-- ============================================ -->
-
-    <record id="view_wfm_visit_timeline_calendar" model="ir.ui.view">
-        <field name="name">wfm.visit.timeline.calendar</field>
-        <field name="model">wfm.visit</field>
-        <field name="arch" type="xml">
-            <calendar string="Visits Timeline"
-                      date_start="visit_date"
-                      color="partner_id"
-                      mode="month"
-                      event_open_popup="true"
-                      quick_create="false">
-                <field name="name"/>
-                <field name="client_id"/>
-                <field name="installation_id"/>
-                <field name="partner_id"/>
-                <field name="state"/>
-                <field name="duration"/>
-            </calendar>
-        </field>
-    </record>
-
-    <!-- Visit Timeline Action -->
-    <record id="action_wfm_visit_timeline" model="ir.actions.act_window">
-        <field name="name">Visits Timeline</field>
-        <field name="res_model">wfm.visit</field>
-        <field name="view_mode">calendar,list,form,kanban</field>
-        <field name="context">{}</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Schedule your first OHS Visit
-            </p>
-            <p>
-                View all visits on a calendar timeline.
-            </p>
-        </field>
-    </record>
-
-    <!-- ============================================ -->
     <!-- INSTALLATION SERVICE TIMELINE CALENDAR VIEW -->
     <!-- ============================================ -->
 
