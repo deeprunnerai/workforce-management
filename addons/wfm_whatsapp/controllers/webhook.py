@@ -45,7 +45,7 @@ class WhatsAppWebhook(http.Controller):
                 return self._twiml_response("Invalid request")
 
             # Extract phone number (remove 'whatsapp:' prefix)
-            phone = from_number.replace('whatsapp:', '')
+            phone = from_number.replace('whatsapp:', '').strip()
 
             # Process with sudo to bypass access rights
             env = request.env(user=SUPERUSER_ID)
