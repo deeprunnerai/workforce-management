@@ -261,62 +261,27 @@ Need assistance? Contact GEP support."""
         visit = visits[visit_number - 1]
 
         # Format date and time
-        date_str = visit.visit_date.strftime('%A, %d %B %Y') if visit.visit_date else 'TBD'
+        date_str = visit.visit_date.strftime('%d/%m/%Y') if visit.visit_date else 'TBD'
         start_time = f"{int(visit.start_time):02d}:{int((visit.start_time % 1) * 60):02d}" if visit.start_time else 'TBD'
-        end_time = f"{int(visit.end_time):02d}:{int((visit.end_time % 1) * 60):02d}" if visit.end_time else 'TBD'
-        duration = f"{visit.duration:.1f}" if visit.duration else 'N/A'
-        status = '✅ Confirmed' if visit.state == 'confirmed' else '⏳ Awaiting Confirmation'
+        status = '✅' if visit.state == 'confirmed' else '⏳'
 
-        # Build address
-        address_lines = []
-        if visit.installation_id:
-            inst = visit.installation_id
-            if inst.name:
-                address_lines.append(inst.name)
-            if inst.street:
-                address_lines.append(inst.street)
-            if inst.city:
-                city_line = inst.city
-                if hasattr(inst, 'postal_code') and inst.postal_code:
-                    city_line = f"{inst.postal_code} {city_line}"
-                address_lines.append(city_line)
-
-        address_text = '\n   '.join(address_lines) if address_lines else 'Address not specified'
+        # Build short address
+        address = visit.installation_id.city if visit.installation_id and visit.installation_id.city else 'N/A'
 
         # Get Google Maps URL
         maps_url = self._get_google_maps_url(visit.installation_id)
 
-        response = f"""📋 *Visit Details #{visit_number}*
+        response = f"""{status} *{visit.name}*
 
-━━━━━━━━━━━━━━━━━━━━━
-📌 *VISIT INFORMATION*
-━━━━━━━━━━━━━━━━━━━━━
-
-🔖 *Reference:* {visit.name}
-📊 *Status:* {status}
-📅 *Date:* {date_str}
-⏰ *Time:* {start_time} - {end_time}
-⏱️ *Duration:* {duration} hours
-
-━━━━━━━━━━━━━━━━━━━━━
-🏢 *CLIENT & LOCATION*
-━━━━━━━━━━━━━━━━━━━━━
-
-🏛️ *Client:* {visit.client_id.name or 'N/A'}
-📍 *Location:*
-   {address_text}"""
+📅 {date_str} at {start_time}
+🏢 {visit.client_id.name or 'N/A'}
+📍 {address}"""
 
         if maps_url:
-            response += f"""
-
-🗺️ *Navigate:*
-{maps_url}"""
+            response += f"\n\n🗺️ {maps_url}"
 
         if visit.state == 'assigned':
-            response += """
-
-━━━━━━━━━━━━━━━━━━━━━
-Reply *ACCEPT* to confirm or *DENY* to decline."""
+            response += "\n\nReply *ACCEPT* or *DENY*"
 
         return response
 
