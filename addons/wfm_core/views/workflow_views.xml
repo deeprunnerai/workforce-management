@@ -234,9 +234,9 @@
                         domain="[('status', '=', 'running')]"/>
                 <separator/>
                 <filter string="Today" name="filter_today"
-                        domain="[('started_at', '>=', context_today().strftime('%Y-%m-%d'))]"/>
+                        date="started_at" default_period="today"/>
                 <filter string="This Week" name="filter_week"
-                        domain="[('started_at', '>=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                        date="started_at" default_period="this_week"/>
                 <group expand="0" string="Group By">
                     <filter string="Workflow" name="groupby_workflow"
                             context="{'group_by': 'workflow_id'}"/>
