@@ -90,22 +90,33 @@ class WhatsAppWebhook(http.Controller):
         # Normalize phone for search
         phone_clean = phone.replace('+', '').replace(' ', '').replace('-', '')
 
+        # Ensure phone has + prefix for sanitized search
+        phone_with_plus = '+' + phone_clean if not phone.startswith('+') else phone.replace(' ', '')
+
         # Try different search patterns
         Partner = env['res.partner'].sudo()
 
-        # Direct match on phone field
+        # First try phone_sanitized field (most reliable)
         partner = Partner.search([
             '|',
-            ('phone', 'ilike', phone),
-            ('phone', 'ilike', phone_clean[-10:]),  # Last 10 digits
+            ('phone_sanitized', '=', phone_with_plus),
+            ('phone_sanitized', 'ilike', phone_clean[-10:]),  # Last 10 digits
         ], limit=1)
 
         if not partner:
-            # Try with country code variations
-            if phone_clean.startswith('30'):  # Greece
+            # Fallback to phone field
+            partner = Partner.search([
+                '|',
+                ('phone', 'ilike', phone),
+                ('phone', 'ilike', phone_clean[-10:]),
+            ], limit=1)
+
+        if not partner:
+            # Try with country code variations (Greece)
+            if phone_clean.startswith('30'):
                 local = phone_clean[2:]
                 partner = Partner.search([
-                    ('phone', 'ilike', local),
+                    ('phone_sanitized', 'ilike', local),
                 ], limit=1)
 
         return partner
