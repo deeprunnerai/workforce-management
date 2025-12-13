@@ -16,6 +16,39 @@ Client pays GEP → GEP pays Partner → GEP keeps margin
 
 ---
 
+## Documentation Maintenance (IMPORTANT)
+
+**All developers MUST keep documentation up to date.** Update these files after completing tasks:
+
+| File | Purpose | Update When |
+|------|---------|-------------|
+| `STATUS.md` | Project progress, branch status, KPIs | After each deployment, data change, or milestone |
+| `CLAUDE.md` | Technical context, models, roadmap | After adding models, features, or architecture changes |
+| `CHANGELOG.md` | Version history | After each merge to main |
+| `TASKS.md` | Task tracking | After completing or starting tasks |
+
+### Update Checklist (Run after each work session)
+```bash
+# 1. Update STATUS.md with current progress
+# 2. Update CHANGELOG.md if merging to main
+# 3. Commit and push documentation
+git add *.md && git commit -m "docs: update project status" && git push
+
+# 4. Sync all branches
+for branch in dev-a dev-b dev-c; do
+  git checkout $branch && git merge main --no-edit && git push origin $branch
+done
+git checkout main
+```
+
+### Documentation Rules
+1. **STATUS.md** - Update module status, data counts, branch commits after EVERY deployment
+2. **CLAUDE.md** - Update data models section when adding/modifying models
+3. **Keep branches synced** - Always sync dev-a, dev-b, dev-c with main after merging
+4. **Timestamp updates** - Add "Last Updated" date at bottom of STATUS.md
+
+---
+
 ## Key Terminology
 
 | Term | Greek | Definition |
