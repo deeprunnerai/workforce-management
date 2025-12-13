@@ -24,5 +24,19 @@
             <field name="active">True</field>
             <field name="priority">100</field>
         </record>
+
+        <!-- SEPE Daily Export - Auto-export yesterday's completed visits -->
+        <record id="ir_cron_sepe_daily_export" model="ir.cron">
+            <field name="name">WFM: SEPE Daily Export</field>
+            <field name="model_id" ref="model_wfm_sepe_export"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_daily_export()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).replace(hour=6, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="active">False</field>
+            <field name="priority">50</field>
+        </record>
     </data>
 </odoo>
