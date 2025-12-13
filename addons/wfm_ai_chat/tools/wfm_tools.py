@@ -453,3 +453,182 @@ class WfmToolExecutor(models.AbstractModel):
             'count': len(result),
             'messages': result
         }
+
+    # ==================== Workflow Tools ====================
+
+    def _tool_wfm_create_workflow(self, args):
+        """Create a new autonomous workflow."""
+        if not args.get('name') or not args.get('prompt'):
+            return {'error': 'Both name and prompt are required'}
+
+        Workflow = self.env['wfm.workflow']
+
+        vals = {
+            'name': args['name'],
+            'prompt': args['prompt'],
+        }
+
+        if args.get('description'):
+            vals['description'] = args['description']
+
+        if args.get('schedule_type'):
+            vals['schedule_type'] = args['schedule_type']
+
+        if args.get('interval_number'):
+            vals['interval_number'] = args['interval_number']
+
+        if args.get('interval_type'):
+            vals['interval_type'] = args['interval_type']
+
+        if args.get('cron_expression'):
+            vals['cron_expression'] = args['cron_expression']
+
+        try:
+            workflow = Workflow.create(vals)
+            return {
+                'success': True,
+                'message': f"Created workflow '{workflow.name}' (ID: {workflow.id})",
+                'workflow': {
+                    'id': workflow.id,
+                    'name': workflow.name,
+                    'state': workflow.state,
+                    'schedule_type': workflow.schedule_type,
+                    'cron_description': workflow.cron_description,
+                }
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_list_workflows(self, args):
+        """List existing workflows."""
+        Workflow = self.env['wfm.workflow']
+        domain = []
+
+        if args.get('state'):
+            domain.append(('state', '=', args['state']))
+
+        limit = args.get('limit', 10)
+        workflows = Workflow.search(domain, limit=limit, order='sequence, name')
+
+        result = []
+        for w in workflows:
+            result.append({
+                'id': w.id,
+                'name': w.name,
+                'description': w.description or '',
+                'state': w.state,
+                'schedule_type': w.schedule_type,
+                'cron_description': w.cron_description or '',
+                'last_run': w.last_run.strftime('%d/%m/%Y %H:%M') if w.last_run else None,
+                'next_run': w.next_run.strftime('%d/%m/%Y %H:%M') if w.next_run else None,
+                'run_count': w.run_count,
+                'success_rate': f"{w.success_rate:.0f}%",
+            })
+
+        return {
+            'count': len(result),
+            'workflows': result
+        }
+
+    def _tool_wfm_update_workflow(self, args):
+        """Update an existing workflow."""
+        if not args.get('workflow_id'):
+            return {'error': 'workflow_id is required'}
+
+        Workflow = self.env['wfm.workflow']
+        workflow = Workflow.browse(args['workflow_id'])
+
+        if not workflow.exists():
+            return {'error': f"Workflow {args['workflow_id']} not found"}
+
+        vals = {}
+        if args.get('name'):
+            vals['name'] = args['name']
+        if args.get('prompt'):
+            vals['prompt'] = args['prompt']
+        if args.get('schedule_type'):
+            vals['schedule_type'] = args['schedule_type']
+        if args.get('interval_number'):
+            vals['interval_number'] = args['interval_number']
+        if args.get('interval_type'):
+            vals['interval_type'] = args['interval_type']
+        if args.get('cron_expression'):
+            vals['cron_expression'] = args['cron_expression']
+
+        # Handle state changes via action methods
+        state = args.get('state')
+        if state == 'active' and workflow.state != 'active':
+            workflow.action_activate()
+        elif state == 'paused' and workflow.state == 'active':
+            workflow.action_pause()
+
+        if vals:
+            workflow.write(vals)
+
+        return {
+            'success': True,
+            'message': f"Updated workflow '{workflow.name}'",
+            'workflow': {
+                'id': workflow.id,
+                'name': workflow.name,
+                'state': workflow.state,
+                'schedule_type': workflow.schedule_type,
+                'cron_description': workflow.cron_description,
+            }
+        }
+
+    def _tool_wfm_run_workflow(self, args):
+        """Manually trigger a workflow."""
+        if not args.get('workflow_id'):
+            return {'error': 'workflow_id is required'}
+
+        Workflow = self.env['wfm.workflow']
+        workflow = Workflow.browse(args['workflow_id'])
+
+        if not workflow.exists():
+            return {'error': f"Workflow {args['workflow_id']} not found"}
+
+        try:
+            workflow.action_run_now()
+            return {
+                'success': True,
+                'message': f"Triggered workflow '{workflow.name}'",
+                'workflow_id': workflow.id,
+                'workflow_name': workflow.name,
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_workflow_logs(self, args):
+        """Get execution logs for a workflow."""
+        WorkflowLog = self.env['wfm.workflow.log']
+        domain = []
+
+        if args.get('workflow_id'):
+            domain.append(('workflow_id', '=', args['workflow_id']))
+
+        if args.get('status'):
+            domain.append(('status', '=', args['status']))
+
+        limit = args.get('limit', 10)
+        logs = WorkflowLog.search(domain, limit=limit, order='started_at desc')
+
+        result = []
+        for log in logs:
+            result.append({
+                'id': log.id,
+                'workflow': log.workflow_id.name,
+                'started_at': log.started_at.strftime('%d/%m/%Y %H:%M') if log.started_at else None,
+                'ended_at': log.ended_at.strftime('%d/%m/%Y %H:%M') if log.ended_at else None,
+                'duration_seconds': log.duration_seconds,
+                'status': log.status,
+                'tool_call_count': log.tool_call_count,
+                'tokens_total': log.tokens_total,
+                'error': log.error if log.status == 'failed' else None,
+                'result_preview': (log.result[:200] + '...') if log.result and len(log.result) > 200 else log.result,
+            })
+
+        return {
+            'count': len(result),
+            'logs': result
+        }

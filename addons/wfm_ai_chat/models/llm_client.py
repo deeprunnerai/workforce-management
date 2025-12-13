@@ -61,6 +61,11 @@ You have access to these tools to interact with the WFM system:
 - wfm_send_whatsapp: Send a custom WhatsApp message to a partner
 - wfm_send_visit_notification: Send predefined WhatsApp notification (assignment/confirmation/reminder/cancellation)
 - wfm_list_whatsapp_messages: List WhatsApp message history
+- wfm_create_workflow: Create an autonomous workflow that runs on a schedule
+- wfm_list_workflows: List existing workflows
+- wfm_update_workflow: Update a workflow's prompt or schedule
+- wfm_run_workflow: Manually trigger a workflow now
+- wfm_workflow_logs: Get execution logs for a workflow
 
 Guidelines:
 1. Always be helpful and concise
@@ -331,6 +336,161 @@ When responding:
                         }
                     }
                 }
+            },
+            # Workflow Tools
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_create_workflow",
+                    "description": "Create an autonomous workflow that runs on a schedule. Workflows execute AI agents to perform automated tasks.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Name of the workflow"
+                            },
+                            "prompt": {
+                                "type": "string",
+                                "description": "Natural language instructions for the AI agent to execute"
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Brief description of what the workflow does"
+                            },
+                            "schedule_type": {
+                                "type": "string",
+                                "enum": ["manual", "interval", "cron"],
+                                "description": "How the workflow is scheduled: manual (run on demand), interval (every X minutes/hours/days), cron (cron expression)"
+                            },
+                            "interval_number": {
+                                "type": "integer",
+                                "description": "For interval schedules: how many units between runs"
+                            },
+                            "interval_type": {
+                                "type": "string",
+                                "enum": ["minutes", "hours", "days", "weeks"],
+                                "description": "For interval schedules: the time unit"
+                            },
+                            "cron_expression": {
+                                "type": "string",
+                                "description": "For cron schedules: cron expression (e.g., '0 9 * * *' for daily at 9AM)"
+                            }
+                        },
+                        "required": ["name", "prompt"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_list_workflows",
+                    "description": "List existing autonomous workflows",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "state": {
+                                "type": "string",
+                                "enum": ["draft", "active", "paused", "error"],
+                                "description": "Filter by workflow state"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of workflows to return (default 10)"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_update_workflow",
+                    "description": "Update an existing workflow's configuration",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "workflow_id": {
+                                "type": "integer",
+                                "description": "Workflow ID to update"
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "New name for the workflow"
+                            },
+                            "prompt": {
+                                "type": "string",
+                                "description": "New prompt/instructions for the AI agent"
+                            },
+                            "state": {
+                                "type": "string",
+                                "enum": ["active", "paused"],
+                                "description": "Activate or pause the workflow"
+                            },
+                            "schedule_type": {
+                                "type": "string",
+                                "enum": ["manual", "interval", "cron"],
+                                "description": "New schedule type"
+                            },
+                            "interval_number": {
+                                "type": "integer",
+                                "description": "New interval number"
+                            },
+                            "interval_type": {
+                                "type": "string",
+                                "enum": ["minutes", "hours", "days", "weeks"],
+                                "description": "New interval type"
+                            },
+                            "cron_expression": {
+                                "type": "string",
+                                "description": "New cron expression"
+                            }
+                        },
+                        "required": ["workflow_id"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_run_workflow",
+                    "description": "Manually trigger a workflow to run now",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "workflow_id": {
+                                "type": "integer",
+                                "description": "Workflow ID to run"
+                            }
+                        },
+                        "required": ["workflow_id"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_workflow_logs",
+                    "description": "Get execution logs for a workflow",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "workflow_id": {
+                                "type": "integer",
+                                "description": "Workflow ID to get logs for"
+                            },
+                            "status": {
+                                "type": "string",
+                                "enum": ["running", "success", "failed", "timeout", "cancelled"],
+                                "description": "Filter by execution status"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of logs to return (default 10)"
+                            }
+                        }
+                    }
+                }
             }
         ]
 
@@ -396,7 +556,7 @@ When responding:
                 'tool_calls': []
             }
 
-    def chat_with_tools(self, message, conversation_history=None, max_rounds=3):
+    def chat_with_tools(self, message, conversation_history=None, max_rounds=5):
         """
         Complete chat interaction with automatic tool execution.
 
