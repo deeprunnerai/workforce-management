@@ -1,8 +1,8 @@
 {
     'name': 'WFM Field Service Management',
-    'version': '19.0.2.0.0',
+    'version': '19.0.4.0.0',
     'category': 'Services/Field Service',
-    'summary': 'Kanban, Dashboard, Smart Assignment, and Coordinator Tools for GEP OHS Workforce Management',
+    'summary': 'Kanban, Dashboard, Smart Assignment, Churn Prediction, AI Retention for GEP OHS Workforce Management',
     'description': """
         GEP OHS Workforce Management - Field Service Module
         ====================================================
@@ -20,6 +20,21 @@
         - Availability, Performance, Proximity, Workload scoring
         - Top 2 partner recommendations for quick decisions
         - Auto-tracking of partner-client relationships
+
+        Churn Prediction Dashboard:
+        - Partner health scoring (0-100 risk score)
+        - 5-factor churn risk algorithm
+        - Risk levels: Low, Medium, High, Critical
+        - Intervention tracking for retention efforts
+        - Daily automated health computation
+        - Proactive alerts for at-risk partners
+
+        AI-Powered Retention Engine (NEW):
+        - Claude AI integration for personalized retention strategies
+        - Automatic WhatsApp message generation in Greek
+        - Risk-based urgency recommendations
+        - One-click outreach to at-risk partners
+        - Comprehensive partner context analysis
 
         Part of the GEP OHS Workforce Management System.
     """,
@@ -40,7 +55,9 @@
         'views/gantt_views.xml',
         'views/visit_form_extension.xml',
         'views/dashboard_views.xml',
+        'views/churn_dashboard_views.xml',
         'views/menu.xml',
+        'data/cron_jobs.xml',
     ],
     'assets': {
         'web.assets_backend': [

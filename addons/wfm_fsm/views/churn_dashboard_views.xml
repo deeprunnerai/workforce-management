@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ===== RETENTION TICKET VIEWS ===== -->
+
+    <!-- Ticket List View -->
+    <record id="view_partner_health_list" model="ir.ui.view">
+        <field name="name">wfm.partner.health.list</field>
+        <field name="model">wfm.partner.health</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="risk_level == 'critical'"
+                  decoration-warning="risk_level == 'high'"
+                  decoration-info="risk_level == 'medium'">
+                <field name="partner_id"/>
+                <field name="ticket_state" widget="badge"
+                       decoration-info="ticket_state == 'open'"
+                       decoration-warning="ticket_state == 'in_progress'"
+                       decoration-success="ticket_state == 'resolved'"
+                       decoration-muted="ticket_state == 'closed'"/>
+                <field name="churn_risk_score" widget="progressbar"
+                       options="{'max_value': 100}"/>
+                <field name="risk_level" widget="badge"
+                       decoration-danger="risk_level == 'critical'"
+                       decoration-warning="risk_level == 'high'"
+                       decoration-info="risk_level == 'medium'"
+                       decoration-success="risk_level == 'low'"/>
+                <field name="planned_action"/>
+                <field name="final_verdict" widget="badge"
+                       decoration-success="final_verdict == 'retained'"
+                       decoration-danger="final_verdict == 'churned'"
+                       decoration-warning="final_verdict == 'in_progress'"
+                       decoration-muted="final_verdict == 'pending'"/>
+                <field name="assigned_coordinator_id" widget="many2one_avatar_user"/>
+                <field name="days_since_last_visit"/>
+                <button name="action_start_work"
+                        string="▶️ Start"
+                        type="object"
+                        class="btn-primary"
+                        invisible="ticket_state != 'open'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Ticket Form View -->
+    <record id="view_partner_health_form" model="ir.ui.view">
+        <field name="name">wfm.partner.health.form</field>
+        <field name="model">wfm.partner.health</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <!-- Workflow Buttons -->
+                    <button name="action_start_work"
+                            string="▶️ Start Working"
+                            type="object"
+                            class="btn-primary"
+                            invisible="ticket_state != 'open'"/>
+                    <button name="action_create_intervention"
+                            string="📝 Log Action"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="ticket_state in ('resolved', 'closed')"/>
+                    <button name="action_resolve_retained"
+                            string="🎉 Partner Retained"
+                            type="object"
+                            class="btn-success"
+                            invisible="ticket_state not in ('in_progress',)"/>
+                    <button name="action_resolve_churned"
+                            string="💔 Partner Left"
+                            type="object"
+                            class="btn-danger"
+                            invisible="ticket_state not in ('in_progress',)"/>
+                    <button name="action_close_ticket"
+                            string="🔒 Close Ticket"
+                            type="object"
+                            invisible="ticket_state != 'resolved'"/>
+                    <button name="action_reopen_ticket"
+                            string="🔄 Reopen"
+                            type="object"
+                            invisible="ticket_state not in ('resolved', 'closed')"/>
+                    <field name="ticket_state" widget="statusbar"
+                           statusbar_visible="open,in_progress,resolved,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_partner"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-user">
+                            <span>Partner Profile</span>
+                        </button>
+                    </div>
+
+                    <!-- Resolution Banner -->
+                    <div class="alert alert-success" role="status"
+                         invisible="resolution_outcome != 'retained'">
+                        <strong>🎉 Partner Retained!</strong>
+                        Resolved on <field name="resolution_date" class="oe_inline" readonly="1"/>
+                    </div>
+                    <div class="alert alert-danger" role="status"
+                         invisible="resolution_outcome != 'churned'">
+                        <strong>💔 Partner Left</strong>
+                        Marked on <field name="resolution_date" class="oe_inline" readonly="1"/>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="partner_id" readonly="1"/>
+                        </h1>
+                        <h3 class="text-muted">
+                            <field name="risk_level" widget="badge"
+                                   decoration-danger="risk_level == 'critical'"
+                                   decoration-warning="risk_level == 'high'"
+                                   decoration-info="risk_level == 'medium'"
+                                   decoration-success="risk_level == 'low'"/>
+                            Risk Score: <field name="churn_risk_score" class="oe_inline"/> / 100
+                        </h3>
+                    </div>
+
+                    <group>
+                        <group string="📊 Risk Assessment">
+                            <field name="churn_risk_score" widget="progressbar"
+                                   options="{'max_value': 100}"/>
+                            <field name="risk_trend"/>
+                            <field name="computed_date" string="Last Computed"/>
+                        </group>
+                        <group string="📋 Ticket Info">
+                            <field name="assigned_coordinator_id" widget="many2one_avatar_user"/>
+                            <field name="planned_action" widget="radio"
+                                   options="{'horizontal': true}"/>
+                            <field name="last_intervention_date" string="Last Action"/>
+                        </group>
+                    </group>
+
+                    <!-- TAKE ACTION Section - Shows based on planned_action -->
+                    <group string="🚀 Take Action" invisible="ticket_state in ('resolved', 'closed') or not planned_action">
+                        <div colspan="2">
+                            <!-- Phone Call -->
+                            <div class="p-3 border rounded bg-light" invisible="planned_action != 'call'">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="h3 mb-0 me-3">📞</span>
+                                    <div>
+                                        <strong class="h5">Call Partner</strong><br/>
+                                        <span class="text-primary h4"><field name="partner_phone" class="oe_inline" readonly="1"/></span>
+                                        <span class="text-muted ms-2" invisible="not partner_mobile">
+                                            Mobile: <field name="partner_mobile" class="oe_inline" readonly="1"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button name="action_call_partner" type="object"
+                                            string="📞 Call Now" class="btn btn-primary btn-lg me-2"/>
+                                    <button name="action_create_intervention" type="object"
+                                            string="📝 Log Call Result" class="btn btn-outline-secondary"/>
+                                </div>
+                            </div>
+
+                            <!-- WhatsApp -->
+                            <div class="p-3 border rounded bg-light" invisible="planned_action != 'whatsapp'">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="h3 mb-0 me-3">💬</span>
+                                    <div>
+                                        <strong class="h5">Send WhatsApp Message</strong><br/>
+                                        <span class="text-muted">To: <field name="partner_phone" class="oe_inline" readonly="1"/></span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button name="action_open_whatsapp" type="object"
+                                            string="💬 Open WhatsApp" class="btn btn-success btn-lg me-2"/>
+                                    <button name="action_create_intervention" type="object"
+                                            string="📝 Log Message" class="btn btn-outline-secondary"/>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="p-3 border rounded bg-light" invisible="planned_action != 'email'">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="h3 mb-0 me-3">📧</span>
+                                    <div>
+                                        <strong class="h5">Send Email</strong><br/>
+                                        <span class="text-muted"><field name="partner_email" class="oe_inline" readonly="1"/></span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button name="action_send_email" type="object"
+                                            string="📧 Compose Email" class="btn btn-info btn-lg me-2"/>
+                                    <button name="action_create_intervention" type="object"
+                                            string="📝 Log Email" class="btn btn-outline-secondary"/>
+                                </div>
+                            </div>
+
+                            <!-- In-Person Meeting -->
+                            <div class="p-3 border rounded bg-light" invisible="planned_action != 'meeting'">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="h3 mb-0 me-3">🤝</span>
+                                    <div>
+                                        <strong class="h5">Schedule In-Person Meeting</strong><br/>
+                                        <span class="text-muted">Create calendar event and send invite</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button name="action_schedule_meeting" type="object"
+                                            string="🤝 Create Meeting" class="btn btn-warning btn-lg me-2"/>
+                                    <button name="action_create_intervention" type="object"
+                                            string="📝 Log Meeting" class="btn btn-outline-secondary"/>
+                                </div>
+                            </div>
+
+                            <!-- Bonus/Incentive -->
+                            <div class="p-3 border rounded bg-light" invisible="planned_action != 'bonus'">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="h3 mb-0 me-3">💰</span>
+                                    <div>
+                                        <strong class="h5">Offer Bonus/Incentive</strong><br/>
+                                        <span class="text-muted">Discuss with manager, then offer to partner</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button name="action_create_intervention" type="object"
+                                            string="📝 Log Bonus Discussion" class="btn btn-secondary btn-lg"/>
+                                </div>
+                            </div>
+
+                            <!-- Workload Adjustment -->
+                            <div class="p-3 border rounded bg-light" invisible="planned_action != 'workload'">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="h3 mb-0 me-3">📊</span>
+                                    <div>
+                                        <strong class="h5">Adjust Workload</strong><br/>
+                                        <span class="text-muted">Review and modify partner's visit assignments</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button name="action_view_partner_visits" type="object"
+                                            string="📊 View Assignments" class="btn btn-primary btn-lg me-2"/>
+                                    <button name="action_create_intervention" type="object"
+                                            string="📝 Log Adjustment" class="btn btn-outline-secondary"/>
+                                </div>
+                            </div>
+                        </div>
+                    </group>
+
+                    <!-- Prompt to select action -->
+                    <group invisible="ticket_state in ('resolved', 'closed') or planned_action">
+                        <div colspan="2" class="alert alert-info">
+                            <strong>👆 Select a Planned Action above</strong> to see the action panel.
+                        </div>
+                    </group>
+
+                    <notebook>
+                        <page string="📝 Action Log" name="action_log">
+                            <field name="intervention_ids" nolabel="1">
+                                <list editable="bottom" decoration-success="partner_response == 'positive'"
+                                      decoration-warning="partner_response == 'callback'"
+                                      decoration-danger="partner_response == 'negative'">
+                                    <field name="date" widget="datetime"/>
+                                    <field name="intervention_type"/>
+                                    <field name="summary"/>
+                                    <field name="partner_response" widget="badge"/>
+                                    <field name="coordinator_id" widget="many2one_avatar_user"/>
+                                    <field name="needs_follow_up" widget="boolean"/>
+                                </list>
+                            </field>
+                            <div class="mt-3">
+                                <button name="action_create_intervention"
+                                        string="➕ Log New Action"
+                                        type="object"
+                                        class="btn-primary"
+                                        invisible="ticket_state in ('resolved', 'closed')"/>
+                            </div>
+                        </page>
+                        <page string="📈 Risk Breakdown" name="risk_breakdown">
+                            <group>
+                                <group string="Score Components">
+                                    <label for="decline_rate_score" string="Decline Rate"/>
+                                    <div class="d-flex align-items-center">
+                                        <field name="decline_rate_score" widget="progressbar"
+                                               options="{'max_value': 30}" class="flex-grow-1"/>
+                                        <span class="ms-2 text-muted small">/ 30</span>
+                                    </div>
+                                    <label for="volume_change_score" string="Volume Drop"/>
+                                    <div class="d-flex align-items-center">
+                                        <field name="volume_change_score" widget="progressbar"
+                                               options="{'max_value': 25}" class="flex-grow-1"/>
+                                        <span class="ms-2 text-muted small">/ 25</span>
+                                    </div>
+                                    <label for="inactivity_score" string="Inactivity"/>
+                                    <div class="d-flex align-items-center">
+                                        <field name="inactivity_score" widget="progressbar"
+                                               options="{'max_value': 20}" class="flex-grow-1"/>
+                                        <span class="ms-2 text-muted small">/ 20</span>
+                                    </div>
+                                    <label for="payment_issue_score" string="Payment Issues"/>
+                                    <div class="d-flex align-items-center">
+                                        <field name="payment_issue_score" widget="progressbar"
+                                               options="{'max_value': 15}" class="flex-grow-1"/>
+                                        <span class="ms-2 text-muted small">/ 15</span>
+                                    </div>
+                                    <label for="feedback_score" string="Negative Feedback"/>
+                                    <div class="d-flex align-items-center">
+                                        <field name="feedback_score" widget="progressbar"
+                                               options="{'max_value': 10}" class="flex-grow-1"/>
+                                        <span class="ms-2 text-muted small">/ 10</span>
+                                    </div>
+                                </group>
+                                <group string="Activity Metrics">
+                                    <field name="visits_last_30d" string="Visits (Last 30d)"/>
+                                    <field name="visits_previous_30d" string="Visits (Prev 30d)"/>
+                                    <field name="visits_declined_30d" string="Declined Visits"/>
+                                    <field name="days_since_last_visit"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="📋 Resolution" name="resolution"
+                              invisible="ticket_state not in ('resolved', 'closed')">
+                            <group>
+                                <group>
+                                    <field name="resolution_outcome" readonly="1"/>
+                                    <field name="resolution_date" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="resolution_notes"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Ticket Kanban View -->
+    <record id="view_partner_health_kanban" model="ir.ui.view">
+        <field name="name">wfm.partner.health.kanban</field>
+        <field name="model">wfm.partner.health</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="ticket_state" class="o_kanban_small_column">
+                <field name="partner_id"/>
+                <field name="churn_risk_score"/>
+                <field name="risk_level"/>
+                <field name="ticket_state"/>
+                <field name="planned_action"/>
+                <field name="final_verdict"/>
+                <field name="assigned_coordinator_id"/>
+                <field name="days_since_last_visit"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb-2">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="partner_id"/>
+                                    </strong>
+                                </div>
+                                <field name="risk_level" widget="badge"
+                                       decoration-danger="risk_level == 'critical'"
+                                       decoration-warning="risk_level == 'high'"
+                                       decoration-info="risk_level == 'medium'"
+                                       decoration-success="risk_level == 'low'"/>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Risk Score:</span>
+                                    <strong><field name="churn_risk_score"/>/100</strong>
+                                </div>
+                                <field name="churn_risk_score" widget="progressbar"
+                                       options="{'max_value': 100}"/>
+                                <div class="mt-2" t-if="record.planned_action.value">
+                                    <span class="badge bg-secondary">
+                                        <field name="planned_action"/>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <span>Last visit: <field name="days_since_last_visit"/>d ago</span>
+                                </div>
+                                <!-- Final Verdict shown at the bottom -->
+                                <div class="mt-2" t-if="record.final_verdict.value">
+                                    <field name="final_verdict" widget="badge"
+                                           decoration-success="final_verdict == 'retained'"
+                                           decoration-danger="final_verdict == 'churned'"
+                                           decoration-warning="final_verdict == 'in_progress'"
+                                           decoration-muted="final_verdict == 'pending'"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom mt-2">
+                                <field name="assigned_coordinator_id" widget="many2one_avatar_user"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_partner_health_search" model="ir.ui.view">
+        <field name="name">wfm.partner.health.search</field>
+        <field name="model">wfm.partner.health</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="assigned_coordinator_id"/>
+                <separator/>
+                <filter string="Open Tickets" name="open"
+                        domain="[('ticket_state', '=', 'open')]"/>
+                <filter string="In Progress" name="in_progress"
+                        domain="[('ticket_state', '=', 'in_progress')]"/>
+                <filter string="Resolved" name="resolved"
+                        domain="[('ticket_state', '=', 'resolved')]"/>
+                <separator/>
+                <filter string="Critical Risk" name="critical"
+                        domain="[('risk_level', '=', 'critical')]"/>
+                <filter string="High Risk" name="high"
+                        domain="[('risk_level', '=', 'high')]"/>
+                <separator/>
+                <filter string="🎉 Retained" name="retained"
+                        domain="[('final_verdict', '=', 'retained')]"/>
+                <filter string="💔 Churned" name="churned"
+                        domain="[('final_verdict', '=', 'churned')]"/>
+                <separator/>
+                <filter string="My Tickets" name="my_tickets"
+                        domain="[('assigned_coordinator_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Ticket Status" name="group_ticket_state"
+                        context="{'group_by': 'ticket_state'}"/>
+                <filter string="Risk Level" name="group_risk_level"
+                        context="{'group_by': 'risk_level'}"/>
+                <filter string="Final Verdict" name="group_final_verdict"
+                        context="{'group_by': 'final_verdict'}"/>
+                <filter string="Coordinator" name="group_coordinator"
+                        context="{'group_by': 'assigned_coordinator_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ===== ACTION LOG VIEWS ===== -->
+
+    <!-- Action Log List View -->
+    <record id="view_partner_intervention_list" model="ir.ui.view">
+        <field name="name">wfm.partner.intervention.list</field>
+        <field name="model">wfm.partner.intervention</field>
+        <field name="arch" type="xml">
+            <list decoration-success="partner_response == 'positive'"
+                  decoration-warning="partner_response in ('callback', 'no_answer')"
+                  decoration-danger="partner_response == 'negative'">
+                <field name="date" widget="datetime"/>
+                <field name="partner_id"/>
+                <field name="intervention_type"/>
+                <field name="summary"/>
+                <field name="partner_response" widget="badge"
+                       decoration-success="partner_response == 'positive'"
+                       decoration-warning="partner_response in ('callback', 'neutral')"
+                       decoration-danger="partner_response == 'negative'"
+                       decoration-muted="partner_response == 'no_answer'"/>
+                <field name="coordinator_id" widget="many2one_avatar_user"/>
+                <field name="needs_follow_up" widget="boolean"/>
+                <field name="follow_up_date"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action Log Form View -->
+    <record id="view_partner_intervention_form" model="ir.ui.view">
+        <field name="name">wfm.partner.intervention.form</field>
+        <field name="model">wfm.partner.intervention</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_ticket" type="object"
+                                class="oe_stat_button" icon="fa-ticket"
+                                string="View Ticket"/>
+                    </div>
+                    <div class="oe_title mb-3">
+                        <h2>
+                            Action for: <field name="partner_id" readonly="1" class="oe_inline"/>
+                        </h2>
+                    </div>
+                    <group>
+                        <group string="📋 What did you do?">
+                            <field name="health_id" invisible="1"/>
+                            <field name="intervention_type" widget="radio"/>
+                            <field name="summary" placeholder="e.g., Called to discuss workload concerns..."
+                                   string="Brief Summary"/>
+                            <field name="date" widget="datetime" string="When"/>
+                            <field name="coordinator_id" widget="many2one_avatar_user" string="Done by"/>
+                        </group>
+                        <group string="📞 Partner's Response">
+                            <field name="partner_response" widget="radio"/>
+                            <div colspan="2" class="text-muted small" invisible="partner_response">
+                                How did the partner react to your outreach?
+                            </div>
+                        </group>
+                    </group>
+                    <group string="📝 Detailed Notes">
+                        <field name="notes" nolabel="1" colspan="2"
+                               placeholder="What was discussed? What concerns did the partner raise? What was agreed upon?"/>
+                    </group>
+                    <group string="🔄 Follow-up Required?" col="4">
+                        <field name="needs_follow_up"/>
+                        <field name="follow_up_date" invisible="not needs_follow_up"/>
+                        <field name="follow_up_notes" nolabel="1" colspan="4"
+                               invisible="not needs_follow_up"
+                               placeholder="What needs to be done in the follow-up?"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===== ACTIONS ===== -->
+
+    <!-- Retention Tickets Dashboard -->
+    <record id="action_retention_tickets" model="ir.actions.act_window">
+        <field name="name">Retention Tickets</field>
+        <field name="res_model">wfm.partner.health</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_partner_health_search"/>
+        <field name="domain">[('risk_level', 'in', ['high', 'critical'])]</field>
+        <field name="context">{'search_default_open': 1, 'search_default_in_progress': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No retention tickets
+            </p>
+            <p>
+                High and critical risk partners will appear here as tickets to work on.
+            </p>
+        </field>
+    </record>
+
+    <!-- My Tickets Action -->
+    <record id="action_my_retention_tickets" model="ir.actions.act_window">
+        <field name="name">My Tickets</field>
+        <field name="res_model">wfm.partner.health</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_partner_health_search"/>
+        <field name="context">{'search_default_my_tickets': 1, 'search_default_in_progress': 1}</field>
+    </record>
+
+    <!-- All Partner Health (Analytics) -->
+    <record id="action_churn_dashboard" model="ir.actions.act_window">
+        <field name="name">Churn Analytics</field>
+        <field name="res_model">wfm.partner.health</field>
+        <field name="view_mode">list,kanban,pivot,graph,form</field>
+        <field name="search_view_id" ref="view_partner_health_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No partner health records
+            </p>
+            <p>
+                Run the daily health computation to see churn predictions.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action Log Action -->
+    <record id="action_partner_interventions" model="ir.actions.act_window">
+        <field name="name">Action Log</field>
+        <field name="res_model">wfm.partner.intervention</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No actions logged yet
+            </p>
+            <p>
+                Actions taken on retention tickets will appear here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_partner_health_pivot" model="ir.ui.view">
+        <field name="name">wfm.partner.health.pivot</field>
+        <field name="model">wfm.partner.health</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="ticket_state" type="col"/>
+                <field name="risk_level" type="row"/>
+                <field name="churn_risk_score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_partner_health_graph" model="ir.ui.view">
+        <field name="name">wfm.partner.health.graph</field>
+        <field name="model">wfm.partner.health</field>
+        <field name="arch" type="xml">
+            <graph type="pie">
+                <field name="resolution_outcome"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ===== MENU ITEMS ===== -->
+
+    <!-- Partner Retention at root level (same as Operations, Configuration) -->
+    <menuitem id="menu_partner_retention"
+              name="Partner Retention"
+              parent="wfm_core.menu_wfm_root"
+              sequence="50"/>
+
+    <!-- Retention Tickets -->
+    <menuitem id="menu_retention_tickets"
+              name="Retention Tickets"
+              parent="menu_partner_retention"
+              action="action_retention_tickets"
+              sequence="10"/>
+
+    <!-- My Tickets -->
+    <menuitem id="menu_my_tickets"
+              name="My Tickets"
+              parent="menu_partner_retention"
+              action="action_my_retention_tickets"
+              sequence="20"/>
+
+    <!-- Action Log -->
+    <menuitem id="menu_action_log"
+              name="Action Log"
+              parent="menu_partner_retention"
+              action="action_partner_interventions"
+              sequence="30"/>
+
+    <!-- Analytics -->
+    <menuitem id="menu_churn_analytics"
+              name="Churn Analytics"
+              parent="menu_partner_retention"
+              action="action_churn_dashboard"
+              sequence="40"/>
+
+</odoo>

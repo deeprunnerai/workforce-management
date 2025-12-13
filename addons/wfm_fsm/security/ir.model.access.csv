@@ -4,3 +4,6 @@ access_wfm_visit_assign_wizard_user,wfm.visit.assign.wizard.user,model_wfm_visit
 access_wfm_partner_client_relationship_user,wfm.partner.client.relationship.user,model_wfm_partner_client_relationship,base.group_user,1,1,1,0
 access_wfm_assignment_engine_user,wfm.assignment.engine.user,model_wfm_assignment_engine,base.group_user,1,0,0,0
 access_wfm_smart_assign_wizard_user,wfm.smart.assign.wizard.user,model_wfm_smart_assign_wizard,base.group_user,1,1,1,1
+access_wfm_partner_health_user,wfm.partner.health.user,model_wfm_partner_health,base.group_user,1,1,1,0
+access_wfm_partner_intervention_user,wfm.partner.intervention.user,model_wfm_partner_intervention,base.group_user,1,1,1,1
+access_wfm_ai_retention_engine_user,wfm.ai.retention.engine.user,model_wfm_ai_retention_engine,base.group_user,1,1,1,0

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Daily Partner Health Computation Cron Job -->
+    <record id="ir_cron_compute_partner_health" model="ir.cron">
+        <field name="name">WFM: Compute Partner Health Scores</field>
+        <field name="model_id" ref="model_wfm_partner_health"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_compute_all_partner_health()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>
