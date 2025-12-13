@@ -14,7 +14,7 @@
               name="Dashboard"
               parent="wfm_core.menu_wfm_root"
               action="action_dashboard"
-              groups="wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
+              groups="base.group_system,wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
               sequence="10"/>
 
     <!-- ============================================ -->
@@ -63,7 +63,7 @@
               name="Partner Health"
               parent="wfm_core.menu_wfm_partners_parent"
               action="action_churn_dashboard"
-              groups="wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
+              groups="base.group_system,wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
               sequence="50"/>
 
     <!-- ============================================ -->
@@ -83,7 +83,7 @@
     <menuitem id="menu_requests_parent"
               name="Requests"
               parent="wfm_core.menu_wfm_root"
-              groups="wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
+              groups="base.group_system,wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
               sequence="55"/>
 
     <menuitem id="menu_partner_referrals"
