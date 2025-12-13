@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- LiteLLM Configuration Parameters -->
+        <!-- These can be set via Settings > Technical > System Parameters -->
+        <!--
+        Required parameters:
+        - wfm_ai_chat.litellm_api_key: Your LiteLLM API key
+        - wfm_ai_chat.litellm_base_url: LiteLLM proxy URL (default: https://prod.litellm.deeprunner.ai)
+        - wfm_ai_chat.model: Model name (default: claude-3-5-haiku-latest)
+        -->
+    </data>
+</odoo>

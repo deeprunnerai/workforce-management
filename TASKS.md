@@ -1,6 +1,6 @@
 # WFM Tasks
 
-**Last Updated:** 2025-12-13
+**Last Updated:** 2025-12-13 12:30 IST
 
 ---
 
@@ -34,6 +34,19 @@
 - [x] Visit actions (Confirm/Start/Complete/Cancel)
 - [x] Bug fix: Hide Draft visits from partners
 
+### WhatsApp Integration (wfm_whatsapp)
+- [x] Module scaffold with Twilio dependency
+- [x] WhatsApp message log model (`wfm.whatsapp.message`)
+- [x] Twilio REST API integration for sending
+- [x] Webhook endpoint for incoming messages
+- [x] Auto-notification on partner assignment
+- [x] Partner commands: help, visits, status
+- [x] Visit details with Google Maps: visit N
+- [x] Visit actions: visit N accept, visit N deny
+- [x] Message logging and audit trail
+- [x] Environment variables configuration
+- [x] Deployed to production
+
 ### Menu & Navigation
 - [x] Flat dropdown structure (Dashboard, Visits, Partners, Clients, Config)
 - [x] Filtered partner views (Physicians, Engineers)
@@ -43,7 +56,7 @@
 
 ### Deployment
 - [x] All modules deployed to production
-- [x] All branches synced (main, dev-a, dev-b, dev-c)
+- [x] All branches synced (main, dev-a)
 - [x] Demo credentials configured
 
 ---
@@ -58,17 +71,6 @@
 ---
 
 ## Pending Tasks
-
-### High Priority
-
-#### WhatsApp Integration (wfm_whatsapp)
-- [ ] Create module scaffold with Twilio dependency
-- [ ] Create Twilio service (`services/twilio_service.py`)
-- [ ] Create WhatsApp message log model
-- [ ] Override `_trigger_notification_agent()` from wfm_core
-- [ ] Add notification templates (assignment, confirmation, 24h reminder)
-- [ ] Test with Twilio sandbox
-- [ ] Deploy to production
 
 ### Medium Priority
 
@@ -102,7 +104,7 @@
 
 ## Task Priority Order
 
-1. **WhatsApp Integration** - Critical for partner notifications
+1. ~~**WhatsApp Integration** - Critical for partner notifications~~ ✅ Done
 2. **Partner Account Creation** - Needed for demo
 3. **Visit Report Submission** - Completes partner workflow
 4. **Payment Excel Download** - Partner earnings visibility
@@ -110,13 +112,13 @@
 
 ---
 
-## Environment Variables Needed
+## Environment Variables (Configured)
 
 ```bash
-# For WhatsApp integration
-TWILIO_ACCOUNT_SID=xxx
-TWILIO_AUTH_TOKEN=xxx
-TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+# WhatsApp integration (configured in docker-compose.yml)
+TWILIO_ACCOUNT_SID=AC245974...
+TWILIO_AUTH_TOKEN=840ebc38...
+TWILIO_WHATSAPP_NUMBER=+14155238886
 ```
 
 ---

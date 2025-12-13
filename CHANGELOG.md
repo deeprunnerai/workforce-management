@@ -6,43 +6,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [Unreleased]
+## [1.0.0] - 2025-12-13
 
 ### Added
-- Initial project structure with `addons/wfm_core/` directory
-- `CLAUDE.md` - Project context for AI-assisted development
-- `PLAN.md` - Dev A implementation approach
-- `TASKS.md` - Detailed task breakdown (39 tasks, 8 phases)
-- `STATUS.md` - Progress tracking template
-- Git branches: `main`, `dev-a`, `dev-b`, `dev-c`
 
-### @gauravdr (Core Models) - In Progress
-- [ ] `res.partner` extension (client/partner flags)
-- [ ] `wfm.installation` model
-- [ ] `wfm.visit.stage` model
-- [ ] `wfm.visit` model
-- [ ] Seed data (10 clients, 50 installations, 100 partners, 200 visits)
+#### wfm_core (19.0.1.0.0)
+- `res.partner` extension with client/partner flags
+- `wfm.installation` model for client locations
+- `wfm.visit.stage` model for Kanban pipeline
+- `wfm.visit` model with state workflow
+- `wfm.contract` and `wfm.contract.service` models
+- Seed data: 10 clients, 50 installations, 100 partners, 200 visits
 
-### @riya-2098 (Kanban/Dashboard) - Pending
-- [ ] Kanban pipeline view
-- [ ] Dashboard with 4 color cards
-- [ ] Stage drag-drop functionality
+#### wfm_fsm (19.0.2.0.0)
+- Kanban pipeline with drag-drop
+- Coordinator dashboard with color-coded cards
+- Calendar and Timeline views
+- Smart Assignment Engine with AI scoring
+- Partner-Client relationship tracking
 
-### @PanosAndr (Portal/WhatsApp) - Pending
-- [ ] Partner portal (view-only)
-- [ ] WhatsApp notification agent
-- [ ] Twilio integration
+#### wfm_portal (19.0.1.0.0)
+- Backend partner portal
+- Security group `group_wfm_partner`
+- Partner visit views (list, form, kanban, calendar)
+- Partner availability calendar
+- My Profile feature
+- Visit actions (Confirm/Start/Complete/Cancel)
 
----
+#### wfm_whatsapp (19.0.1.0.0)
+- Twilio REST API integration
+- Webhook endpoint for incoming WhatsApp messages
+- Auto-notification on partner assignment
+- Partner commands: `help`, `visits`, `status`, `visit N`
+- Visit actions: `visit N accept`, `visit N deny`
+- Google Maps links in visit details
+- Message logging and audit trail
 
-## [0.1.0] - TBD
-
-### Added
-- Initial release of wfm_core module
-- Client and Partner management
-- Installation tracking
-- Visit scheduling with Kanban stages
-- Autonomous notification agent
+### Fixed
+- Draft visits no longer visible to partners in portal
 
 ---
 
@@ -50,7 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 | Version | Date | Description |
 |---------|------|-------------|
-| 0.1.0 | TBD | MVP Release - 12h Sprint |
+| 1.0.0 | 2025-12-13 | MVP Release with WhatsApp integration |
 
 ---
 
