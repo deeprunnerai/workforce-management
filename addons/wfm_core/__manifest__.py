@@ -1,6 +1,6 @@
 {
     'name': 'WFM Core',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Services/Field Service',
     'summary': 'Core models for GEP OHS Workforce Management',
     'description': """
