@@ -91,7 +91,7 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 | Module | Purpose | Status |
 |--------|---------|--------|
 | `wfm_core` | Data models, business logic | ✅ Deployed |
-| `wfm_fsm` | Field Service Management (Kanban, dashboard) | 📋 Planned |
+| `wfm_fsm` | Field Service Management (Kanban, dashboard, Smart Assignment) | ✅ In Development |
 | `wfm_portal` | Partner self-service portal | 📋 Planned |
 | `wfm_whatsapp` | Twilio WhatsApp integration | 📋 Planned |
 
@@ -130,6 +130,41 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 3. Confirmed (sequence=30)
 4. In Progress (sequence=40)
 5. Completed (sequence=50)
+
+### wfm.partner.client.relationship (NEW - wfm_fsm)
+- `partner_id` - Many2one to partner
+- `client_id` - Many2one to client
+- `total_visits`, `completed_visits` - Visit statistics
+- `avg_rating`, `on_time_rate` - Performance metrics
+- `relationship_score` - Computed (0-100) based on history
+- `first_visit_date`, `last_visit_date` - Timeline
+
+### wfm.assignment.engine (NEW - wfm_fsm)
+- Scoring algorithm for partner recommendations
+- Weights: Relationship 35%, Availability 25%, Performance 20%, Proximity 10%, Workload 10%
+- Methods: `get_recommended_partners()`, `assign_partner_to_visit()`
+
+---
+
+## Smart Partner Assignment (wfm_fsm)
+
+**Purpose:** AI-powered partner recommendations prioritizing relationship continuity.
+
+### Scoring Weights
+| Factor | Weight | Logic |
+|--------|--------|-------|
+| Relationship | 35% | Prior visit history with client (TOP PRIORITY) |
+| Availability | 25% | Schedule conflicts on visit date |
+| Performance | 20% | Completion rate, ratings |
+| Proximity | 10% | Same city as installation |
+| Workload | 10% | Current assignment balance |
+
+### Usage Flow
+1. Coordinator opens draft visit (no partner assigned)
+2. Recommendation table shows Top 2 partners with AI reasoning
+3. Click "Smart Assign" button to open wizard
+4. Wizard shows detailed score breakdown
+5. One-click assign from recommendations or manual selection
 
 ---
 
@@ -268,7 +303,7 @@ Use Greek test data (company names, addresses, partner names).
 ## Out of Scope (Phase 1)
 
 - SEPE export automation
-- AI assignment suggestions
+- ~~AI assignment suggestions~~ ✅ Implemented in wfm_fsm
 - Availability calendar
 - Visit report submission
 - Payment/accounting integration

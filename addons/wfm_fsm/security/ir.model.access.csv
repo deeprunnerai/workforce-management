@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_wfm_dashboard_user,wfm.dashboard.user,model_wfm_dashboard,base.group_user,1,1,1,0
+access_wfm_visit_assign_wizard_user,wfm.visit.assign.wizard.user,model_wfm_visit_assign_wizard,base.group_user,1,1,1,1
+access_wfm_partner_client_relationship_user,wfm.partner.client.relationship.user,model_wfm_partner_client_relationship,base.group_user,1,1,1,0
+access_wfm_assignment_engine_user,wfm.assignment.engine.user,model_wfm_assignment_engine,base.group_user,1,0,0,0
+access_wfm_smart_assign_wizard_user,wfm.smart.assign.wizard.user,model_wfm_smart_assign_wizard,base.group_user,1,1,1,1

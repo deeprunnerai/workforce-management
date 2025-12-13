@@ -1,0 +1,214 @@
+/* WFM FSM Dashboard Styles */
+
+.o_wfm_dashboard {
+    /* Main dashboard container */
+    .wfm-dashboard-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+    }
+
+    /* Color-coded status cards */
+    .wfm-card-green {
+        border-left: 4px solid #28a745 !important;
+
+        .wfm-card-icon,
+        .wfm-card-count {
+            color: #28a745;
+        }
+    }
+
+    .wfm-card-yellow {
+        border-left: 4px solid #ffc107 !important;
+
+        .wfm-card-icon,
+        .wfm-card-count {
+            color: #ffc107;
+        }
+    }
+
+    .wfm-card-orange {
+        border-left: 4px solid #fd7e14 !important;
+
+        .wfm-card-icon,
+        .wfm-card-count {
+            color: #fd7e14;
+        }
+    }
+
+    .wfm-card-red {
+        border-left: 4px solid #dc3545 !important;
+
+        .wfm-card-icon,
+        .wfm-card-count {
+            color: #dc3545;
+        }
+    }
+
+    .wfm-card-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .wfm-card-count {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .wfm-card-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+}
+
+/* Kanban view enhancements */
+.o_wfm_visit_kanban {
+    .o_kanban_record {
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.2s ease;
+
+        &:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Overdue indicator */
+        .badge-overdue {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background-color: #dc3545;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* Progress bar styling */
+        .progress {
+            height: 4px;
+            background-color: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+
+            .progress-bar {
+                transition: width 0.3s ease;
+            }
+        }
+
+        /* Priority stars */
+        .o_priority {
+            .fa-star {
+                color: #ffc107;
+            }
+
+            .fa-star-o {
+                color: #dee2e6;
+            }
+        }
+    }
+
+    /* Stage columns */
+    .o_kanban_group {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin: 0 4px;
+
+        .o_kanban_header {
+            background-color: #fff;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 2px solid #e9ecef;
+            padding: 12px;
+
+            .o_column_title {
+                font-weight: 600;
+                font-size: 0.9rem;
+            }
+        }
+    }
+}
+
+/* Calendar view enhancements */
+.o_wfm_visit_calendar {
+    .fc-event {
+        border-radius: 4px;
+        padding: 2px 4px;
+
+        &.wfm-event-draft {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        &.wfm-event-assigned {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        &.wfm-event-confirmed {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        &.wfm-event-in-progress {
+            background-color: #fd7e14;
+            border-color: #fd7e14;
+        }
+
+        &.wfm-event-done {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        &.wfm-event-cancelled {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            text-decoration: line-through;
+        }
+    }
+}
+
+/* Quick action buttons */
+.wfm-quick-actions {
+    .btn {
+        margin-right: 8px;
+        margin-bottom: 8px;
+
+        i {
+            margin-right: 4px;
+        }
+    }
+}
+
+/* Stats cards */
+.wfm-stat-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #e9ecef;
+    }
+
+    .wfm-stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    .wfm-stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+}

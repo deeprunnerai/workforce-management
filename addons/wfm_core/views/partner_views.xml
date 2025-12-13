@@ -107,4 +107,40 @@
             </p>
         </field>
     </record>
+
+    <!-- WFM Partners - Physicians Only -->
+    <record id="action_wfm_partners_physicians" model="ir.actions.act_window">
+        <field name="name">Physicians</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_wfm_partner', '=', True), ('specialty', '=', 'physician')]</field>
+        <field name="context">{'default_is_wfm_partner': True, 'default_specialty': 'physician'}</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_wfm_partner_tree')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No physicians found
+            </p>
+            <p>
+                Physicians are medical professionals who conduct occupational health visits.
+            </p>
+        </field>
+    </record>
+
+    <!-- WFM Partners - Safety Engineers Only -->
+    <record id="action_wfm_partners_engineers" model="ir.actions.act_window">
+        <field name="name">Safety Engineers</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_wfm_partner', '=', True), ('specialty', '=', 'safety_engineer')]</field>
+        <field name="context">{'default_is_wfm_partner': True, 'default_specialty': 'safety_engineer'}</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_wfm_partner_tree')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No safety engineers found
+            </p>
+            <p>
+                Safety engineers are professionals who conduct workplace safety assessments.
+            </p>
+        </field>
+    </record>
 </odoo>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Visit Assignment Wizard Form -->
+    <record id="view_wfm_visit_assign_wizard_form" model="ir.ui.view">
+        <field name="name">wfm.visit.assign.wizard.form</field>
+        <field name="model">wfm.visit.assign.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Assign Partner to Visits">
+                <group>
+                    <group string="Visits to Assign">
+                        <field name="visit_count" readonly="1"/>
+                        <field name="client_id" readonly="1" invisible="not client_id"/>
+                        <field name="installation_id" readonly="1" invisible="not installation_id"/>
+                    </group>
+                    <group string="Filter Partners">
+                        <field name="specialty_filter"/>
+                        <field name="city_filter" placeholder="e.g., Athens, Thessaloniki"/>
+                    </group>
+                </group>
+                <group string="Select Partner">
+                    <field name="partner_id" options="{'no_create': True}"/>
+                </group>
+                <group string="Suggested Partners" invisible="not suggested_partner_ids">
+                    <field name="suggested_partner_ids" nolabel="1" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="specialty"/>
+                            <field name="city"/>
+                            <field name="hourly_rate"/>
+                        </list>
+                    </field>
+                </group>
+                <group string="Selected Visits">
+                    <field name="visit_ids" nolabel="1" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="client_id"/>
+                            <field name="installation_id"/>
+                            <field name="visit_date"/>
+                            <field name="state"/>
+                        </list>
+                    </field>
+                </group>
+                <footer>
+                    <button name="action_assign" string="Assign" type="object" class="btn-primary"/>
+                    <button name="action_assign_and_view" string="Assign &amp; View" type="object" class="btn-secondary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for bulk assignment from list view -->
+    <record id="action_wfm_visit_assign_wizard" model="ir.actions.act_window">
+        <field name="name">Assign Partner</field>
+        <field name="res_model">wfm.visit.assign.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="wfm_core.model_wfm_visit"/>
+        <field name="binding_view_types">list,kanban</field>
+    </record>
+</odoo>

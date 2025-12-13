@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Smart Assignment Wizard Form View -->
+    <record id="wfm_smart_assign_wizard_form" model="ir.ui.view">
+        <field name="name">wfm.smart.assign.wizard.form</field>
+        <field name="model">wfm.smart.assign.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Smart Partner Assignment">
+                <sheet>
+                    <!-- Visit Info Header -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="visit_id" readonly="1" options="{'no_open': True}"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Visit Details">
+                            <field name="client_id" readonly="1"/>
+                            <field name="installation_id" readonly="1"/>
+                            <field name="visit_date" readonly="1"/>
+                        </group>
+                        <group string="Manual Selection">
+                            <field name="partner_id"
+                                   placeholder="Or select a partner manually..."
+                                   options="{'no_create': True}"/>
+                            <button name="action_assign_selected"
+                                    string="Assign Selected Partner"
+                                    type="object"
+                                    class="btn-secondary"
+                                    invisible="not partner_id"/>
+                        </group>
+                    </group>
+
+                    <separator string="AI Recommendations (Top 2)"/>
+
+                    <!-- Recommendations Display -->
+                    <field name="recommendations_html" class="oe_read_only" nolabel="1"/>
+
+                    <!-- Quick Assign Buttons -->
+                    <group>
+                        <group>
+                            <field name="recommendation_1_id" invisible="1"/>
+                            <field name="recommendation_1_score" invisible="1"/>
+                            <button name="action_assign_recommendation_1"
+                                    type="object"
+                                    class="btn-success btn-lg w-100 mb-2"
+                                    invisible="not recommendation_1_id">
+                                <i class="fa fa-check me-2"/>
+                                Assign #1: <field name="recommendation_1_id" readonly="1" class="d-inline"/>
+                            </button>
+                        </group>
+                        <group>
+                            <field name="recommendation_2_id" invisible="1"/>
+                            <field name="recommendation_2_score" invisible="1"/>
+                            <button name="action_assign_recommendation_2"
+                                    type="object"
+                                    class="btn-info btn-lg w-100 mb-2"
+                                    invisible="not recommendation_2_id">
+                                <i class="fa fa-check me-2"/>
+                                Assign #2: <field name="recommendation_2_id" readonly="1" class="d-inline"/>
+                            </button>
+                        </group>
+                    </group>
+
+                    <!-- Hidden fields for details -->
+                    <field name="recommendation_1_details" invisible="1"/>
+                    <field name="recommendation_2_details" invisible="1"/>
+                </sheet>
+                <footer>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Smart Assignment Action -->
+    <record id="action_smart_assign_wizard" model="ir.actions.act_window">
+        <field name="name">Smart Partner Assignment</field>
+        <field name="res_model">wfm.smart.assign.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="wfm_smart_assign_wizard_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="wfm_core.model_wfm_visit"/>
+        <field name="binding_view_types">form</field>
+    </record>
+</odoo>

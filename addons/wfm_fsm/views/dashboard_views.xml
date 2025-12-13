@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Dashboard Form View with 4 Color Cards -->
+    <record id="view_wfm_dashboard_form" model="ir.ui.view">
+        <field name="name">wfm.dashboard.form</field>
+        <field name="model">wfm.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Coordinator Dashboard" create="0" edit="0" delete="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <!-- Main Status Cards - 4 Colors -->
+                    <div class="row mt-4">
+                        <!-- Green Card - Completed -->
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="card h-100" style="border-left: 4px solid #28a745; cursor: pointer;"
+                                 onclick="document.querySelector('[name=action_view_green]').click()">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-success">
+                                        <i class="fa fa-check-circle fa-2x mb-2 d-block"/>
+                                        Completed
+                                    </h5>
+                                    <h2 class="card-text text-success">
+                                        <field name="green_count"/>
+                                    </h2>
+                                    <p class="text-muted small">Work done, happy flow</p>
+                                    <button name="action_view_green" type="object"
+                                            class="btn btn-success btn-sm mt-2" invisible="1">View</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Yellow Card - Assigned -->
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="card h-100" style="border-left: 4px solid #ffc107; cursor: pointer;"
+                                 onclick="document.querySelector('[name=action_view_yellow]').click()">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-warning">
+                                        <i class="fa fa-user-plus fa-2x mb-2 d-block"/>
+                                        Assigned
+                                    </h5>
+                                    <h2 class="card-text text-warning">
+                                        <field name="yellow_count"/>
+                                    </h2>
+                                    <p class="text-muted small">Tasks assigned, dates yet to come</p>
+                                    <button name="action_view_yellow" type="object"
+                                            class="btn btn-warning btn-sm mt-2" invisible="1">View</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Orange Card - In Progress -->
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="card h-100" style="border-left: 4px solid #fd7e14; cursor: pointer;"
+                                 onclick="document.querySelector('[name=action_view_orange]').click()">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title" style="color: #fd7e14;">
+                                        <i class="fa fa-spinner fa-2x mb-2 d-block"/>
+                                        In Progress
+                                    </h5>
+                                    <h2 class="card-text" style="color: #fd7e14;">
+                                        <field name="orange_count"/>
+                                    </h2>
+                                    <p class="text-muted small">Partner has started work</p>
+                                    <button name="action_view_orange" type="object"
+                                            class="btn btn-sm mt-2" style="background-color: #fd7e14; color: white;" invisible="1">View</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Red Card - Action Required -->
+                        <div class="col-md-3 col-sm-6 mb-4">
+                            <div class="card h-100" style="border-left: 4px solid #dc3545; cursor: pointer;"
+                                 onclick="document.querySelector('[name=action_view_red]').click()">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-danger">
+                                        <i class="fa fa-exclamation-triangle fa-2x mb-2 d-block"/>
+                                        Action Required
+                                    </h5>
+                                    <h2 class="card-text text-danger">
+                                        <field name="red_count"/>
+                                    </h2>
+                                    <p class="text-muted small">Delayed, needs attention</p>
+                                    <button name="action_view_red" type="object"
+                                            class="btn btn-danger btn-sm mt-2" invisible="1">View</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Secondary Stats Row -->
+                    <div class="row mt-2">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center py-3">
+                                    <h6 class="text-muted mb-1">Total Visits</h6>
+                                    <h3 class="mb-0"><field name="total_visits"/></h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card bg-light" style="cursor: pointer;"
+                                 onclick="document.querySelector('[name=action_view_today]').click()">
+                                <div class="card-body text-center py-3">
+                                    <h6 class="text-muted mb-1">Today's Visits</h6>
+                                    <h3 class="mb-0 text-primary"><field name="today_visits"/></h3>
+                                    <button name="action_view_today" type="object" invisible="1">View</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card bg-light" style="cursor: pointer;"
+                                 onclick="document.querySelector('[name=action_view_unassigned]').click()">
+                                <div class="card-body text-center py-3">
+                                    <h6 class="text-muted mb-1">Unassigned</h6>
+                                    <h3 class="mb-0 text-info"><field name="unassigned_visits"/></h3>
+                                    <button name="action_view_unassigned" type="object" invisible="1">View</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center py-3">
+                                    <h6 class="text-muted mb-1">This Week</h6>
+                                    <h3 class="mb-0"><field name="week_visits"/></h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h4>Quick Actions</h4>
+                            <div class="btn-group" role="group">
+                                <button name="action_view_red" type="object" class="btn btn-outline-danger">
+                                    <i class="fa fa-exclamation-triangle"/> Review Action Required
+                                </button>
+                                <button name="action_view_unassigned" type="object" class="btn btn-outline-info">
+                                    <i class="fa fa-user-plus"/> Assign Partners
+                                </button>
+                                <button name="action_view_today" type="object" class="btn btn-outline-primary">
+                                    <i class="fa fa-calendar-check-o"/> Today's Schedule
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Dashboard Action -->
+    <record id="action_wfm_dashboard" model="ir.actions.act_window">
+        <field name="name">Coordinator Dashboard</field>
+        <field name="res_model">wfm.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'form_view_initial_mode': 'readonly'}</field>
+    </record>
+
+    <!-- Server action to open dashboard (creates if not exists) -->
+    <record id="action_open_wfm_dashboard" model="ir.actions.server">
+        <field name="name">Open Dashboard</field>
+        <field name="model_id" ref="model_wfm_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">
+dashboard_id = env['wfm.dashboard'].get_or_create_dashboard()
+action = {
+    'name': 'Coordinator Dashboard',
+    'type': 'ir.actions.act_window',
+    'res_model': 'wfm.dashboard',
+    'res_id': dashboard_id,
+    'view_mode': 'form',
+    'target': 'current',
+    'context': {'form_view_initial_mode': 'readonly'},
+}
+        </field>
+    </record>
+
+    <!-- Actions for dashboard card clicks - Green -->
+    <record id="action_dashboard_green" model="ir.actions.act_window">
+        <field name="name">Completed Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('state', '=', 'done')]</field>
+        <field name="context">{'search_default_done': 1}</field>
+    </record>
+
+    <!-- Actions for dashboard card clicks - Yellow -->
+    <record id="action_dashboard_yellow" model="ir.actions.act_window">
+        <field name="name">Assigned Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('state', 'in', ('assigned', 'confirmed'))]</field>
+    </record>
+
+    <!-- Actions for dashboard card clicks - Orange -->
+    <record id="action_dashboard_orange" model="ir.actions.act_window">
+        <field name="name">In Progress Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('state', '=', 'in_progress')]</field>
+    </record>
+
+    <!-- Actions for dashboard card clicks - Red -->
+    <record id="action_dashboard_red" model="ir.actions.act_window">
+        <field name="name">Action Required</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_overdue', '=', True)]</field>
+    </record>
+</odoo>

@@ -6,63 +6,83 @@
               sequence="50"
               web_icon="wfm_core,static/description/icon.png"/>
 
-    <!-- Operations Menu -->
-    <menuitem id="menu_wfm_operations"
-              name="Operations"
-              parent="menu_wfm_root"
-              sequence="10"/>
-
+    <!-- ============================================ -->
+    <!-- VISITS DROPDOWN (sequence 20)               -->
+    <!-- ============================================ -->
     <menuitem id="menu_wfm_visits"
               name="Visits"
-              parent="menu_wfm_operations"
-              action="action_wfm_visits"
-              sequence="10"/>
-
-    <menuitem id="menu_wfm_contracts"
-              name="Contracts"
-              parent="menu_wfm_operations"
-              action="action_wfm_contracts"
+              parent="menu_wfm_root"
               sequence="20"/>
 
-    <menuitem id="menu_wfm_contract_services"
-              name="Contract Services"
-              parent="menu_wfm_operations"
-              action="action_wfm_contract_services"
+    <!-- ============================================ -->
+    <!-- PARTNERS DROPDOWN (sequence 30)             -->
+    <!-- ============================================ -->
+    <menuitem id="menu_wfm_partners_parent"
+              name="Partners"
+              parent="menu_wfm_root"
               sequence="30"/>
 
-    <menuitem id="menu_wfm_installation_services"
-              name="Installation Services"
-              parent="menu_wfm_operations"
-              action="action_wfm_installation_services"
+    <menuitem id="menu_wfm_partners_all"
+              name="All"
+              parent="menu_wfm_partners_parent"
+              action="action_wfm_partners"
+              sequence="10"/>
+
+    <menuitem id="menu_wfm_partners_physicians"
+              name="Physicians"
+              parent="menu_wfm_partners_parent"
+              action="action_wfm_partners_physicians"
+              sequence="20"/>
+
+    <menuitem id="menu_wfm_partners_engineers"
+              name="Engineers"
+              parent="menu_wfm_partners_parent"
+              action="action_wfm_partners_engineers"
+              sequence="30"/>
+
+    <!-- ============================================ -->
+    <!-- CLIENTS DROPDOWN (sequence 40)              -->
+    <!-- ============================================ -->
+    <menuitem id="menu_wfm_clients_parent"
+              name="Clients"
+              parent="menu_wfm_root"
               sequence="40"/>
 
-    <!-- Configuration Menu -->
-    <menuitem id="menu_wfm_configuration"
-              name="Configuration"
-              parent="menu_wfm_root"
-              sequence="90"/>
-
-    <menuitem id="menu_wfm_clients"
-              name="Clients"
-              parent="menu_wfm_configuration"
+    <menuitem id="menu_wfm_clients_all"
+              name="All"
+              parent="menu_wfm_clients_parent"
               action="action_wfm_clients"
               sequence="10"/>
 
     <menuitem id="menu_wfm_installations"
               name="Installations"
-              parent="menu_wfm_configuration"
+              parent="menu_wfm_clients_parent"
               action="action_wfm_installations"
               sequence="20"/>
 
-    <menuitem id="menu_wfm_partners"
-              name="Partners"
-              parent="menu_wfm_configuration"
-              action="action_wfm_partners"
+    <menuitem id="menu_wfm_contracts"
+              name="Contracts"
+              parent="menu_wfm_clients_parent"
+              action="action_wfm_contracts"
               sequence="30"/>
 
-    <menuitem id="menu_wfm_visit_stages"
-              name="Visit Stages"
-              parent="menu_wfm_configuration"
+    <menuitem id="menu_wfm_contract_services"
+              name="Contract Services"
+              parent="menu_wfm_clients_parent"
+              action="action_wfm_contract_services"
+              sequence="35"/>
+
+    <!-- ============================================ -->
+    <!-- CONFIG DROPDOWN (sequence 90)               -->
+    <!-- ============================================ -->
+    <menuitem id="menu_wfm_config"
+              name="Config"
+              parent="menu_wfm_root"
+              sequence="90"/>
+
+    <menuitem id="menu_wfm_stages"
+              name="Stages"
+              parent="menu_wfm_config"
               action="action_wfm_visit_stages"
-              sequence="40"/>
+              sequence="10"/>
 </odoo>

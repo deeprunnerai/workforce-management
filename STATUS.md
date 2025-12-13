@@ -194,3 +194,110 @@ http://localhost:8069/odoo
 ---
 
 **Last Updated:** 2025-12-13
+
+---
+---
+
+# Dev B Status
+
+## Current Sprint Status
+
+| Metric | Value |
+|--------|-------|
+| **Developer** | Riya ([@riya-2098](https://github.com/riya-2098)) |
+| **Branch** | `dev-b` |
+| **Start Time** | 2025-12-13 |
+| **Current Phase** | Smart Assignment Complete |
+| **Overall Progress** | 100% |
+
+---
+
+## Phase Progress
+
+| Phase | Status | Progress |
+|-------|--------|----------|
+| 1. wfm_fsm Module Setup | ✅ Complete | 3/3 |
+| 2. Kanban Pipeline | ✅ Complete | 5/5 |
+| 3. Coordinator Dashboard | ✅ Complete | 5/5 |
+| 4. Calendar View | ✅ Complete | 2/2 |
+| 5. Smart Assignment Engine | ✅ Complete | 3/3 |
+| 6. Visit Form Extensions | ✅ Complete | 6/6 |
+| 7. Menu Structure | ✅ Complete | 3/3 |
+| 8. Testing & Validation | ✅ Complete | 6/6 |
+
+---
+
+## Completed Tasks
+
+- [x] wfm_fsm module scaffold
+- [x] Kanban pipeline with drag-drop stages
+- [x] State/stage synchronization
+- [x] Coordinator dashboard with color-coded cards
+- [x] Calendar view for visits
+- [x] Partner-Client relationship model
+- [x] AI scoring algorithm (5 weighted factors)
+- [x] Smart Assign wizard with Top 2 recommendations
+- [x] Form view recommendations with AI reasoning
+- [x] Menu structure for Coordinator
+
+---
+
+## In Progress
+
+_None - All tasks complete_
+
+---
+
+## Blockers
+
+_None_
+
+---
+
+## Notes & Decisions
+
+- Scoring weights: Relationship 35%, Availability 25%, Performance 20%, Proximity 10%, Workload 10%
+- Relationship prioritized per business requirement (clients prefer familiar partners)
+- Contextual alerts explain when no relationship history exists
+- Smart Assign hidden when partner already assigned to avoid confusion
+- Fixed data inconsistency: visits with partner but state='draft' corrected
+
+---
+
+## Files Created/Modified (Dev B)
+
+| File | Status | Description |
+|------|--------|-------------|
+| `models/visit_fsm.py` | Done | Visit extensions, recommendations |
+| `models/partner_relationship.py` | Done | Relationship tracking |
+| `models/assignment_engine.py` | Done | AI scoring algorithm |
+| `wizard/smart_assign_wizard.py` | Done | Assignment wizard |
+| `wizard/smart_assign_wizard_views.xml` | Done | Wizard form |
+| `views/visit_form_extension.xml` | Done | Smart Assign button |
+| `views/partner_relationship_views.xml` | Done | Relationship views |
+| `views/visit_fsm_views.xml` | Done | Kanban, calendar |
+| `views/dashboard_views.xml` | Done | Dashboard action |
+| `views/menu.xml` | Done | Coordinator menu |
+| `security/ir.model.access.csv` | Done | Access rules |
+
+---
+
+## Integration Handoffs
+
+### To @PanosAndr (Dev C) - READY
+- [x] `action_assign()` triggers notification hook
+- [x] Relationship data for partner portal
+- [x] Assignment engine available for portal use
+
+---
+
+## Commits
+
+| Commit | Description |
+|--------|-------------|
+| `8725d5c` | Add wfm_fsm module with coordinator dashboard and Kanban pipeline |
+| `be792a3` | Add Smart Partner Assignment Engine with AI-powered recommendations |
+
+---
+
+**Last Updated:** 2025-12-13
