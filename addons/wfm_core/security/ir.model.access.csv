@@ -5,3 +5,5 @@ access_wfm_visit_user,wfm.visit.user,model_wfm_visit,base.group_user,1,1,1,1
 access_wfm_contract_user,wfm.contract.user,model_wfm_contract,base.group_user,1,1,1,1
 access_wfm_contract_service_user,wfm.contract.service.user,model_wfm_contract_service,base.group_user,1,1,1,1
 access_wfm_installation_service_user,wfm.installation.service.user,model_wfm_installation_service,base.group_user,1,1,1,1
+access_wfm_sepe_export_user,wfm.sepe.export.user,model_wfm_sepe_export,base.group_user,1,1,1,1
+access_wfm_sepe_export_wizard_user,wfm.sepe.export.wizard.user,model_wfm_sepe_export_wizard,base.group_user,1,1,1,1
