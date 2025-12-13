@@ -190,20 +190,15 @@
         <field name="name">wfm.workflow.log.search</field>
         <field name="model">wfm.workflow.log</field>
         <field name="arch" type="xml">
-            <search>
+            <search string="Workflow Logs">
                 <field name="workflow_id"/>
+                <field name="status"/>
                 <filter string="Success" name="filter_success"
                         domain="[('status', '=', 'success')]"/>
                 <filter string="Failed" name="filter_failed"
                         domain="[('status', '=', 'failed')]"/>
                 <filter string="Running" name="filter_running"
                         domain="[('status', '=', 'running')]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Workflow" name="groupby_workflow"
-                            context="{'group_by': 'workflow_id'}"/>
-                    <filter string="Status" name="groupby_status"
-                            context="{'group_by': 'status'}"/>
-                </group>
             </search>
         </field>
     </record>
