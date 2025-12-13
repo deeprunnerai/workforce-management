@@ -206,10 +206,20 @@ class WhatsAppWebhook(http.Controller):
             return self._handle_visits_list(env, partner)
 
         # Handle visit N command (e.g., visit 1, visit 2)
+        # Also handles: visit 1 accept, visit 2 deny
         if message.startswith('VISIT '):
             parts = message.split()
             if len(parts) >= 2 and parts[1].isdigit():
-                return self._handle_visit_detail(env, partner, int(parts[1]))
+                visit_num = int(parts[1])
+                # Check for accept/deny action
+                if len(parts) >= 3:
+                    action = parts[2]
+                    if action in ['ACCEPT', 'YES', 'OK', 'CONFIRM']:
+                        return self._handle_accept_visit(env, partner, visit_num)
+                    elif action in ['DENY', 'NO', 'CANCEL', 'REJECT']:
+                        return self._handle_deny_visit(env, partner, visit_num)
+                # Just show visit details
+                return self._handle_visit_detail(env, partner, visit_num)
 
         # Handle status command
         if message in ['STATUS']:
@@ -233,8 +243,10 @@ class WhatsAppWebhook(http.Controller):
 Available commands:
 
 📋 *Visit Management:*
-• ACCEPT - Confirm your assigned visit
-• DENY - Decline the assigned visit
+• ACCEPT - Confirm latest assigned visit
+• DENY - Decline latest assigned visit
+• visit 1 accept - Confirm visit #1
+• visit 2 deny - Decline visit #2
 
 📊 *Information:*
 • visits - See your upcoming visits
@@ -243,8 +255,8 @@ Available commands:
 • help - Show this help message
 
 💡 *Tips:*
-• Reply ACCEPT or DENY after receiving an assignment
-• Use visit 1, visit 2 etc. for full details with map
+• Type *visits* to see your list first
+• Use *visit 1 accept* to confirm specific visit
 • Contact your coordinator for schedule changes
 
 Need assistance? Contact GEP support."""
@@ -273,7 +285,7 @@ Need assistance? Contact GEP support."""
             response += f"   🏢 {visit.client_id.name or 'N/A'}\n\n"
 
         response += "━━━━━━━━━━━━━━━━━━━━━\n"
-        response += "💡 Reply *visit 1* for full details with map"
+        response += "💡 *visit 1* for details | *visit 1 accept* to confirm"
 
         return response
 
@@ -502,6 +514,107 @@ If this was a mistake, please contact your coordinator immediately."""
 
         except Exception as e:
             _logger.error(f"Error declining visit {visit.name}: {e}")
+            return "❌ Error processing decline. Please try again or contact your coordinator."
+
+    def _handle_accept_visit(self, env, partner, visit_number):
+        """Handle visit N accept - confirm a specific visit by number."""
+        Visit = env['wfm.visit'].sudo()
+
+        # Get visits in same order as visits list
+        visits = Visit.search([
+            ('partner_id', '=', partner.id),
+            ('state', 'in', ['assigned', 'confirmed']),
+        ], order='visit_date asc', limit=10)
+
+        if not visits:
+            return "📋 You have no upcoming visits."
+
+        if visit_number < 1 or visit_number > len(visits):
+            return f"❌ Invalid visit number. You have {len(visits)} upcoming visit(s).\n\nType *visits* to see the list."
+
+        visit = visits[visit_number - 1]
+
+        if visit.state == 'confirmed':
+            return f"ℹ️ Visit #{visit_number} ({visit.name}) is already confirmed."
+
+        try:
+            visit.write({'state': 'confirmed'})
+
+            visit.message_post(
+                body=f"✅ Partner confirmed via WhatsApp (visit #{visit_number})",
+                message_type='notification',
+                subtype_xmlid='mail.mt_note'
+            )
+
+            _logger.info(f"Visit {visit.name} confirmed by {partner.name} via WhatsApp")
+
+            date_str = visit.visit_date.strftime('%A, %d %B %Y') if visit.visit_date else 'TBD'
+            time_str = f"{int(visit.start_time):02d}:{int((visit.start_time % 1) * 60):02d}" if visit.start_time else 'TBD'
+
+            return f"""✅ *Visit #{visit_number} Confirmed!*
+
+🔖 Reference: {visit.name}
+📅 Date: {date_str}
+⏰ Time: {time_str}
+🏢 Client: {visit.client_id.name or 'N/A'}
+
+See you there! Safe travels. 🚗"""
+
+        except Exception as e:
+            _logger.error(f"Error confirming visit {visit.name}: {e}")
+            return "❌ Error confirming visit. Please try again or contact your coordinator."
+
+    def _handle_deny_visit(self, env, partner, visit_number):
+        """Handle visit N deny - decline a specific visit by number."""
+        Visit = env['wfm.visit'].sudo()
+
+        # Get visits in same order as visits list
+        visits = Visit.search([
+            ('partner_id', '=', partner.id),
+            ('state', 'in', ['assigned', 'confirmed']),
+        ], order='visit_date asc', limit=10)
+
+        if not visits:
+            return "📋 You have no upcoming visits."
+
+        if visit_number < 1 or visit_number > len(visits):
+            return f"❌ Invalid visit number. You have {len(visits)} upcoming visit(s).\n\nType *visits* to see the list."
+
+        visit = visits[visit_number - 1]
+
+        if visit.state == 'confirmed':
+            return f"⚠️ Visit #{visit_number} ({visit.name}) is already confirmed.\n\nContact your coordinator to make changes."
+
+        try:
+            visit_name = visit.name
+            visit_date = visit.visit_date.strftime('%d/%m/%Y') if visit.visit_date else 'TBD'
+            client_name = visit.client_id.name or 'N/A'
+
+            visit.write({
+                'partner_id': False,
+                'state': 'draft',
+            })
+
+            visit.message_post(
+                body=f"❌ Partner {partner.name} declined via WhatsApp (visit #{visit_number}). Visit returned to draft.",
+                message_type='notification',
+                subtype_xmlid='mail.mt_note'
+            )
+
+            _logger.info(f"Visit {visit_name} declined by {partner.name} via WhatsApp")
+
+            return f"""❌ *Visit #{visit_number} Declined*
+
+🔖 Reference: {visit_name}
+📅 Date: {visit_date}
+🏢 Client: {client_name}
+
+The coordinator will assign another partner.
+
+If this was a mistake, contact your coordinator immediately."""
+
+        except Exception as e:
+            _logger.error(f"Error declining visit: {e}")
             return "❌ Error processing decline. Please try again or contact your coordinator."
 
     def _handle_unknown(self, env, partner, message):
