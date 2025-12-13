@@ -54,15 +54,15 @@ class WfmVisitFsm(models.Model):
                 visit.recommended_partner_ids = [(5, 0, 0)]
                 visit.recommendation_html = '<p class="text-muted">Save visit to see recommendations</p>'
 
-    def _get_retention_one_liner(self, partner_id):
-        """Get a one-liner retention status for a partner (if any open ticket exists).
+    def _get_health_status(self, partner_id):
+        """Get health status for a partner (if any concerns exist).
 
         This doesn't affect the scoring, just provides coordinator awareness.
 
         Returns:
-            HTML string with alert (or empty string if no issue)
+            HTML string with alert (or empty string if healthy)
         """
-        # Look for any open/in_progress retention tickets for this partner
+        # Look for any open/in_progress health tickets for this partner
         health = self.env['wfm.partner.health'].search([
             ('partner_id', '=', partner_id),
             ('ticket_state', 'in', ['open', 'in_progress']),
@@ -72,22 +72,30 @@ class WfmVisitFsm(models.Model):
         if not health:
             return ''
 
-        # Build one-liner based on risk level and status
-        risk_emoji = '🔴' if health.risk_level == 'critical' else '🟠'
-        risk_label = 'Critical' if health.risk_level == 'critical' else 'High Risk'
+        # Build one-liner based on risk level
+        if health.risk_level == 'critical':
+            risk_emoji = '🔴'
+            risk_label = 'At Risk'
+        else:
+            risk_emoji = '🟠'
+            risk_label = 'Watch'
 
         # Build reason based on highest score component
         reason = ''
         if health.decline_rate_score >= 15:
             reason = f"declined {health.visits_declined_30d} visits"
         elif health.inactivity_score >= 10:
-            reason = f"inactive {health.days_since_last_visit}d"
+            days = health.days_since_last_visit
+            if days >= 60:
+                reason = "long inactive"
+            else:
+                reason = f"inactive {days}d"
         elif health.volume_change_score >= 15:
             reason = "activity drop"
         elif health.payment_issue_score >= 5:
-            reason = "payment concerns"
+            reason = "payment issue"
         else:
-            reason = f"score {health.churn_risk_score:.0f}/100"
+            reason = "needs attention"
 
         return f'{risk_emoji} {risk_label}: {reason}'
 
@@ -123,7 +131,7 @@ class WfmVisitFsm(models.Model):
                     <th style="width: 25%;">Partner</th>
                     <th style="width: 10%;">Score</th>
                     <th style="width: 45%;">Why Recommended</th>
-                    <th style="width: 15%;">Retention</th>
+                    <th style="width: 15%;">Health</th>
                 </tr>
             </thead>
             <tbody>
@@ -176,10 +184,10 @@ class WfmVisitFsm(models.Model):
             row_class = 'table-success' if i == 1 else ''
             rank_badge = 'bg-success' if i == 1 else 'bg-info'
 
-            # Get retention one-liner for this partner
-            retention_note = self._get_retention_one_liner(rec['partner_id'])
-            if not retention_note:
-                retention_note = '<span class="text-muted">✓ OK</span>'
+            # Get health status for this partner
+            health_note = self._get_health_status(rec['partner_id'])
+            if not health_note:
+                health_note = '<span class="text-success">✓ Good</span>'
 
             html += f'''
                 <tr class="{row_class}">
@@ -187,7 +195,7 @@ class WfmVisitFsm(models.Model):
                     <td><strong>{rec['partner_name']}</strong></td>
                     <td><strong>{rec['total_score']:.0f}</strong>/100</td>
                     <td>{" • ".join(reasons) if reasons else "Best available option"}</td>
-                    <td style="font-size: 11px;">{retention_note}</td>
+                    <td style="font-size: 11px;">{health_note}</td>
                 </tr>
             '''
 

@@ -187,8 +187,8 @@ class WfmSmartAssignWizard(models.TransientModel):
             elif work_score < 5:
                 reasons.append("Heavy workload")
 
-            # Get retention status one-liner (if any)
-            retention_alert = self._get_retention_one_liner(rec['partner_id'])
+            # Get health status one-liner (if any concerns)
+            health_alert = self._get_health_alert(rec['partner_id'])
 
             # Determine card style based on rank
             if i == 1:
@@ -216,8 +216,8 @@ class WfmSmartAssignWizard(models.TransientModel):
                     </div>
                 </div>
                 <div class="card-body py-2">
-                    <!-- Retention Alert (if any) -->
-                    {retention_alert}
+                    <!-- Health Alert (if any) -->
+                    {health_alert}
 
                     <!-- AI Reasoning Summary -->
                     <div class="alert alert-light py-1 px-2 mb-2 small">
@@ -308,15 +308,15 @@ class WfmSmartAssignWizard(models.TransientModel):
             }
         }
 
-    def _get_retention_one_liner(self, partner_id):
-        """Get a one-liner retention status for a partner (if any open ticket exists).
+    def _get_health_alert(self, partner_id):
+        """Get health alert for a partner (if any concerns exist).
 
         This doesn't affect the scoring, just provides coordinator awareness.
 
         Returns:
-            HTML string with alert (or empty string if no issue)
+            HTML string with alert (or empty string if healthy)
         """
-        # Look for any open/in_progress retention tickets for this partner
+        # Look for any open/in_progress health tickets for this partner
         health = self.env['wfm.partner.health'].search([
             ('partner_id', '=', partner_id),
             ('ticket_state', 'in', ['open', 'in_progress']),
@@ -326,29 +326,37 @@ class WfmSmartAssignWizard(models.TransientModel):
         if not health:
             return ''
 
-        # Build one-liner based on risk level and status
-        risk_emoji = '🔴' if health.risk_level == 'critical' else '🟠'
-        risk_label = 'Critical Risk' if health.risk_level == 'critical' else 'High Risk'
+        # Build one-liner based on risk level
+        if health.risk_level == 'critical':
+            risk_emoji = '🔴'
+            risk_label = 'At Risk'
+        else:
+            risk_emoji = '🟠'
+            risk_label = 'Watch'
 
         # Build reason based on highest score component
         reason = ''
         if health.decline_rate_score >= 15:
             reason = f"declined {health.visits_declined_30d} recent visits"
         elif health.inactivity_score >= 10:
-            reason = f"inactive for {health.days_since_last_visit} days"
+            days = health.days_since_last_visit
+            if days >= 60:
+                reason = "long inactive"
+            else:
+                reason = f"inactive for {days} days"
         elif health.volume_change_score >= 15:
-            reason = "significant drop in activity"
+            reason = "drop in activity"
         elif health.payment_issue_score >= 5:
-            reason = "payment-related concerns"
+            reason = "payment concerns"
         else:
-            reason = f"risk score: {health.churn_risk_score:.0f}/100"
+            reason = "needs attention"
 
         # Build the alert HTML - informational only, not blocking
         alert_html = f'''
         <div class="alert alert-warning py-1 px-2 mb-2 small d-flex align-items-center">
             <span class="me-2">{risk_emoji}</span>
-            <span><strong>Retention Note:</strong> {risk_label} partner - {reason}.
-            <em class="text-muted">(This client may have good relations regardless)</em></span>
+            <span><strong>{risk_label}:</strong> {reason}
+            <em class="text-muted ms-1">(FYI only - doesn't affect score)</em></span>
         </div>
         '''
 
