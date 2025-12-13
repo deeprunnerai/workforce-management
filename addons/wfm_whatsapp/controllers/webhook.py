@@ -8,6 +8,14 @@ from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
+# Twilio import with fallback
+try:
+    from twilio.rest import Client as TwilioClient
+    TWILIO_AVAILABLE = True
+except ImportError:
+    TWILIO_AVAILABLE = False
+    _logger.warning("Twilio library not installed.")
+
 
 class WhatsAppWebhook(http.Controller):
     """Webhook controller for Twilio WhatsApp incoming messages.
@@ -56,27 +64,27 @@ class WhatsAppWebhook(http.Controller):
 
             if not partner:
                 _logger.warning(f"No partner found for phone: {phone}")
-                return self._twiml_response(
-                    "Sorry, we couldn't identify your account. "
-                    "Please contact GEP support."
+                self._send_whatsapp_reply(
+                    from_number,
+                    "Sorry, we couldn't identify your account. Please contact GEP support."
                 )
+                return self._twiml_empty()
 
             # Log incoming message
             self._log_incoming_message(env, partner, phone, message_body, message_sid)
 
-            # Process command
+            # Process command and send response via Twilio API
             response = self._process_message(env, partner, message_body.upper())
+            self._send_whatsapp_reply(from_number, response)
 
-            return self._twiml_response(response)
+            return self._twiml_empty()
 
         except Exception as e:
             _logger.exception(f"WhatsApp webhook error: {e}")
-            return self._twiml_response(
-                "Sorry, an error occurred. Please try again or contact support."
-            )
+            return self._twiml_empty()
 
     def _twiml_response(self, message):
-        """Generate TwiML response for Twilio."""
+        """Generate TwiML response for Twilio (not used for WhatsApp)."""
         twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Message>{message}</Message>
@@ -85,6 +93,56 @@ class WhatsAppWebhook(http.Controller):
             twiml,
             headers=[('Content-Type', 'text/xml')]
         )
+
+    def _twiml_empty(self):
+        """Return empty TwiML response (just acknowledge receipt)."""
+        twiml = """<?xml version="1.0" encoding="UTF-8"?>
+<Response></Response>"""
+        return request.make_response(
+            twiml,
+            headers=[('Content-Type', 'text/xml')]
+        )
+
+    def _send_whatsapp_reply(self, to_number, message):
+        """Send WhatsApp reply using Twilio REST API.
+
+        Args:
+            to_number: Recipient in format 'whatsapp:+1234567890'
+            message: Message body to send
+        """
+        if not TWILIO_AVAILABLE:
+            _logger.error("Twilio library not available - cannot send reply")
+            return False
+
+        try:
+            account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+            auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+            from_number = os.environ.get('TWILIO_WHATSAPP_NUMBER', '+14155238886')
+
+            if not account_sid or not auth_token:
+                _logger.error("Twilio credentials not configured")
+                return False
+
+            client = TwilioClient(account_sid, auth_token)
+
+            # Ensure from_number has whatsapp: prefix
+            if not from_number.startswith('whatsapp:'):
+                from_number = f"whatsapp:{from_number}"
+
+            _logger.info(f"Sending WhatsApp reply: {from_number} -> {to_number}")
+
+            result = client.messages.create(
+                body=message,
+                from_=from_number,
+                to=to_number
+            )
+
+            _logger.info(f"WhatsApp reply sent. SID: {result.sid}")
+            return True
+
+        except Exception as e:
+            _logger.exception(f"Failed to send WhatsApp reply: {e}")
+            return False
 
     def _find_partner_by_phone(self, env, phone):
         """Find partner by phone number (various formats)."""
@@ -261,27 +319,62 @@ Need assistance? Contact GEP support."""
         visit = visits[visit_number - 1]
 
         # Format date and time
-        date_str = visit.visit_date.strftime('%d/%m/%Y') if visit.visit_date else 'TBD'
+        date_str = visit.visit_date.strftime('%A, %d %B %Y') if visit.visit_date else 'TBD'
         start_time = f"{int(visit.start_time):02d}:{int((visit.start_time % 1) * 60):02d}" if visit.start_time else 'TBD'
-        status = '✅' if visit.state == 'confirmed' else '⏳'
+        end_time = f"{int(visit.end_time):02d}:{int((visit.end_time % 1) * 60):02d}" if visit.end_time else 'TBD'
+        duration = f"{visit.duration:.1f}" if visit.duration else 'N/A'
+        status = '✅ Confirmed' if visit.state == 'confirmed' else '⏳ Awaiting Confirmation'
 
-        # Build short address
-        address = visit.installation_id.city if visit.installation_id and visit.installation_id.city else 'N/A'
+        # Build address
+        address_lines = []
+        if visit.installation_id:
+            inst = visit.installation_id
+            if inst.name:
+                address_lines.append(inst.name)
+            if inst.street:
+                address_lines.append(inst.street)
+            if inst.city:
+                city_line = inst.city
+                if hasattr(inst, 'postal_code') and inst.postal_code:
+                    city_line = f"{inst.postal_code} {city_line}"
+                address_lines.append(city_line)
+
+        address_text = '\n   '.join(address_lines) if address_lines else 'Address not specified'
 
         # Get Google Maps URL
         maps_url = self._get_google_maps_url(visit.installation_id)
 
-        response = f"""{status} *{visit.name}*
+        response = f"""📋 *Visit Details #{visit_number}*
 
-📅 {date_str} at {start_time}
-🏢 {visit.client_id.name or 'N/A'}
-📍 {address}"""
+━━━━━━━━━━━━━━━━━━━━━
+📌 *VISIT INFORMATION*
+━━━━━━━━━━━━━━━━━━━━━
+
+🔖 *Reference:* {visit.name}
+📊 *Status:* {status}
+📅 *Date:* {date_str}
+⏰ *Time:* {start_time} - {end_time}
+⏱️ *Duration:* {duration} hours
+
+━━━━━━━━━━━━━━━━━━━━━
+🏢 *CLIENT & LOCATION*
+━━━━━━━━━━━━━━━━━━━━━
+
+🏛️ *Client:* {visit.client_id.name or 'N/A'}
+📍 *Location:*
+   {address_text}"""
 
         if maps_url:
-            response += f"\n\n🗺️ {maps_url}"
+            response += f"""
+
+🗺️ *Navigate:*
+{maps_url}"""
 
         if visit.state == 'assigned':
-            response += "\n\nReply *ACCEPT* or *DENY*"
+            response += """
+
+━━━━━━━━━━━━━━━━━━━━━
+Reply *ACCEPT* to confirm or *DENY* to decline."""
 
         return response
 
