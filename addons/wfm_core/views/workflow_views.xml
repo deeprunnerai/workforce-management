@@ -192,25 +192,17 @@
         <field name="arch" type="xml">
             <search>
                 <field name="workflow_id"/>
-                <field name="result"/>
                 <filter string="Success" name="filter_success"
                         domain="[('status', '=', 'success')]"/>
                 <filter string="Failed" name="filter_failed"
                         domain="[('status', '=', 'failed')]"/>
                 <filter string="Running" name="filter_running"
                         domain="[('status', '=', 'running')]"/>
-                <separator/>
-                <filter string="Today" name="filter_today"
-                        domain="[('started_at', '&gt;=', context_today().strftime('%Y-%m-%d')), ('started_at', '&lt;', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d'))]"/>
-                <filter string="This Week" name="filter_week"
-                        domain="[('started_at', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
                 <group expand="0" string="Group By">
                     <filter string="Workflow" name="groupby_workflow"
                             context="{'group_by': 'workflow_id'}"/>
                     <filter string="Status" name="groupby_status"
                             context="{'group_by': 'status'}"/>
-                    <filter string="Date" name="groupby_date"
-                            context="{'group_by': 'started_at:day'}"/>
                 </group>
             </search>
         </field>
@@ -222,6 +214,6 @@
         <field name="res_model">wfm.workflow.log</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="wfm_workflow_log_view_search"/>
-        <field name="context">{'search_default_filter_today': 1}</field>
+        <field name="context">{}</field>
     </record>
 </odoo>
