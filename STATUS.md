@@ -6,8 +6,8 @@
 |--------|-------|
 | **Last Updated** | 2025-12-13 |
 | **Production URL** | https://odoo.deeprunner.ai |
-| **Current Branch** | All synced at `0f3c2f6` |
-| **Overall Progress** | 85% |
+| **Current Branch** | dev-a (2937547) |
+| **Overall Progress** | 90% |
 
 ---
 
@@ -15,40 +15,50 @@
 
 | Module | Version | Status | Description |
 |--------|---------|--------|-------------|
-| `wfm_core` | 19.0.1.0.0 | Deployed | Core models, business logic |
-| `wfm_fsm` | 19.0.2.0.0 | Deployed | FSM dashboard, Kanban, Smart Assignment |
+| `wfm_core` | 19.0.2.1.0 | Deployed | Core models, SEPE, billing, workflows |
+| `wfm_fsm` | 19.0.4.0.0 | Deployed | Dashboard, Smart Assignment, Churn Analysis |
 | `wfm_portal` | 19.0.1.0.0 | Deployed | Partner self-service portal |
 | `wfm_whatsapp` | 19.0.1.0.0 | Deployed | WhatsApp notifications via Twilio |
+| `wfm_ai_chat` | 19.0.1.0.0 | Deployed | AI Chat with LLM tools |
 
 ---
 
-## Recent Completions (Today)
+## Recent Completions
 
-### WhatsApp Integration (wfm_whatsapp)
-- [x] Twilio REST API integration for sending messages
-- [x] Webhook endpoint for incoming messages (`/whatsapp/webhook`)
-- [x] Partner commands: help, visits, status, visit N
-- [x] Visit actions: visit N accept, visit N deny
-- [x] Auto-notifications on partner assignment
-- [x] Google Maps links in visit details
-- [x] Message logging in database
+### AI Chat Integration (wfm_ai_chat)
+- [x] LLM client with OpenAI-compatible API
+- [x] WFM-specific tools for visit management
+- [x] Churn analysis tools (7 new tools)
+- [x] System prompt with business context
+
+### Churn Analysis (wfm_fsm)
+- [x] Partner health scoring model
+- [x] Risk level classification (low/medium/high/critical)
+- [x] Retention ticket system
+- [x] AI-powered retention strategies
+- [x] Churn dashboard with analytics
+
+### Autonomous Workflow Engine (wfm_core)
+- [x] Workflow model with trigger conditions
+- [x] Action execution (WhatsApp, field updates, webhooks)
+- [x] Execution logging and audit trail
+- [x] Scheduled cron job for workflow processing
+
+### SEPE Export (wfm_core - dev-c)
+- [x] SEPE export wizard
+- [x] Export history tracking
+- [x] Government compliance reporting
+
+### Billing Dashboard (wfm_core - dev-c)
+- [x] Billing status views (Not Billed, Invoiced, Paid, Settled)
+- [x] Overview dashboard
+- [x] Filter actions for each status
 
 ### Menu Reorganization
-- [x] Flat dropdown structure: Dashboard, Visits, Partners, Clients, Config
-- [x] Removed nested Operations/Configuration menus
-- [x] Added filtered views: Physicians, Engineers, By Client
-- [x] Timeline views distributed under each dropdown
-- [x] Cleaned up duplicate menu items in production
-
-### Partner Portal Bug Fix
-- [x] Fixed: Draft visits no longer visible to partners
-- [x] Security rule updated to exclude `state != 'draft'`
-- [x] Action domain added as additional safeguard
-
-### Deployment
-- [x] All branches synced to `0f3c2f6`
-- [x] Production upgraded with latest changes
-- [x] Demo credentials documented
+- [x] Analysis menu with Partner Retention and Churn Analytics
+- [x] Reporting menu with SEPE (dev-c)
+- [x] Automation menu with Workflows and Execution Logs
+- [x] Billing menu with status filters (dev-c)
 
 ---
 
@@ -61,18 +71,24 @@
 | Client & Installation Management | wfm_core | Done |
 | Partner Management | wfm_core | Done |
 | Contract Management | wfm_core | Done |
+| SEPE Exports | wfm_core | Done |
+| Billing Dashboard | wfm_core | Done |
+| Autonomous Workflows | wfm_core | Done |
 | Kanban Pipeline | wfm_fsm | Done |
 | Coordinator Dashboard | wfm_fsm | Done |
 | Calendar View | wfm_fsm | Done |
 | Timeline Views (OCA) | wfm_fsm | Done |
 | Smart Assignment Engine | wfm_fsm | Done |
 | Partner-Client Relationships | wfm_fsm | Done |
+| Partner Churn Analysis | wfm_fsm | Done |
 | Partner Portal (Backend) | wfm_portal | Done |
 | Partner Availability Calendar | wfm_portal | Done |
 | My Profile Feature | wfm_portal | Done |
 | Visit Actions (Confirm/Start/Complete/Cancel) | wfm_portal | Done |
 | WhatsApp Notifications | wfm_whatsapp | Done |
 | WhatsApp Partner Commands | wfm_whatsapp | Done |
+| AI Chat Interface | wfm_ai_chat | Done |
+| Churn Analysis Tools | wfm_ai_chat | Done |
 
 ### In Progress
 | Feature | Module | Progress |
@@ -84,7 +100,6 @@
 |---------|--------|----------|
 | Visit Report Submission | wfm_portal | Medium |
 | Payment Excel Download | wfm_portal | Medium |
-| SEPE Export | wfm_core | Low |
 
 ---
 
@@ -93,23 +108,38 @@
 ```
 Workforce Management
 ├── Dashboard (direct link)
-├── Visits ▼
+├── Visits
 │   ├── Kanban
 │   ├── Calendar
 │   ├── Timeline
 │   └── By Client
-├── Partners ▼
+├── Partners
 │   ├── All
 │   ├── Physicians
 │   ├── Engineers
 │   └── Timeline
-├── Clients ▼
+├── Clients
 │   ├── All
 │   ├── Installations
 │   ├── Contracts
-│   ├── Contract Services
-│   └── Timeline
-└── Config ▼
+│   └── Contract Services
+├── Reporting
+│   └── SEPE
+│       ├── Create Export
+│       └── Export History
+├── Billing
+│   ├── Overview
+│   ├── Not Billed
+│   ├── Invoiced
+│   ├── Client Paid
+│   └── Settled
+├── Analysis
+│   ├── Partner Retention
+│   └── Churn Analytics
+├── Automation
+│   ├── Workflows
+│   └── Execution Logs
+└── Config
     └── Stages
 ```
 
@@ -117,12 +147,12 @@ Workforce Management
 
 ## Branch Status
 
-| Branch | Commit | Status |
-|--------|--------|--------|
-| main | 0f3c2f6 | Synced |
-| dev-a | 0f3c2f6 | Synced |
-| dev-b | bb34a5e | Behind |
-| dev-c | bb34a5e | Behind |
+| Branch | Commit | Status | Features |
+|--------|--------|--------|----------|
+| main | 85e603b | Base | Core, FSM, Portal, WhatsApp |
+| dev-a | 2937547 | Active | + Workflows, AI Chat, Churn Tools |
+| dev-b | bb34a5e | Behind | Kanban work |
+| dev-c | 855fa9a | Active | + SEPE, Billing, Workflows |
 
 ---
 
@@ -144,11 +174,11 @@ _None_
 
 ## Next Steps
 
-1. ~~**WhatsApp Integration** - Create `wfm_whatsapp` module with Twilio~~ ✅ Done
-2. **Partner Account Creation** - Create remaining 94 partner users
-3. **Visit Report Submission** - Allow partners to submit reports from portal
-4. **Payment Excel Download** - Partners download earnings summary
+1. **Partner Account Creation** - Create remaining 94 partner users
+2. **Visit Report Submission** - Allow partners to submit reports from portal
+3. **Payment Excel Download** - Partners download earnings summary
+4. **Deploy dev-a to production** - Push latest features to production
 
 ---
 
-**Last Updated:** 2025-12-13 12:30 IST
+**Last Updated:** 2025-12-13 18:00 IST

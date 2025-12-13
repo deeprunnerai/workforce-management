@@ -1,6 +1,6 @@
 # WFM Tasks
 
-**Last Updated:** 2025-12-13 12:30 IST
+**Last Updated:** 2025-12-13 18:00 IST
 
 ---
 
@@ -13,6 +13,10 @@
 - [x] Contract and Contract Service models
 - [x] Visit stages configuration
 - [x] Notification trigger hooks
+- [x] SEPE export wizard and history
+- [x] Billing dashboard with status filters
+- [x] Autonomous workflow engine
+- [x] Workflow execution logging
 
 ### Coordinator Tools (wfm_fsm)
 - [x] Kanban pipeline with drag-drop
@@ -23,6 +27,10 @@
 - [x] AI scoring algorithm (5 weighted factors)
 - [x] Smart Assignment wizard with Top 2 recommendations
 - [x] Form view recommendations with AI reasoning
+- [x] Partner health scoring (churn risk)
+- [x] Churn analytics dashboard
+- [x] Retention ticket system
+- [x] AI-powered retention strategies
 
 ### Partner Portal (wfm_portal)
 - [x] Backend portal module scaffold
@@ -47,16 +55,28 @@
 - [x] Environment variables configuration
 - [x] Deployed to production
 
+### AI Chat Integration (wfm_ai_chat)
+- [x] LLM client with OpenAI-compatible API
+- [x] Visit management tools
+- [x] Partner management tools
+- [x] Churn analysis tools (7 tools)
+- [x] Dashboard tools
+- [x] System prompt with business context
+
 ### Menu & Navigation
 - [x] Flat dropdown structure (Dashboard, Visits, Partners, Clients, Config)
 - [x] Filtered partner views (Physicians, Engineers)
 - [x] Visits by Client view
 - [x] Timeline views under each dropdown
 - [x] Cleaned up duplicate menu items
+- [x] Analysis menu with Partner Retention and Churn Analytics
+- [x] Reporting menu with SEPE
+- [x] Billing menu with status filters
+- [x] Automation menu with Workflows and Execution Logs
 
 ### Deployment
 - [x] All modules deployed to production
-- [x] All branches synced (main, dev-a)
+- [x] All branches synced (main, dev-a, dev-c)
 - [x] Demo credentials configured
 
 ---
@@ -90,25 +110,28 @@
 
 ### Low Priority
 
-#### SEPE Export
-- [ ] Research SEPE format requirements
-- [ ] Create export wizard
-- [ ] Generate compliance reports
-
 #### Data Quality
 - [ ] Seed additional test data
 - [ ] Validate all visit states
 - [ ] Test full workflow end-to-end
+
+#### Documentation
+- [ ] API documentation for AI Chat tools
+- [ ] User guide for coordinators
+- [ ] Partner portal guide
 
 ---
 
 ## Task Priority Order
 
 1. ~~**WhatsApp Integration** - Critical for partner notifications~~ ✅ Done
-2. **Partner Account Creation** - Needed for demo
-3. **Visit Report Submission** - Completes partner workflow
-4. **Payment Excel Download** - Partner earnings visibility
-5. **SEPE Export** - Future compliance feature
+2. ~~**AI Chat Integration** - Natural language interface~~ ✅ Done
+3. ~~**Churn Analysis** - Partner retention~~ ✅ Done
+4. ~~**Autonomous Workflows** - Automation engine~~ ✅ Done
+5. ~~**SEPE Exports** - Government compliance~~ ✅ Done
+6. **Partner Account Creation** - Needed for demo
+7. **Visit Report Submission** - Completes partner workflow
+8. **Payment Excel Download** - Partner earnings visibility
 
 ---
 
@@ -119,6 +142,10 @@
 TWILIO_ACCOUNT_SID=AC245974...
 TWILIO_AUTH_TOKEN=840ebc38...
 TWILIO_WHATSAPP_NUMBER=+14155238886
+
+# AI Chat integration
+OPENAI_API_KEY=sk-...
+LLM_API_BASE=https://api.openai.com/v1
 ```
 
 ---
