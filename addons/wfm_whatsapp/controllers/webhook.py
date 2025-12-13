@@ -93,13 +93,11 @@ class WhatsAppWebhook(http.Controller):
         # Try different search patterns
         Partner = env['res.partner'].sudo()
 
-        # Direct match
+        # Direct match on phone field
         partner = Partner.search([
-            '|', '|', '|',
+            '|',
             ('phone', 'ilike', phone),
-            ('mobile', 'ilike', phone),
             ('phone', 'ilike', phone_clean[-10:]),  # Last 10 digits
-            ('mobile', 'ilike', phone_clean[-10:]),
         ], limit=1)
 
         if not partner:
@@ -107,9 +105,7 @@ class WhatsAppWebhook(http.Controller):
             if phone_clean.startswith('30'):  # Greece
                 local = phone_clean[2:]
                 partner = Partner.search([
-                    '|',
                     ('phone', 'ilike', local),
-                    ('mobile', 'ilike', local),
                 ], limit=1)
 
         return partner
