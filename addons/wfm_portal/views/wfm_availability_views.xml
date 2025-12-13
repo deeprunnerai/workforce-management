@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Partner Availability - List View -->
+    <record id="wfm_partner_availability_list" model="ir.ui.view">
+        <field name="name">wfm.partner.availability.list</field>
+        <field name="model">wfm.partner.availability</field>
+        <field name="arch" type="xml">
+            <list string="My Unavailability" editable="bottom">
+                <field name="partner_id" column_invisible="True"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="reason"/>
+                <field name="notes"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Partner Availability - Form View -->
+    <record id="wfm_partner_availability_form" model="ir.ui.view">
+        <field name="name">wfm.partner.availability.form</field>
+        <field name="model">wfm.partner.availability</field>
+        <field name="arch" type="xml">
+            <form string="Unavailability Period">
+                <sheet>
+                    <group>
+                        <group string="Period">
+                            <field name="partner_id" invisible="1"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group string="Details">
+                            <field name="reason"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1" placeholder="Additional notes about this unavailability..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Partner Availability - Calendar View -->
+    <record id="wfm_partner_availability_calendar" model="ir.ui.view">
+        <field name="name">wfm.partner.availability.calendar</field>
+        <field name="model">wfm.partner.availability</field>
+        <field name="arch" type="xml">
+            <calendar string="My Availability" date_start="date_from" date_stop="date_to" color="reason" mode="month" quick_create="false">
+                <field name="reason"/>
+                <field name="notes"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Partner Availability - Search View -->
+    <record id="wfm_partner_availability_search" model="ir.ui.view">
+        <field name="name">wfm.partner.availability.search</field>
+        <field name="model">wfm.partner.availability</field>
+        <field name="arch" type="xml">
+            <search string="Search Unavailability">
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="reason"/>
+                <filter string="Upcoming" name="filter_upcoming" domain="[('date_to', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Past" name="filter_past" domain="[('date_to', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Vacation" name="filter_vacation" domain="[('reason', '=', 'vacation')]"/>
+                <filter string="Sick Leave" name="filter_sick" domain="[('reason', '=', 'sick')]"/>
+                <filter string="Personal" name="filter_personal" domain="[('reason', '=', 'personal')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Partner Availability - Action -->
+    <record id="action_wfm_partner_availability" model="ir.actions.act_window">
+        <field name="name">My Availability</field>
+        <field name="res_model">wfm.partner.availability</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="search_view_id" ref="wfm_partner_availability_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Mark your unavailable dates
+            </p>
+            <p>
+                Click to add dates when you are not available for visits.
+                The coordinator will see this when assigning visits.
+            </p>
+        </field>
+    </record>
+</odoo>

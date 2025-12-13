@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Partner View of Visits - List View -->
+    <record id="wfm_visit_partner_list" model="ir.ui.view">
+        <field name="name">wfm.visit.partner.list</field>
+        <field name="model">wfm.visit</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="My Visits" decoration-info="state == 'assigned'" decoration-warning="state == 'in_progress'" decoration-success="state == 'done'" decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="visit_date"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="start_time" widget="float_time"/>
+                <field name="end_time" widget="float_time"/>
+                <field name="duration"/>
+                <field name="visit_type"/>
+                <field name="state" widget="badge" decoration-info="state == 'assigned'" decoration-primary="state == 'confirmed'" decoration-warning="state == 'in_progress'" decoration-success="state == 'done'" decoration-danger="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Partner View of Visits - Form View -->
+    <record id="wfm_visit_partner_form" model="ir.ui.view">
+        <field name="name">wfm.visit.partner.form</field>
+        <field name="model">wfm.visit</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <form string="Visit Details">
+                <header>
+                    <button name="action_confirm" string="Confirm Visit" type="object" class="btn-primary" invisible="state != 'assigned'"/>
+                    <button name="action_start" string="Start Visit" type="object" class="btn-primary" invisible="state != 'confirmed'"/>
+                    <button name="action_complete" string="Complete Visit" type="object" class="btn-success" invisible="state != 'in_progress'"/>
+                    <button name="action_cancel" string="Cancel Visit" type="object" class="btn-secondary" invisible="state in ('done', 'cancelled')" confirm="Are you sure you want to cancel this visit?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="assigned,confirmed,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Schedule">
+                            <field name="visit_date" readonly="1"/>
+                            <field name="start_time" widget="float_time" readonly="1"/>
+                            <field name="end_time" widget="float_time" readonly="1"/>
+                            <field name="duration" readonly="1"/>
+                            <field name="visit_type" readonly="1"/>
+                        </group>
+                        <group string="Client Information">
+                            <field name="client_id" readonly="1"/>
+                            <field name="installation_id" readonly="1"/>
+                            <field name="installation_address" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Visit notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Partner View of Visits - Kanban View -->
+    <record id="wfm_visit_partner_kanban" model="ir.ui.view">
+        <field name="name">wfm.visit.partner.kanban</field>
+        <field name="model">wfm.visit</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="visit_date"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <field name="state"/>
+                <field name="visit_type"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_details">
+                            <strong class="o_kanban_record_title">
+                                <field name="name"/>
+                            </strong>
+                            <div class="o_kanban_record_subtitle">
+                                <span title="Date"><field name="visit_date"/></span>
+                            </div>
+                            <div>
+                                <span title="Client"><field name="client_id"/></span>
+                            </div>
+                            <div>
+                                <span title="Location"><field name="installation_id"/></span>
+                            </div>
+                            <div class="mt-2">
+                                <span title="Time">
+                                    <field name="start_time" widget="float_time"/> - <field name="end_time" widget="float_time"/>
+                                </span>
+                            </div>
+                            <div class="mt-2">
+                                <field name="visit_type" widget="badge"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Partner View of Visits - Calendar View -->
+    <record id="wfm_visit_partner_calendar" model="ir.ui.view">
+        <field name="name">wfm.visit.partner.calendar</field>
+        <field name="model">wfm.visit</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <calendar string="My Visits" date_start="visit_date" color="state" mode="month" event_open_popup="true" quick_create="false">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="start_time" widget="float_time"/>
+                <field name="end_time" widget="float_time"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Partner Search View -->
+    <record id="wfm_visit_partner_search" model="ir.ui.view">
+        <field name="name">wfm.visit.partner.search</field>
+        <field name="model">wfm.visit</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <search string="Search Visits">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="visit_date"/>
+                <filter string="Upcoming" name="filter_upcoming" domain="[('visit_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Past" name="filter_past" domain="[('visit_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Assigned" name="filter_assigned" domain="[('state', '=', 'assigned')]"/>
+                <filter string="Confirmed" name="filter_confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="In Progress" name="filter_in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Completed" name="filter_done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Date" name="groupby_date" context="{'group_by': 'visit_date'}"/>
+                <filter string="Client" name="groupby_client" context="{'group_by': 'client_id'}"/>
+                <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Partner Action for Visits -->
+    <record id="action_wfm_visit_partner" model="ir.actions.act_window">
+        <field name="name">My Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">list,kanban,calendar,form</field>
+        <field name="search_view_id" ref="wfm_visit_partner_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('wfm_visit_partner_list')}),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('wfm_visit_partner_kanban')}),
+            (0, 0, {'view_mode': 'calendar', 'view_id': ref('wfm_visit_partner_calendar')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('wfm_visit_partner_form')})]"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No visits assigned yet
+            </p>
+            <p>
+                Your assigned OHS visits will appear here.
+            </p>
+        </field>
+    </record>
+</odoo>

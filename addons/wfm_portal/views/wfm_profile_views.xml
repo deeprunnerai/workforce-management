@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Partner Profile - Form View (Limited fields for self-editing) -->
+    <record id="wfm_partner_profile_form" model="ir.ui.view">
+        <field name="name">wfm.partner.profile.form</field>
+        <field name="model">res.partner</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <form string="My Profile">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Contact Information">
+                            <field name="email"/>
+                            <field name="phone"/>
+                        </group>
+                        <group string="Address">
+                            <field name="street"/>
+                            <field name="street2"/>
+                            <field name="city"/>
+                            <field name="zip"/>
+                            <field name="country_id" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                    </group>
+                    <group string="Professional Information" invisible="not is_wfm_partner">
+                        <group>
+                            <field name="specialty" readonly="1"/>
+                            <field name="hourly_rate"/>
+                        </group>
+                        <group>
+                            <field name="vat" string="Tax ID"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Partner Profile - Server Action (opens current user's partner dynamically) -->
+    <record id="action_wfm_partner_profile" model="ir.actions.server">
+        <field name="name">My Profile</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_my_profile()</field>
+    </record>
+</odoo>

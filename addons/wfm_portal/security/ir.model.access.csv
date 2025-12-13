@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_wfm_visit_partner,wfm.visit.partner,wfm_core.model_wfm_visit,wfm_portal.group_wfm_partner,1,1,0,0
+access_wfm_installation_partner,wfm.installation.partner,wfm_core.model_wfm_installation,wfm_portal.group_wfm_partner,1,0,0,0
+access_wfm_visit_stage_partner,wfm.visit.stage.partner,wfm_core.model_wfm_visit_stage,wfm_portal.group_wfm_partner,1,0,0,0
+access_wfm_partner_availability,wfm.partner.availability.partner,wfm_portal.model_wfm_partner_availability,wfm_portal.group_wfm_partner,1,1,1,1
+access_res_partner_wfm_partner,res.partner.wfm.partner,base.model_res_partner,wfm_portal.group_wfm_partner,1,1,0,0

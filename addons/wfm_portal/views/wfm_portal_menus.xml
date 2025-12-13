@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Partner Portal Root Menu -->
+    <menuitem
+        id="menu_wfm_partner_root"
+        name="Partner Portal"
+        sequence="5"
+        web_icon="wfm_portal,static/description/icon.png"
+        groups="wfm_portal.group_wfm_partner"/>
+
+    <!-- My Visits Menu -->
+    <menuitem
+        id="menu_wfm_partner_visits"
+        name="My Visits"
+        parent="menu_wfm_partner_root"
+        action="action_wfm_visit_partner"
+        sequence="10"
+        groups="wfm_portal.group_wfm_partner"/>
+
+    <!-- My Availability Menu -->
+    <menuitem
+        id="menu_wfm_partner_availability"
+        name="My Availability"
+        parent="menu_wfm_partner_root"
+        action="action_wfm_partner_availability"
+        sequence="20"
+        groups="wfm_portal.group_wfm_partner"/>
+
+    <!-- My Profile Menu -->
+    <menuitem
+        id="menu_wfm_partner_profile"
+        name="My Profile"
+        parent="menu_wfm_partner_root"
+        action="action_wfm_partner_profile"
+        sequence="30"
+        groups="wfm_portal.group_wfm_partner"/>
+</odoo>
