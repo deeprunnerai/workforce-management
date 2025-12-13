@@ -177,8 +177,15 @@ class PartnerReferral(models.Model):
         """Send email notification to coordinators about new referral."""
         self.ensure_one()
 
-        # Just send to admin email for now
-        coordinator_emails = self.env.company.email or 'admin@gepgroup.gr'
+        # Get coordinator emails from wfm_coordinator group
+        coordinator_emails = ''
+        coordinator_group = self.env.ref('wfm_portal.group_wfm_coordinator', raise_if_not_found=False)
+        if coordinator_group and coordinator_group.users:
+            coordinator_emails = ','.join(
+                user.email for user in coordinator_group.users if user.email
+            )
+        if not coordinator_emails:
+            coordinator_emails = self.env.company.email or 'admin@gepgroup.gr'
 
         specialty_label = dict(self._fields['candidate_specialty'].selection).get(self.candidate_specialty, self.candidate_specialty)
 
