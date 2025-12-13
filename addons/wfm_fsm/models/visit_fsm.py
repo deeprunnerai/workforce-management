@@ -217,7 +217,7 @@ class WfmVisitFsm(models.Model):
                     <th style="width: 25%;">Partner</th>
                     <th style="width: 10%;">Score</th>
                     <th style="width: 45%;">Why Recommended</th>
-                    <th style="width: 15%;">Health</th>
+                    <th style="width: 15%;">Remark</th>
                 </tr>
             </thead>
             <tbody>
