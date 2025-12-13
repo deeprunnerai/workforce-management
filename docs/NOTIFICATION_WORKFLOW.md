@@ -264,11 +264,22 @@ Re: Visit {visit_reference}
 
 ## Configuration
 
+### Twilio Webhook URLs
+
+Configure these URLs in your Twilio WhatsApp Sandbox or Business settings:
+
+| Setting | URL |
+|---------|-----|
+| **Webhook URL (incoming messages)** | `https://odoo.deeprunner.ai/whatsapp/webhook` |
+| **Status Callback URL** | `https://odoo.deeprunner.ai/whatsapp/status` |
+
 ### Environment Variables
 
+Set these in the Docker container or server environment:
+
 ```bash
-TWILIO_ACCOUNT_SID=your_account_sid_here
-TWILIO_AUTH_TOKEN=your_auth_token_here
+TWILIO_ACCOUNT_SID=<your_account_sid>
+TWILIO_AUTH_TOKEN=<your_auth_token>
 TWILIO_WHATSAPP_NUMBER=+14155238886
 ```
 
@@ -278,6 +289,20 @@ TWILIO_WHATSAPP_NUMBER=+14155238886
 |-----|-------|-------------|
 | `wfm.whatsapp.enabled` | True/False | Enable/disable WhatsApp |
 | `wfm.whatsapp.reminder_hours` | 24 | Hours before visit for reminder |
+
+---
+
+## Partner Commands (WhatsApp)
+
+Partners can reply to WhatsApp messages with these commands:
+
+| Command | Variations | Action |
+|---------|------------|--------|
+| **ACCEPT** | YES, OK, CONFIRM, ΝΑΙ | Confirm assigned visit |
+| **DENY** | NO, CANCEL, REJECT, ΟΧΙ | Decline assigned visit |
+| **/help** | HELP, ? | Show help information |
+| **/visits** | VISITS | List upcoming visits |
+| **/status** | STATUS | Check current assignment |
 
 ---
 
