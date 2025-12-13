@@ -66,6 +66,13 @@ You have access to these tools to interact with the WFM system:
 - wfm_update_workflow: Update a workflow's prompt or schedule
 - wfm_run_workflow: Manually trigger a workflow now
 - wfm_workflow_logs: Get execution logs for a workflow
+- wfm_list_at_risk_partners: List partners at risk of churning (high/critical risk)
+- wfm_get_partner_health: Get detailed churn risk analysis for a partner
+- wfm_log_retention_action: Log a retention intervention (call, email, meeting, etc.)
+- wfm_resolve_retention_ticket: Resolve a retention ticket with outcome
+- wfm_churn_dashboard_stats: Get churn analysis dashboard statistics
+- wfm_get_ai_retention_strategy: Get AI-powered retention strategy for a partner
+- wfm_run_churn_computation: Trigger churn risk computation for all partners
 
 Guidelines:
 1. Always be helpful and concise
@@ -489,6 +496,153 @@ When responding:
                                 "description": "Maximum number of logs to return (default 10)"
                             }
                         }
+                    }
+                }
+            },
+            # Churn Analysis Tools
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_list_at_risk_partners",
+                    "description": "List partners at risk of churning. By default shows high and critical risk partners.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "risk_level": {
+                                "type": "string",
+                                "enum": ["low", "medium", "high", "critical"],
+                                "description": "Filter by specific risk level"
+                            },
+                            "ticket_state": {
+                                "type": "string",
+                                "enum": ["open", "in_progress", "resolved", "closed"],
+                                "description": "Filter by retention ticket state"
+                            },
+                            "my_tickets": {
+                                "type": "boolean",
+                                "description": "Only show tickets assigned to current user"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of partners to return (default 20)"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_get_partner_health",
+                    "description": "Get detailed churn risk analysis for a specific partner, including score breakdown",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "partner_id": {
+                                "type": "integer",
+                                "description": "Partner ID to get health data for"
+                            },
+                            "health_id": {
+                                "type": "integer",
+                                "description": "Health record ID (alternative to partner_id)"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_log_retention_action",
+                    "description": "Log a retention intervention/action for a partner (call, email, meeting, etc.)",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "health_id": {
+                                "type": "integer",
+                                "description": "Health record ID for the partner"
+                            },
+                            "intervention_type": {
+                                "type": "string",
+                                "enum": ["call", "whatsapp", "email", "meeting", "bonus", "workload"],
+                                "description": "Type of intervention performed"
+                            },
+                            "notes": {
+                                "type": "string",
+                                "description": "Notes about the intervention"
+                            },
+                            "outcome": {
+                                "type": "string",
+                                "enum": ["positive", "neutral", "negative", "pending"],
+                                "description": "Outcome of the intervention"
+                            }
+                        },
+                        "required": ["health_id", "intervention_type"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_resolve_retention_ticket",
+                    "description": "Resolve a retention ticket with outcome (retained, churned, or false alarm)",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "health_id": {
+                                "type": "integer",
+                                "description": "Health record ID to resolve"
+                            },
+                            "outcome": {
+                                "type": "string",
+                                "enum": ["retained", "churned", "false_alarm"],
+                                "description": "Resolution outcome"
+                            },
+                            "notes": {
+                                "type": "string",
+                                "description": "Resolution notes"
+                            }
+                        },
+                        "required": ["health_id", "outcome"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_churn_dashboard_stats",
+                    "description": "Get churn analysis dashboard statistics: risk distribution, ticket counts, retention rate",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {}
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_get_ai_retention_strategy",
+                    "description": "Get AI-powered retention strategy and personalized WhatsApp message for a partner",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "health_id": {
+                                "type": "integer",
+                                "description": "Health record ID to generate strategy for"
+                            }
+                        },
+                        "required": ["health_id"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_run_churn_computation",
+                    "description": "Trigger churn risk computation for all partners. Updates health records with new risk scores.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {}
                     }
                 }
             }
