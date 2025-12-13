@@ -1,0 +1,23 @@
+{
+  "jsonrpc": "2.0",
+  "method": "call",
+  "params": {
+    "service": "object",
+    "method": "execute_kw",
+    "args": [
+      "odoo_deeprunner",
+      2,
+      "AdminSecure2025",
+      "res.users",
+      "create",
+      [{
+        "name": "Δρ. Στέφανος Αναστασιάδης",
+        "login": "s.anastasiadis@ohs.gr",
+        "email": "s.anastasiadis@ohs.gr",
+        "password": "partner123",
+        "partner_id": 107
+      }]
+    ]
+  },
+  "id": 1
+}

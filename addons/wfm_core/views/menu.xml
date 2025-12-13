@@ -73,6 +73,64 @@
               sequence="35"/>
 
     <!-- ============================================ -->
+    <!-- SEPE DROPDOWN (sequence 50)                 -->
+    <!-- ============================================ -->
+    <menuitem id="menu_wfm_sepe_parent"
+              name="SEPE"
+              parent="menu_wfm_root"
+              sequence="50"/>
+
+    <menuitem id="menu_wfm_sepe_create"
+              name="Create Export"
+              parent="menu_wfm_sepe_parent"
+              action="action_sepe_export_wizard"
+              sequence="10"/>
+
+    <menuitem id="menu_wfm_sepe_exports"
+              name="Export History"
+              parent="menu_wfm_sepe_parent"
+              action="action_wfm_sepe_export"
+              sequence="20"/>
+
+    <!-- ============================================ -->
+    <!-- BILLING DROPDOWN (sequence 60)              -->
+    <!-- ============================================ -->
+    <menuitem id="menu_wfm_billing_parent"
+              name="Billing"
+              parent="menu_wfm_root"
+              sequence="60"/>
+
+    <menuitem id="menu_wfm_billing_overview"
+              name="Overview"
+              parent="menu_wfm_billing_parent"
+              action="action_billing_overview"
+              sequence="10"/>
+
+    <menuitem id="menu_wfm_billing_not_billed"
+              name="Not Billed"
+              parent="menu_wfm_billing_parent"
+              action="action_visits_not_billed"
+              sequence="20"/>
+
+    <menuitem id="menu_wfm_billing_invoiced"
+              name="Invoiced"
+              parent="menu_wfm_billing_parent"
+              action="action_visits_invoiced"
+              sequence="30"/>
+
+    <menuitem id="menu_wfm_billing_client_paid"
+              name="Client Paid"
+              parent="menu_wfm_billing_parent"
+              action="action_visits_client_paid"
+              sequence="40"/>
+
+    <menuitem id="menu_wfm_billing_settled"
+              name="Settled"
+              parent="menu_wfm_billing_parent"
+              action="action_visits_settled"
+              sequence="50"/>
+
+    <!-- ============================================ -->
     <!-- AUTOMATION DROPDOWN (sequence 80)           -->
     <!-- ============================================ -->
     <menuitem id="menu_wfm_automation"

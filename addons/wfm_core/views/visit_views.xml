@@ -58,6 +58,26 @@
                         <page string="Notes" name="notes">
                             <field name="notes" placeholder="Add notes about this visit..."/>
                         </page>
+                        <page string="Billing" name="billing">
+                            <group>
+                                <group string="Billing Status">
+                                    <field name="billing_status" widget="badge"
+                                           decoration-info="billing_status == 'not_billed'"
+                                           decoration-warning="billing_status == 'invoiced'"
+                                           decoration-primary="billing_status == 'client_paid'"
+                                           decoration-success="billing_status == 'settled'"/>
+                                    <field name="invoice_reference"/>
+                                </group>
+                                <group string="Payment">
+                                    <field name="partner_payment_amount"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </group>
+                            </group>
+                            <group string="SEPE Export">
+                                <field name="sepe_exported"/>
+                                <field name="sepe_export_date" invisible="not sepe_exported"/>
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
                 <chatter/>
@@ -78,8 +98,16 @@
                 <field name="partner_id"/>
                 <field name="visit_date"/>
                 <field name="duration"/>
+                <field name="partner_payment_amount" optional="hide"/>
                 <field name="stage_id"/>
                 <field name="state"/>
+                <field name="billing_status" widget="badge"
+                       decoration-info="billing_status == 'not_billed'"
+                       decoration-warning="billing_status == 'invoiced'"
+                       decoration-primary="billing_status == 'client_paid'"
+                       decoration-success="billing_status == 'settled'"
+                       optional="show"/>
+                <field name="sepe_exported" optional="hide"/>
             </list>
         </field>
     </record>
@@ -143,11 +171,18 @@
                 <filter string="In Progress" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
                 <filter string="Completed" name="done" domain="[('state', '=', 'done')]"/>
                 <separator/>
+                <filter string="Not Billed" name="not_billed" domain="[('billing_status', '=', 'not_billed'), ('state', '=', 'done')]"/>
+                <filter string="Invoiced" name="invoiced" domain="[('billing_status', '=', 'invoiced')]"/>
+                <filter string="Client Paid" name="client_paid" domain="[('billing_status', '=', 'client_paid')]"/>
+                <filter string="Settled" name="settled" domain="[('billing_status', '=', 'settled')]"/>
+                <filter string="Not Exported" name="not_exported" domain="[('sepe_exported', '=', False), ('state', '=', 'done')]"/>
+                <separator/>
                 <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
                 <filter string="Installation" name="group_installation" context="{'group_by': 'installation_id'}"/>
                 <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
                 <filter string="Visit Date" name="group_date" context="{'group_by': 'visit_date'}"/>
                 <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                <filter string="Billing Status" name="group_billing" context="{'group_by': 'billing_status'}"/>
             </search>
         </field>
     </record>

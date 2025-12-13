@@ -1,0 +1,18 @@
+{
+  "jsonrpc": "2.0",
+  "method": "call",
+  "params": {
+    "service": "object",
+    "method": "execute_kw",
+    "args": [
+      "odoo_deeprunner",
+      2,
+      "AdminSecure2025",
+      "res.partner",
+      "read",
+      [[107]],
+      {"fields": ["name", "email"]}
+    ]
+  },
+  "id": 1
+}
