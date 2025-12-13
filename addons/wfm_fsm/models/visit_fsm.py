@@ -519,28 +519,29 @@ class WfmVisitFsm(models.Model):
 
         # Financial metrics
         # Monthly revenue (completed visits this month)
+        # Client price = partner_payment * 1.5 (50% margin)
         completed_this_month = self.search([
             ('state', '=', 'done'),
             ('visit_date', '>=', start_of_month),
             ('visit_date', '<=', today),
         ])
-        monthly_revenue = sum(v.price_total or 0 for v in completed_this_month)
+        monthly_revenue = sum((v.partner_payment_amount or 0) * 1.5 for v in completed_this_month)
 
         # Outstanding invoices (invoiced but not paid)
         outstanding = self.search([
             ('billing_status', '=', 'invoiced'),
         ])
-        outstanding_invoices = sum(v.price_total or 0 for v in outstanding)
+        outstanding_invoices = sum((v.partner_payment_amount or 0) * 1.5 for v in outstanding)
 
         # Partner payments due (client paid but not settled)
         pending_settlement = self.search([
             ('billing_status', '=', 'client_paid'),
         ])
-        partner_payments_due = sum(v.partner_price or 0 for v in pending_settlement)
+        partner_payments_due = sum(v.partner_payment_amount or 0 for v in pending_settlement)
 
-        # Profit margin calculation
-        total_revenue = sum(v.price_total or 0 for v in completed_this_month)
-        total_cost = sum(v.partner_price or 0 for v in completed_this_month)
+        # Profit margin calculation (50% markup = 33% margin)
+        total_revenue = sum((v.partner_payment_amount or 0) * 1.5 for v in completed_this_month)
+        total_cost = sum(v.partner_payment_amount or 0 for v in completed_this_month)
         profit_margin = ((total_revenue - total_cost) / total_revenue * 100) if total_revenue > 0 else 0
 
         # Operational metrics
