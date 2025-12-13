@@ -1,20 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Dashboard Client Action -->
-    <record id="action_dashboard" model="ir.actions.client">
-        <field name="name">Dashboard</field>
-        <field name="tag">wfm_fsm.dashboard</field>
+    <!-- Admin Dashboard Client Action -->
+    <record id="action_admin_dashboard" model="ir.actions.client">
+        <field name="name">Admin Dashboard</field>
+        <field name="tag">wfm_fsm.admin_dashboard</field>
+    </record>
+
+    <!-- Coordinator Dashboard Client Action -->
+    <record id="action_coordinator_dashboard" model="ir.actions.client">
+        <field name="name">Coordinator Dashboard</field>
+        <field name="tag">wfm_fsm.coordinator_dashboard</field>
     </record>
 
     <!-- ============================================ -->
-    <!-- DASHBOARD (direct link, sequence 10)        -->
-    <!-- Admin + Coordinator                         -->
+    <!-- ADMIN DASHBOARD (sequence 10)               -->
+    <!-- WFM Admin + System Admin ONLY               -->
     <!-- ============================================ -->
-    <menuitem id="menu_dashboard"
+    <menuitem id="menu_admin_dashboard"
               name="Dashboard"
               parent="wfm_core.menu_wfm_root"
-              action="action_dashboard"
-              groups="base.group_system,wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
+              action="action_admin_dashboard"
+              groups="base.group_system,wfm_core.group_wfm_admin"
+              sequence="10"/>
+
+    <!-- ============================================ -->
+    <!-- COORDINATOR DASHBOARD (sequence 10)         -->
+    <!-- WFM Coordinator ONLY                        -->
+    <!-- ============================================ -->
+    <menuitem id="menu_coordinator_dashboard"
+              name="Dashboard"
+              parent="wfm_core.menu_wfm_root"
+              action="action_coordinator_dashboard"
+              groups="wfm_portal.group_wfm_coordinator"
               sequence="10"/>
 
     <!-- ============================================ -->

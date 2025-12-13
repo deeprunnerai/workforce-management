@@ -64,8 +64,10 @@
     'assets': {
         'web.assets_backend': [
             'wfm_fsm/static/src/scss/dashboard.scss',
-            'wfm_fsm/static/src/js/dashboard.js',
-            'wfm_fsm/static/src/xml/dashboard.xml',
+            'wfm_fsm/static/src/js/coordinator_dashboard.js',
+            'wfm_fsm/static/src/js/admin_dashboard.js',
+            'wfm_fsm/static/src/xml/coordinator_dashboard.xml',
+            'wfm_fsm/static/src/xml/admin_dashboard.xml',
         ],
     },
     'installable': True,

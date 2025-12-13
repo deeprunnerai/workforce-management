@@ -1,4 +1,5 @@
 from odoo import models, fields, api, _
+from datetime import timedelta
 
 
 class WfmVisitFsm(models.Model):
@@ -480,3 +481,111 @@ class WfmVisitFsm(models.Model):
             'target': 'new',
             'context': {'default_visit_id': self.id},
         }
+
+    @api.model
+    def get_activity_feed(self, limit=20):
+        """Get recent visit activities for dashboard live feed."""
+        cutoff = fields.Datetime.now() - timedelta(hours=24)
+        messages = self.env['mail.message'].sudo().search([
+            ('model', '=', 'wfm.visit'),
+            ('message_type', 'in', ['notification', 'comment']),
+            ('create_date', '>=', cutoff),
+        ], order='create_date desc', limit=limit)
+
+        result = []
+        for msg in messages:
+            visit = self.sudo().browse(msg.res_id)
+            if visit.exists():
+                result.append({
+                    'id': msg.id,
+                    'body': msg.body or '',
+                    'author_name': msg.author_id.name or 'System',
+                    'author_avatar': f'/web/image/res.partner/{msg.author_id.id}/avatar_128' if msg.author_id else '',
+                    'create_date': msg.create_date.isoformat() if msg.create_date else '',
+                    'visit_id': msg.res_id,
+                    'visit_name': visit.display_name or f'Visit #{msg.res_id}',
+                    'client_name': visit.client_id.name if visit.client_id else '',
+                })
+        return result
+
+    @api.model
+    def get_admin_dashboard_data(self):
+        """Get comprehensive admin dashboard data including financial and operational metrics."""
+        # Start with coordinator data
+        data = self.get_dashboard_data()
+
+        today = fields.Date.context_today(self)
+        start_of_month = today.replace(day=1)
+
+        # Financial metrics
+        # Monthly revenue (completed visits this month)
+        completed_this_month = self.search([
+            ('state', '=', 'done'),
+            ('visit_date', '>=', start_of_month),
+            ('visit_date', '<=', today),
+        ])
+        monthly_revenue = sum(v.price_total or 0 for v in completed_this_month)
+
+        # Outstanding invoices (invoiced but not paid)
+        outstanding = self.search([
+            ('billing_status', '=', 'invoiced'),
+        ])
+        outstanding_invoices = sum(v.price_total or 0 for v in outstanding)
+
+        # Partner payments due (client paid but not settled)
+        pending_settlement = self.search([
+            ('billing_status', '=', 'client_paid'),
+        ])
+        partner_payments_due = sum(v.partner_price or 0 for v in pending_settlement)
+
+        # Profit margin calculation
+        total_revenue = sum(v.price_total or 0 for v in completed_this_month)
+        total_cost = sum(v.partner_price or 0 for v in completed_this_month)
+        profit_margin = ((total_revenue - total_cost) / total_revenue * 100) if total_revenue > 0 else 0
+
+        # Operational metrics
+        Partner = self.env['res.partner'].sudo()
+
+        # Active clients (with visits in last 90 days)
+        active_clients = self.read_group(
+            [('visit_date', '>=', fields.Date.add(today, days=-90))],
+            ['client_id'],
+            ['client_id']
+        )
+        active_clients_count = len(active_clients)
+
+        # Active partners (with assignments in last 30 days)
+        active_partners = self.read_group(
+            [('partner_id', '!=', False), ('visit_date', '>=', fields.Date.add(today, days=-30))],
+            ['partner_id'],
+            ['partner_id']
+        )
+        active_partners_count = len(active_partners)
+
+        # SEPE pending (completed visits not yet exported)
+        sepe_pending = self.search_count([
+            ('state', '=', 'done'),
+            ('sepe_exported', '=', False),
+        ])
+
+        # Partner utilization (average visits per active partner this month)
+        total_partners = Partner.search_count([('is_wfm_partner', '=', True)])
+        visits_this_month = self.search_count([
+            ('partner_id', '!=', False),
+            ('visit_date', '>=', start_of_month),
+        ])
+        partner_utilization = (active_partners_count / total_partners * 100) if total_partners > 0 else 0
+
+        # Add admin-specific data
+        data.update({
+            'monthly_revenue': monthly_revenue,
+            'outstanding_invoices': outstanding_invoices,
+            'partner_payments_due': partner_payments_due,
+            'profit_margin': profit_margin,
+            'active_clients': active_clients_count,
+            'active_partners': active_partners_count,
+            'sepe_pending': sepe_pending,
+            'partner_utilization': partner_utilization,
+        })
+
+        return data

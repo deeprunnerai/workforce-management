@@ -2,14 +2,14 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, useState, onWillStart } from "@odoo/owl";
+import { Component, useState, onWillStart, onWillDestroy } from "@odoo/owl";
 
 /**
- * WFM Dashboard Component
- * Displays coordinator dashboard with 4 color-coded status cards
+ * WFM Coordinator Dashboard Component
+ * Displays coordinator dashboard with visit status cards and live activity feed
  */
-export class WfmDashboard extends Component {
-    static template = "wfm_fsm.Dashboard";
+export class WfmCoordinatorDashboard extends Component {
+    static template = "wfm_fsm.CoordinatorDashboard";
     static props = {
         action: { type: Object, optional: true },
     };
@@ -19,6 +19,7 @@ export class WfmDashboard extends Component {
         this.action = useService("action");
 
         this.state = useState({
+            // Visit status counts
             green: 0,
             yellow: 0,
             orange: 0,
@@ -27,11 +28,29 @@ export class WfmDashboard extends Component {
             today: 0,
             unassigned: 0,
             this_week: 0,
+            // Activity feed
+            activities: [],
+            // Loading states
             loading: true,
+            activitiesLoading: false,
         });
 
         onWillStart(async () => {
-            await this.loadDashboardData();
+            await Promise.all([
+                this.loadDashboardData(),
+                this.loadActivityFeed(),
+            ]);
+        });
+
+        // Auto-refresh activity feed every 30 seconds
+        this.refreshInterval = setInterval(() => {
+            this.loadActivityFeed();
+        }, 30000);
+
+        onWillDestroy(() => {
+            if (this.refreshInterval) {
+                clearInterval(this.refreshInterval);
+            }
         });
     }
 
@@ -49,9 +68,40 @@ export class WfmDashboard extends Component {
         }
     }
 
+    async loadActivityFeed() {
+        try {
+            this.state.activitiesLoading = true;
+            const activities = await this.orm.call(
+                "wfm.visit",
+                "get_activity_feed",
+                [20]
+            );
+            this.state.activities = activities;
+            this.state.activitiesLoading = false;
+        } catch (error) {
+            console.error("Failed to load activity feed:", error);
+            this.state.activitiesLoading = false;
+        }
+    }
+
     async refreshData() {
         this.state.loading = true;
-        await this.loadDashboardData();
+        await Promise.all([
+            this.loadDashboardData(),
+            this.loadActivityFeed(),
+        ]);
+    }
+
+    formatTimeAgo(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        return `${Math.floor(diff / 86400)}d ago`;
     }
 
     async openVisits(filter) {
@@ -117,7 +167,18 @@ export class WfmDashboard extends Component {
             ],
         });
     }
+
+    openVisit(visitId) {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            res_model: "wfm.visit",
+            res_id: visitId,
+            view_mode: "form",
+            views: [[false, "form"]],
+            target: "current",
+        });
+    }
 }
 
-// Register the dashboard as a client action
-registry.category("actions").add("wfm_fsm.dashboard", WfmDashboard);
+// Register the coordinator dashboard as a client action
+registry.category("actions").add("wfm_fsm.coordinator_dashboard", WfmCoordinatorDashboard);

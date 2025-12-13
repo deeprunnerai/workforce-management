@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="wfm_fsm.AdminDashboard">
+        <div class="o_wfm_dashboard o_action">
+            <div class="container-fluid py-4">
+                <!-- Header -->
+                <div class="row mb-4">
+                    <div class="col-12 d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">
+                            <i class="fa fa-tachometer me-2"/>
+                            Admin Dashboard
+                        </h2>
+                        <button class="btn btn-outline-secondary" t-on-click="refreshData">
+                            <i class="fa fa-refresh" t-att-class="{ 'fa-spin': state.loading }"/>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading indicator -->
+                <t t-if="state.loading">
+                    <div class="text-center py-5">
+                        <i class="fa fa-spinner fa-spin fa-3x text-muted"/>
+                        <p class="text-muted mt-2">Loading dashboard...</p>
+                    </div>
+                </t>
+
+                <t t-else="">
+                    <div class="row">
+                        <!-- Main Content Column -->
+                        <div class="col-lg-8">
+                            <!-- Financial Overview Row -->
+                            <div class="row mb-4">
+                                <div class="col-12 mb-2">
+                                    <h5 class="text-muted">
+                                        <i class="fa fa-euro me-2"/>
+                                        Financial Overview
+                                    </h5>
+                                </div>
+                                <!-- Monthly Revenue -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card wfm-card-financial">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-line-chart wfm-card-icon text-success"/>
+                                            <div class="wfm-card-count" t-esc="formatCurrency(state.monthly_revenue)"/>
+                                            <div class="wfm-card-label">Monthly Revenue</div>
+                                            <small class="text-muted d-block mt-1">This month</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Outstanding Invoices -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card wfm-card-financial"
+                                         style="cursor: pointer;" t-on-click="openBillingOverview">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-file-text-o wfm-card-icon text-warning"/>
+                                            <div class="wfm-card-count" t-esc="formatCurrency(state.outstanding_invoices)"/>
+                                            <div class="wfm-card-label">Outstanding</div>
+                                            <small class="text-muted d-block mt-1">Awaiting payment</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Partner Payments Due -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card wfm-card-financial"
+                                         style="cursor: pointer;" t-on-click="openBillingOverview">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-money wfm-card-icon text-info"/>
+                                            <div class="wfm-card-count" t-esc="formatCurrency(state.partner_payments_due)"/>
+                                            <div class="wfm-card-label">Partner Payments</div>
+                                            <small class="text-muted d-block mt-1">Due to partners</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Profit Margin -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card wfm-card-financial">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-percent wfm-card-icon text-primary"/>
+                                            <div class="wfm-card-count" t-esc="formatPercent(state.profit_margin)"/>
+                                            <div class="wfm-card-label">Profit Margin</div>
+                                            <small class="text-muted d-block mt-1">This month</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Operational Health Row -->
+                            <div class="row mb-4">
+                                <div class="col-12 mb-2">
+                                    <h5 class="text-muted">
+                                        <i class="fa fa-heartbeat me-2"/>
+                                        Operational Health
+                                    </h5>
+                                </div>
+                                <!-- Active Clients -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card"
+                                         style="cursor: pointer;" t-on-click="openClients">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-building wfm-card-icon text-primary"/>
+                                            <div class="wfm-card-count" t-esc="state.active_clients"/>
+                                            <div class="wfm-card-label">Active Clients</div>
+                                            <small class="text-muted d-block mt-1">With visits</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Active Partners -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card"
+                                         style="cursor: pointer;" t-on-click="openPartners">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-users wfm-card-icon text-success"/>
+                                            <div class="wfm-card-count" t-esc="state.active_partners"/>
+                                            <div class="wfm-card-label">Active Partners</div>
+                                            <small class="text-muted d-block mt-1">With assignments</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SEPE Pending -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card"
+                                         style="cursor: pointer;" t-on-click="openSEPEExport">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-file-excel-o wfm-card-icon text-warning"/>
+                                            <div class="wfm-card-count" t-esc="state.sepe_pending"/>
+                                            <div class="wfm-card-label">SEPE Pending</div>
+                                            <small class="text-muted d-block mt-1">Not exported</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Partner Utilization -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card"
+                                         style="cursor: pointer;" t-on-click="openPartnerPerformance">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-tasks wfm-card-icon text-info"/>
+                                            <div class="wfm-card-count" t-esc="formatPercent(state.partner_utilization)"/>
+                                            <div class="wfm-card-label">Utilization</div>
+                                            <small class="text-muted d-block mt-1">Partner capacity</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Visit Status Cards Row -->
+                            <div class="row mb-4">
+                                <div class="col-12 mb-2">
+                                    <h5 class="text-muted">
+                                        <i class="fa fa-calendar-check-o me-2"/>
+                                        Visit Status
+                                    </h5>
+                                </div>
+                                <!-- Green Card - Completed -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card wfm-card-green"
+                                         t-on-click="openGreen">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-check-circle wfm-card-icon"/>
+                                            <div class="wfm-card-count" t-esc="state.green"/>
+                                            <div class="wfm-card-label">Completed</div>
+                                            <small class="text-muted d-block mt-1">Work done</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Yellow Card - Assigned -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card wfm-card-yellow"
+                                         t-on-click="openYellow">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-user-plus wfm-card-icon"/>
+                                            <div class="wfm-card-count" t-esc="state.yellow"/>
+                                            <div class="wfm-card-label">Assigned</div>
+                                            <small class="text-muted d-block mt-1">Upcoming</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Orange Card - In Progress -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card wfm-card-orange"
+                                         t-on-click="openOrange">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-spinner wfm-card-icon"/>
+                                            <div class="wfm-card-count" t-esc="state.orange"/>
+                                            <div class="wfm-card-label">In Progress</div>
+                                            <small class="text-muted d-block mt-1">Started</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Red Card - Action Required -->
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="card h-100 wfm-dashboard-card wfm-card-red"
+                                         t-on-click="openRed">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-exclamation-triangle wfm-card-icon"/>
+                                            <div class="wfm-card-count" t-esc="state.red"/>
+                                            <div class="wfm-card-label">Action Required</div>
+                                            <small class="text-muted d-block mt-1">Needs attention</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Secondary Stats Row -->
+                            <div class="row mb-4">
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="wfm-stat-card">
+                                        <div class="wfm-stat-value" t-esc="state.total"/>
+                                        <div class="wfm-stat-label">Total Visits</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="wfm-stat-card" style="cursor: pointer;" t-on-click="openToday">
+                                        <div class="wfm-stat-value text-primary" t-esc="state.today"/>
+                                        <div class="wfm-stat-label">Today's Visits</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="wfm-stat-card" style="cursor: pointer;" t-on-click="openUnassigned">
+                                        <div class="wfm-stat-value text-info" t-esc="state.unassigned"/>
+                                        <div class="wfm-stat-label">Unassigned</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6 mb-3">
+                                    <div class="wfm-stat-card">
+                                        <div class="wfm-stat-value" t-esc="state.this_week"/>
+                                        <div class="wfm-stat-label">This Week</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-bolt me-2"/>
+                                        Quick Actions
+                                    </h5>
+                                </div>
+                                <div class="card-body wfm-quick-actions">
+                                    <button class="btn btn-outline-success" t-on-click="openSEPEExport">
+                                        <i class="fa fa-file-excel-o"/>
+                                        SEPE Export
+                                    </button>
+                                    <button class="btn btn-outline-primary" t-on-click="openBillingOverview">
+                                        <i class="fa fa-euro"/>
+                                        Billing Overview
+                                    </button>
+                                    <button class="btn btn-outline-info" t-on-click="openPartnerPerformance">
+                                        <i class="fa fa-bar-chart"/>
+                                        Partner Health
+                                    </button>
+                                    <button class="btn btn-outline-danger" t-on-click="openRed">
+                                        <i class="fa fa-exclamation-triangle"/>
+                                        Action Required
+                                    </button>
+                                    <button class="btn btn-outline-secondary" t-on-click="openPipeline">
+                                        <i class="fa fa-columns"/>
+                                        Kanban Pipeline
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity Feed Column -->
+                        <div class="col-lg-4">
+                            <div class="card wfm-activity-feed-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-clock-o me-2"/>
+                                        Live Activity
+                                    </h5>
+                                    <small class="text-muted">
+                                        <t t-if="state.activitiesLoading">
+                                            <i class="fa fa-spinner fa-spin"/>
+                                        </t>
+                                        <t t-else="">
+                                            Auto-refresh 30s
+                                        </t>
+                                    </small>
+                                </div>
+                                <div class="card-body p-0 wfm-activity-feed-body">
+                                    <t t-if="state.activities.length === 0">
+                                        <div class="text-center py-4 text-muted">
+                                            <i class="fa fa-inbox fa-2x mb-2"/>
+                                            <p>No recent activity</p>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="list-group list-group-flush">
+                                            <t t-foreach="state.activities" t-as="activity" t-key="activity.id">
+                                                <div class="list-group-item wfm-activity-item"
+                                                     t-on-click="() => this.openVisit(activity.visit_id)">
+                                                    <div class="d-flex align-items-start">
+                                                        <img t-att-src="activity.author_avatar"
+                                                             class="rounded-circle me-2 wfm-activity-avatar"
+                                                             width="32" height="32"
+                                                             onerror="this.src='/web/static/img/user_placeholder.jpg'"/>
+                                                        <div class="flex-grow-1 min-width-0">
+                                                            <div class="d-flex justify-content-between">
+                                                                <strong class="text-truncate" t-esc="activity.author_name"/>
+                                                                <small class="text-muted ms-2" t-esc="formatTimeAgo(activity.create_date)"/>
+                                                            </div>
+                                                            <div class="small text-primary text-truncate" t-esc="activity.visit_name"/>
+                                                            <div class="small text-muted wfm-activity-body" t-out="activity.body"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>
