@@ -296,27 +296,63 @@ TWILIO_WHATSAPP_NUMBER=+14155238886
 
 Partners can reply to WhatsApp messages with these commands:
 
+### Basic Commands
+
 | Command | Variations | Action |
 |---------|------------|--------|
-| **ACCEPT** | YES, OK, CONFIRM, ΝΑΙ | Confirm assigned visit |
-| **DENY** | NO, CANCEL, REJECT, ΟΧΙ | Decline assigned visit |
-| **/help** | HELP, ? | Show help information |
-| **/visits** | VISITS | List upcoming visits |
-| **/status** | STATUS | Check current assignment |
+| **ACCEPT** | YES, OK, CONFIRM | Confirm latest assigned visit |
+| **DENY** | NO, CANCEL, REJECT | Decline latest assigned visit |
+| **help** | ? | Show help information |
+| **visits** | UPCOMING | List upcoming visits |
+| **status** | - | Check current assignment |
+
+### Visit-Specific Commands
+
+| Command | Example | Action |
+|---------|---------|--------|
+| **visit N** | `visit 1` | Show details for visit #N with Google Maps link |
+| **visit N accept** | `visit 1 accept` | Confirm specific visit #N |
+| **visit N deny** | `visit 2 deny` | Decline specific visit #N |
+
+### Example Flow
+
+1. Partner sends `visits` → sees numbered list of upcoming visits
+2. Partner sends `visit 1` → sees full details with map link
+3. Partner sends `visit 1 accept` → confirms that specific visit
+
+### Validation Rules
+
+- Cannot deny an already confirmed visit (must contact coordinator)
+- Cannot accept an already confirmed visit (shows info message)
+- Visit numbers match the order shown in `visits` list
 
 ---
 
 ## Testing Checklist
 
-- [ ] Assignment triggers WhatsApp
+### Outgoing Messages
+- [x] Assignment triggers WhatsApp
 - [ ] Confirmation triggers WhatsApp
 - [ ] Manual "Send WhatsApp" works
-- [ ] Message logged in database
-- [ ] Error handling for invalid numbers
-- [ ] Rate limiting works
+- [x] Message logged in database
 - [ ] 24h reminder cron fires correctly
+
+### Incoming Commands
+- [x] `help` returns command list
+- [x] `visits` returns upcoming visits
+- [x] `visit 1` returns visit details with Google Maps
+- [x] `visit 1 accept` confirms specific visit
+- [x] `visit 1 deny` declines specific visit
+- [x] `ACCEPT` confirms latest assigned visit
+- [x] `DENY` declines latest assigned visit
+- [x] `status` shows current assignment
+
+### Error Handling
+- [x] Unknown partner shows error message
+- [x] Invalid visit number shows error
+- [x] Already confirmed visit cannot be denied
 
 ---
 
-**Document Version:** 1.0
+**Document Version:** 1.1
 **Last Updated:** 2025-12-13
