@@ -6,85 +6,57 @@
         <field name="tag">wfm_fsm.dashboard</field>
     </record>
 
-    <!-- Coordinator Menu -->
-    <menuitem id="menu_coordinator"
-              name="Coordinator"
-              parent="wfm_core.menu_wfm_operations"
-              sequence="5"/>
-
-    <!-- Dashboard -->
+    <!-- ============================================ -->
+    <!-- DASHBOARD (direct link, sequence 10)        -->
+    <!-- ============================================ -->
     <menuitem id="menu_dashboard"
               name="Dashboard"
-              parent="menu_coordinator"
+              parent="wfm_core.menu_wfm_root"
               action="action_dashboard"
               sequence="10"/>
 
-    <!-- Pipeline -->
-    <menuitem id="menu_pipeline"
-              name="Pipeline"
-              parent="menu_coordinator"
+    <!-- ============================================ -->
+    <!-- VISITS SUB-ITEMS                            -->
+    <!-- ============================================ -->
+    <menuitem id="menu_visits_kanban"
+              name="Kanban"
+              parent="wfm_core.menu_wfm_visits"
               action="action_visit_pipeline"
-              sequence="20"/>
-
-    <!-- Today's Visits -->
-    <menuitem id="menu_today"
-              name="Today"
-              parent="menu_coordinator"
-              action="action_visits_today"
-              sequence="30"/>
-
-    <!-- Calendar -->
-    <menuitem id="menu_calendar"
-              name="Calendar"
-              parent="menu_coordinator"
-              action="action_visit_calendar"
-              sequence="40"/>
-
-    <!-- Unassigned -->
-    <menuitem id="menu_unassigned"
-              name="Unassigned"
-              parent="menu_coordinator"
-              action="action_visits_unassigned"
-              sequence="50"/>
-
-    <!-- Overdue -->
-    <menuitem id="menu_overdue"
-              name="Overdue"
-              parent="menu_coordinator"
-              action="action_visits_overdue"
-              sequence="60"/>
-
-    <!-- Timeline Menu (Parent) -->
-    <menuitem id="menu_timeline"
-              name="Timeline"
-              parent="menu_coordinator"
-              sequence="70"/>
-
-    <!-- Visits Timeline -->
-    <menuitem id="menu_visits_timeline"
-              name="Visits"
-              parent="menu_timeline"
-              action="action_wfm_visit_timeline"
               sequence="10"/>
 
-    <!-- Services Timeline -->
-    <menuitem id="menu_services_timeline"
-              name="Services"
-              parent="menu_timeline"
-              action="action_wfm_installation_service_timeline"
+    <menuitem id="menu_visits_calendar"
+              name="Calendar"
+              parent="wfm_core.menu_wfm_visits"
+              action="action_visit_calendar"
               sequence="20"/>
 
-    <!-- Contracts Timeline -->
-    <menuitem id="menu_contracts_timeline"
-              name="Contracts"
-              parent="menu_timeline"
-              action="action_wfm_contract_timeline"
+    <menuitem id="menu_visits_timeline"
+              name="Timeline"
+              parent="wfm_core.menu_wfm_visits"
+              action="action_wfm_visit_timeline"
               sequence="30"/>
 
-    <!-- Partner Relationships (under Configuration) -->
-    <menuitem id="menu_partner_relationships"
-              name="Partner Relationships"
-              parent="wfm_core.menu_wfm_configuration"
-              action="action_partner_client_relationships"
-              sequence="30"/>
+    <menuitem id="menu_visits_by_client"
+              name="By Client"
+              parent="wfm_core.menu_wfm_visits"
+              action="wfm_core.action_wfm_visits_by_client"
+              sequence="40"/>
+
+    <!-- ============================================ -->
+    <!-- PARTNERS TIMELINE                           -->
+    <!-- ============================================ -->
+    <menuitem id="menu_partners_timeline"
+              name="Timeline"
+              parent="wfm_core.menu_wfm_partners_parent"
+              action="action_wfm_installation_service_timeline"
+              sequence="40"/>
+
+    <!-- ============================================ -->
+    <!-- CLIENTS TIMELINE                            -->
+    <!-- ============================================ -->
+    <menuitem id="menu_clients_timeline"
+              name="Timeline"
+              parent="wfm_core.menu_wfm_clients_parent"
+              action="action_wfm_contract_timeline"
+              sequence="40"/>
 </odoo>
