@@ -73,12 +73,18 @@
               sequence="35"/>
 
     <!-- ============================================ -->
-    <!-- SEPE DROPDOWN (sequence 50)                 -->
+    <!-- REPORTING DROPDOWN (sequence 50)            -->
     <!-- ============================================ -->
-    <menuitem id="menu_wfm_sepe_parent"
-              name="SEPE"
+    <menuitem id="menu_wfm_reporting"
+              name="Reporting"
               parent="menu_wfm_root"
               sequence="50"/>
+
+    <!-- SEPE Sub-menu under Reporting -->
+    <menuitem id="menu_wfm_sepe_parent"
+              name="SEPE"
+              parent="menu_wfm_reporting"
+              sequence="10"/>
 
     <menuitem id="menu_wfm_sepe_create"
               name="Create Export"
