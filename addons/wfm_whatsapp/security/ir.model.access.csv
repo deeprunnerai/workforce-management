@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_whatsapp_message_user,wfm.whatsapp.message.user,model_wfm_whatsapp_message,base.group_user,1,1,1,0
+access_whatsapp_compose_user,wfm.whatsapp.compose.user,model_wfm_whatsapp_compose,base.group_user,1,1,1,1

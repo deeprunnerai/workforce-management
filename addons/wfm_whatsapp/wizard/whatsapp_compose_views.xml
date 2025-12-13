@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- WhatsApp Compose Wizard Form -->
+    <record id="wfm_whatsapp_compose_form" model="ir.ui.view">
+        <field name="name">wfm.whatsapp.compose.form</field>
+        <field name="model">wfm.whatsapp.compose</field>
+        <field name="arch" type="xml">
+            <form string="Send WhatsApp Message">
+                <sheet>
+                    <group>
+                        <group string="Recipient">
+                            <field name="partner_id"/>
+                            <field name="partner_phone"/>
+                            <field name="visit_id"/>
+                        </group>
+                        <group string="Message Template">
+                            <field name="template" widget="radio"/>
+                        </group>
+                    </group>
+
+                    <separator string="Message"/>
+                    <field name="message_body" placeholder="Enter your message..." nolabel="1"/>
+
+                    <separator string="Preview"/>
+                    <field name="preview" nolabel="1" class="oe_read_only"/>
+                </sheet>
+                <footer>
+                    <button name="action_send"
+                            string="Send WhatsApp"
+                            type="object"
+                            class="btn-success"
+                            icon="fa-whatsapp"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for compose wizard -->
+    <record id="action_whatsapp_compose" model="ir.actions.act_window">
+        <field name="name">Send WhatsApp</field>
+        <field name="res_model">wfm.whatsapp.compose</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="wfm_whatsapp_compose_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

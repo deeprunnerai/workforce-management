@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- System Parameters for Twilio Configuration
+             Set these via Settings > Technical > System Parameters
+             or via environment variables:
+             - TWILIO_ACCOUNT_SID
+             - TWILIO_AUTH_TOKEN
+             - TWILIO_WHATSAPP_NUMBER
+        -->
+        <record id="config_twilio_account_sid" model="ir.config_parameter">
+            <field name="key">wfm.twilio.account_sid</field>
+            <field name="value"></field>
+        </record>
+
+        <record id="config_twilio_auth_token" model="ir.config_parameter">
+            <field name="key">wfm.twilio.auth_token</field>
+            <field name="value"></field>
+        </record>
+
+        <record id="config_twilio_whatsapp_number" model="ir.config_parameter">
+            <field name="key">wfm.twilio.whatsapp_number</field>
+            <field name="value">+14155238886</field>
+        </record>
+
+        <!-- WhatsApp enabled flag -->
+        <record id="config_whatsapp_enabled" model="ir.config_parameter">
+            <field name="key">wfm.whatsapp.enabled</field>
+            <field name="value">True</field>
+        </record>
+    </data>
+</odoo>
