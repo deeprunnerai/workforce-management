@@ -109,13 +109,13 @@
             <search string="Search SEPE Exports">
                 <field name="name"/>
                 <field name="exported_by"/>
+                <separator/>
                 <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
                 <filter name="exported" string="Exported" domain="[('state', '=', 'exported')]"/>
                 <filter name="submitted" string="Submitted" domain="[('state', '=', 'submitted')]"/>
-                <group string="Group By">
-                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
-                    <filter name="group_exported_by" string="Exported By" context="{'group_by': 'exported_by'}"/>
-                </group>
+                <separator/>
+                <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                <filter name="group_exported_by" string="Exported By" context="{'group_by': 'exported_by'}"/>
             </search>
         </field>
     </record>
