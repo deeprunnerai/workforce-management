@@ -112,25 +112,16 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="prompt"/>
-                <filter string="Active" name="filter_active"
-                        domain="[('state', '=', 'active')]"/>
-                <filter string="Paused" name="filter_paused"
-                        domain="[('state', '=', 'paused')]"/>
-                <filter string="Has Errors" name="filter_errors"
-                        domain="[('state', '=', 'error')]"/>
+                <field name="description"/>
+                <filter string="Active" name="filter_active" domain="[('state', '=', 'active')]"/>
+                <filter string="Paused" name="filter_paused" domain="[('state', '=', 'paused')]"/>
+                <filter string="Has Errors" name="filter_errors" domain="[('state', '=', 'error')]"/>
                 <separator/>
-                <filter string="Scheduled" name="filter_scheduled"
-                        domain="[('schedule_type', '!=', 'manual')]"/>
-                <filter string="Manual Only" name="filter_manual"
-                        domain="[('schedule_type', '=', 'manual')]"/>
+                <filter string="Scheduled" name="filter_scheduled" domain="[('schedule_type', '!=', 'manual')]"/>
+                <filter string="Manual Only" name="filter_manual" domain="[('schedule_type', '=', 'manual')]"/>
                 <group expand="0" string="Group By">
-                    <filter string="State" name="groupby_state"
-                            context="{'group_by': 'state'}"/>
-                    <filter string="Schedule Type" name="groupby_schedule"
-                            context="{'group_by': 'schedule_type'}"/>
-                    <filter string="Created By" name="groupby_creator"
-                            context="{'group_by': 'created_by_id'}"/>
+                    <filter string="State" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Schedule Type" name="groupby_schedule" context="{'group_by': 'schedule_type'}"/>
                 </group>
             </search>
         </field>
