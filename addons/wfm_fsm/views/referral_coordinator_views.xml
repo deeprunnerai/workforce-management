@@ -9,7 +9,7 @@
     <record id="view_referral_coordinator_form" model="ir.ui.view">
         <field name="name">wfm.partner.referral.coordinator.form</field>
         <field name="model">wfm.partner.referral</field>
-        <field name="priority">5</field>
+        <field name="priority">99</field>
         <field name="arch" type="xml">
             <form string="Referral Review">
                 <header>

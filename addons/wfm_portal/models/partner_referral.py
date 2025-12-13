@@ -161,6 +161,9 @@ class PartnerReferral(models.Model):
             'submitted_date': fields.Datetime.now(),
         })
 
+        # Send email to coordinators
+        self._send_coordinator_notification()
+
         # Post message
         self.message_post(
             body=_('Referral submitted by %s for candidate %s') % (
@@ -169,6 +172,54 @@ class PartnerReferral(models.Model):
             ),
             message_type='notification'
         )
+
+    def _send_coordinator_notification(self):
+        """Send email notification to coordinators about new referral."""
+        self.ensure_one()
+
+        # Just send to admin email for now
+        coordinator_emails = self.env.company.email or 'admin@gepgroup.gr'
+
+        specialty_label = dict(self._fields['candidate_specialty'].selection).get(self.candidate_specialty, self.candidate_specialty)
+
+        mail_values = {
+            'subject': _('New Partner Referral: %s (%s)') % (self.candidate_name, specialty_label),
+            'email_from': self.env.company.email or 'mailer@deeprunner.ai',
+            'email_to': coordinator_emails,
+            'body_html': f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2c3e50;">New Partner Referral Submitted</h2>
+
+                <p>A new referral has been submitted and requires your review.</p>
+
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="margin-top: 0; color: #495057;">Candidate Details</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr><td style="padding: 8px 0; font-weight: bold;">Name:</td><td>{self.candidate_name}</td></tr>
+                        <tr><td style="padding: 8px 0; font-weight: bold;">Email:</td><td>{self.candidate_email}</td></tr>
+                        <tr><td style="padding: 8px 0; font-weight: bold;">Phone:</td><td>{self.candidate_phone or 'N/A'}</td></tr>
+                        <tr><td style="padding: 8px 0; font-weight: bold;">Specialty:</td><td>{specialty_label}</td></tr>
+                        <tr><td style="padding: 8px 0; font-weight: bold;">City:</td><td>{self.candidate_city or 'N/A'}</td></tr>
+                    </table>
+                </div>
+
+                <div style="background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="margin-top: 0; color: #495057;">Referred By</h3>
+                    <p><strong>{self.referring_partner_id.name}</strong></p>
+                    <p><em>"{self.referral_reason or 'No reason provided'}"</em></p>
+                </div>
+
+                <p>Please log in to review this referral.</p>
+
+                <p style="color: #7f8c8d; font-size: 12px;">
+                    Reference: {self.name}<br/>
+                    GEP Workforce Management System
+                </p>
+            </div>
+            """,
+        }
+        mail = self.env['mail.mail'].sudo().create(mail_values)
+        mail.send()
 
     def action_start_review(self):
         """Coordinator starts reviewing the referral."""
