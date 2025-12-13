@@ -135,7 +135,8 @@ class WhatsAppWebhook(http.Controller):
 
     def _process_message(self, env, partner, message):
         """Process incoming message and return response."""
-        message = message.strip().upper()
+        message_raw = message.strip()
+        message = message_raw.upper()
 
         # Handle /help command
         if message in ['/HELP', 'HELP', '?']:
@@ -144,6 +145,12 @@ class WhatsAppWebhook(http.Controller):
         # Handle /visits command
         if message in ['/VISITS', 'VISITS', '/UPCOMING']:
             return self._handle_visits_list(env, partner)
+
+        # Handle /visit N command (e.g., /visit 1, /visit 2)
+        if message.startswith('/VISIT ') or message.startswith('VISIT '):
+            parts = message.split()
+            if len(parts) >= 2 and parts[1].isdigit():
+                return self._handle_visit_detail(env, partner, int(parts[1]))
 
         # Handle /status command
         if message in ['/STATUS', 'STATUS']:
@@ -172,11 +179,13 @@ Available commands:
 
 📊 *Information:*
 • /visits - See your upcoming visits
+• /visit 1 - Get details of visit #1
 • /status - Check current visit status
 • /help - Show this help message
 
 💡 *Tips:*
 • Reply ACCEPT or DENY after receiving an assignment
+• Use /visit 1, /visit 2 etc. for full details with map
 • Contact your coordinator for schedule changes
 
 Need assistance? Contact GEP support."""
@@ -203,6 +212,110 @@ Need assistance? Contact GEP support."""
             response += f"{status} *{i}. {visit.name}*\n"
             response += f"   📅 {date_str} at {time_str}\n"
             response += f"   🏢 {visit.client_id.name or 'N/A'}\n\n"
+
+        response += "━━━━━━━━━━━━━━━━━━━━━\n"
+        response += "💡 Reply */visit 1* for full details with map"
+
+        return response
+
+    def _get_google_maps_url(self, installation):
+        """Generate Google Maps URL for an installation."""
+        if not installation:
+            return None
+
+        # Build address string
+        address_parts = []
+        if installation.street:
+            address_parts.append(installation.street)
+        if installation.city:
+            address_parts.append(installation.city)
+        if hasattr(installation, 'postal_code') and installation.postal_code:
+            address_parts.append(installation.postal_code)
+        if hasattr(installation, 'country_id') and installation.country_id:
+            address_parts.append(installation.country_id.name)
+
+        if not address_parts:
+            return None
+
+        import urllib.parse
+        address = ', '.join(address_parts)
+        encoded_address = urllib.parse.quote(address)
+        return f"https://www.google.com/maps/search/?api=1&query={encoded_address}"
+
+    def _handle_visit_detail(self, env, partner, visit_number):
+        """Handle /visit N command - show detailed visit info."""
+        Visit = env['wfm.visit'].sudo()
+
+        visits = Visit.search([
+            ('partner_id', '=', partner.id),
+            ('state', 'in', ['assigned', 'confirmed']),
+        ], order='visit_date asc', limit=10)
+
+        if not visits:
+            return "📋 You have no upcoming visits assigned."
+
+        if visit_number < 1 or visit_number > len(visits):
+            return f"❌ Invalid visit number. You have {len(visits)} upcoming visit(s).\n\nUse /visits to see the list."
+
+        visit = visits[visit_number - 1]
+
+        # Format date and time
+        date_str = visit.visit_date.strftime('%A, %d %B %Y') if visit.visit_date else 'TBD'
+        start_time = f"{int(visit.start_time):02d}:{int((visit.start_time % 1) * 60):02d}" if visit.start_time else 'TBD'
+        end_time = f"{int(visit.end_time):02d}:{int((visit.end_time % 1) * 60):02d}" if visit.end_time else 'TBD'
+        duration = f"{visit.duration:.1f}" if visit.duration else 'N/A'
+        status = '✅ Confirmed' if visit.state == 'confirmed' else '⏳ Awaiting Confirmation'
+
+        # Build address
+        address_lines = []
+        if visit.installation_id:
+            inst = visit.installation_id
+            if inst.name:
+                address_lines.append(inst.name)
+            if inst.street:
+                address_lines.append(inst.street)
+            if inst.city:
+                city_line = inst.city
+                if hasattr(inst, 'postal_code') and inst.postal_code:
+                    city_line = f"{inst.postal_code} {city_line}"
+                address_lines.append(city_line)
+
+        address_text = '\n   '.join(address_lines) if address_lines else 'Address not specified'
+
+        # Get Google Maps URL
+        maps_url = self._get_google_maps_url(visit.installation_id)
+
+        response = f"""📋 *Visit Details #{visit_number}*
+
+━━━━━━━━━━━━━━━━━━━━━
+📌 *VISIT INFORMATION*
+━━━━━━━━━━━━━━━━━━━━━
+
+🔖 *Reference:* {visit.name}
+📊 *Status:* {status}
+📅 *Date:* {date_str}
+⏰ *Time:* {start_time} - {end_time}
+⏱️ *Duration:* {duration} hours
+
+━━━━━━━━━━━━━━━━━━━━━
+🏢 *CLIENT & LOCATION*
+━━━━━━━━━━━━━━━━━━━━━
+
+🏛️ *Client:* {visit.client_id.name or 'N/A'}
+📍 *Location:*
+   {address_text}"""
+
+        if maps_url:
+            response += f"""
+
+🗺️ *Navigate:*
+{maps_url}"""
+
+        if visit.state == 'assigned':
+            response += """
+
+━━━━━━━━━━━━━━━━━━━━━
+Reply *ACCEPT* to confirm or *DENY* to decline."""
 
         return response
 
