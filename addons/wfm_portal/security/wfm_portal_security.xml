@@ -15,6 +15,10 @@
     </data>
 
     <data noupdate="1">
+        <!-- ============================================ -->
+        <!-- Partner Record Rules                         -->
+        <!-- ============================================ -->
+
         <!-- Partners can read and update visits assigned to them (excludes Draft) -->
         <record id="wfm_visit_rule_partner" model="ir.rule">
             <field name="name">WFM Partner: Own Visits Only</field>
@@ -96,6 +100,34 @@
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ============================================ -->
+        <!-- Coordinator Record Rules                     -->
+        <!-- ============================================ -->
+
+        <!-- Coordinators can view and manage all referrals -->
+        <record id="wfm_referral_rule_coordinator" model="ir.rule">
+            <field name="name">WFM Coordinator: All Referrals</field>
+            <field name="model_id" ref="wfm_portal.model_wfm_partner_referral"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('wfm_portal.group_wfm_coordinator'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Coordinators can view all partner availability -->
+        <record id="wfm_availability_rule_coordinator" model="ir.rule">
+            <field name="name">WFM Coordinator: All Availability</field>
+            <field name="model_id" ref="wfm_portal.model_wfm_partner_availability"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('wfm_portal.group_wfm_coordinator'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
     </data>

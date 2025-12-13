@@ -1,25 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Root Menu -->
+    <!-- Root Menu - visible to Admin and Coordinator -->
     <menuitem id="menu_wfm_root"
               name="Workforce Management"
               sequence="50"
+              groups="wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
               web_icon="wfm_core,static/description/icon.png"/>
 
     <!-- ============================================ -->
     <!-- VISITS DROPDOWN (sequence 20)               -->
+    <!-- Admin + Coordinator                         -->
     <!-- ============================================ -->
     <menuitem id="menu_wfm_visits"
               name="Visits"
               parent="menu_wfm_root"
+              groups="wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
               sequence="20"/>
 
     <!-- ============================================ -->
     <!-- PARTNERS DROPDOWN (sequence 30)             -->
+    <!-- Admin + Coordinator                         -->
     <!-- ============================================ -->
     <menuitem id="menu_wfm_partners_parent"
               name="Partners"
               parent="menu_wfm_root"
+              groups="wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
               sequence="30"/>
 
     <menuitem id="menu_wfm_partners_all"
@@ -42,10 +47,12 @@
 
     <!-- ============================================ -->
     <!-- CLIENTS DROPDOWN (sequence 40)              -->
+    <!-- Admin ONLY                                  -->
     <!-- ============================================ -->
     <menuitem id="menu_wfm_clients_parent"
               name="Clients"
               parent="menu_wfm_root"
+              groups="wfm_core.group_wfm_admin"
               sequence="40"/>
 
     <menuitem id="menu_wfm_clients_all"
@@ -74,10 +81,12 @@
 
     <!-- ============================================ -->
     <!-- REPORTING DROPDOWN (sequence 50)            -->
+    <!-- Admin ONLY                                  -->
     <!-- ============================================ -->
     <menuitem id="menu_wfm_reporting"
               name="Reporting"
               parent="menu_wfm_root"
+              groups="wfm_core.group_wfm_admin"
               sequence="50"/>
 
     <!-- SEPE Sub-menu under Reporting -->
@@ -100,10 +109,12 @@
 
     <!-- ============================================ -->
     <!-- BILLING DROPDOWN (sequence 60)              -->
+    <!-- Admin ONLY                                  -->
     <!-- ============================================ -->
     <menuitem id="menu_wfm_billing_parent"
               name="Billing"
               parent="menu_wfm_root"
+              groups="wfm_core.group_wfm_admin"
               sequence="60"/>
 
     <menuitem id="menu_wfm_billing_overview"
@@ -138,10 +149,12 @@
 
     <!-- ============================================ -->
     <!-- AUTOMATION DROPDOWN (sequence 80)           -->
+    <!-- Admin ONLY                                  -->
     <!-- ============================================ -->
     <menuitem id="menu_wfm_automation"
               name="Automation"
               parent="menu_wfm_root"
+              groups="wfm_core.group_wfm_admin"
               sequence="80"/>
 
     <menuitem id="menu_wfm_workflows"
@@ -158,10 +171,12 @@
 
     <!-- ============================================ -->
     <!-- CONFIG DROPDOWN (sequence 90)               -->
+    <!-- Admin ONLY                                  -->
     <!-- ============================================ -->
     <menuitem id="menu_wfm_config"
               name="Config"
               parent="menu_wfm_root"
+              groups="wfm_core.group_wfm_admin"
               sequence="90"/>
 
     <menuitem id="menu_wfm_stages"
