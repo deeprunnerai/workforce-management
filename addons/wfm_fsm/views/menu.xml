@@ -83,7 +83,7 @@
     <menuitem id="menu_partner_health"
               name="Partner Health"
               parent="wfm_core.menu_wfm_partners_parent"
-              action="action_partner_health_dashboard"
+              action="action_churn_dashboard"
               groups="wfm_core.group_wfm_admin,wfm_core.group_wfm_coordinator"
               sequence="50"/>
 </odoo>
