@@ -4,7 +4,7 @@
     <menuitem id="menu_wfm_root"
               name="Workforce Management"
               sequence="50"
-              groups="wfm_core.group_wfm_admin,wfm_core.group_wfm_coordinator"
+              groups="wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
               web_icon="wfm_core,static/description/icon.png"/>
 
     <!-- ============================================ -->
@@ -14,7 +14,7 @@
     <menuitem id="menu_wfm_visits"
               name="Visits"
               parent="menu_wfm_root"
-              groups="wfm_core.group_wfm_admin,wfm_core.group_wfm_coordinator"
+              groups="wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
               sequence="20"/>
 
     <!-- ============================================ -->
@@ -24,7 +24,7 @@
     <menuitem id="menu_wfm_partners_parent"
               name="Partners"
               parent="menu_wfm_root"
-              groups="wfm_core.group_wfm_admin,wfm_core.group_wfm_coordinator"
+              groups="wfm_core.group_wfm_admin,wfm_portal.group_wfm_coordinator"
               sequence="30"/>
 
     <menuitem id="menu_wfm_partners_all"

@@ -6,7 +6,6 @@
         <!-- ============================================ -->
 
         <!-- GEP Admin: gaurav@deeprunner.ai -->
-        <!-- Note: This user should already exist in the system -->
         <function model="res.users" name="write">
             <value model="res.users" search="[('login', '=', 'gaurav@deeprunner.ai')]"/>
             <value eval="{'groups_id': [(4, ref('wfm_core.group_wfm_admin'))]}"/>
@@ -15,13 +14,13 @@
         <!-- GEP Coordinator: r.verma@deeprunner.ai -->
         <function model="res.users" name="write">
             <value model="res.users" search="[('login', '=', 'r.verma@deeprunner.ai')]"/>
-            <value eval="{'groups_id': [(4, ref('wfm_core.group_wfm_coordinator'))]}"/>
+            <value eval="{'groups_id': [(4, ref('wfm_portal.group_wfm_coordinator'))]}"/>
         </function>
 
         <!-- GEP Partner: p.andrikopoulos@deeprunner.ai -->
         <function model="res.users" name="write">
             <value model="res.users" search="[('login', '=', 'p.andrikopoulos@deeprunner.ai')]"/>
-            <value eval="{'groups_id': [(4, ref('wfm_core.group_wfm_partner'))]}"/>
+            <value eval="{'groups_id': [(4, ref('wfm_portal.group_wfm_partner'))]}"/>
         </function>
     </data>
 </odoo>
