@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Partner-Client Relationship List View -->
+    <record id="wfm_partner_client_relationship_list" model="ir.ui.view">
+        <field name="name">wfm.partner.client.relationship.list</field>
+        <field name="model">wfm.partner.client.relationship</field>
+        <field name="arch" type="xml">
+            <list string="Partner-Client Relationships" default_order="relationship_score desc">
+                <field name="partner_id"/>
+                <field name="client_id"/>
+                <field name="total_visits"/>
+                <field name="completed_visits"/>
+                <field name="relationship_score" widget="progressbar"/>
+                <field name="last_visit_date"/>
+                <field name="installations_visited"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Partner-Client Relationship Form View -->
+    <record id="wfm_partner_client_relationship_form" model="ir.ui.view">
+        <field name="name">wfm.partner.client.relationship.form</field>
+        <field name="model">wfm.partner.client.relationship</field>
+        <field name="arch" type="xml">
+            <form string="Partner-Client Relationship">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="partner_id" readonly="1"/> - <field name="client_id" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Relationship">
+                            <field name="partner_id" readonly="1"/>
+                            <field name="client_id" readonly="1"/>
+                            <field name="relationship_score" widget="progressbar"/>
+                        </group>
+                        <group string="Visit Statistics">
+                            <field name="total_visits"/>
+                            <field name="completed_visits"/>
+                            <field name="cancelled_visits"/>
+                            <field name="installations_visited"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Performance">
+                            <field name="avg_rating" widget="priority"/>
+                            <field name="on_time_rate" widget="progressbar"/>
+                        </group>
+                        <group string="Timeline">
+                            <field name="first_visit_date"/>
+                            <field name="last_visit_date"/>
+                        </group>
+                    </group>
+
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_visits"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-calendar">
+                            <field name="total_visits" widget="statinfo" string="Visits"/>
+                        </button>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Partner-Client Relationship Search View -->
+    <record id="wfm_partner_client_relationship_search" model="ir.ui.view">
+        <field name="name">wfm.partner.client.relationship.search</field>
+        <field name="model">wfm.partner.client.relationship</field>
+        <field name="arch" type="xml">
+            <search string="Search Relationships">
+                <field name="partner_id"/>
+                <field name="client_id"/>
+                <separator/>
+                <filter string="High Score (70+)" name="high_score"
+                        domain="[('relationship_score', '>=', 70)]"/>
+                <filter string="Recent Activity" name="recent"
+                        domain="[('last_visit_date', '>=', (context_today() - relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action to view relationships -->
+    <record id="action_partner_client_relationships" model="ir.actions.act_window">
+        <field name="name">Partner Relationships</field>
+        <field name="res_model">wfm.partner.client.relationship</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="wfm_partner_client_relationship_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No relationship data yet
+            </p>
+            <p>Relationships are automatically created when partners complete visits for clients.</p>
+        </field>
+    </record>
+</odoo>

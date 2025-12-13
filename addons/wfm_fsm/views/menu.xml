@@ -80,4 +80,11 @@
               parent="menu_timeline"
               action="action_wfm_contract_timeline"
               sequence="30"/>
+
+    <!-- Partner Relationships (under Configuration) -->
+    <menuitem id="menu_partner_relationships"
+              name="Partner Relationships"
+              parent="wfm_core.menu_wfm_configuration"
+              action="action_partner_client_relationships"
+              sequence="30"/>
 </odoo>

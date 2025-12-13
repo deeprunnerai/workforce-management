@@ -1,8 +1,8 @@
 {
     'name': 'WFM Field Service Management',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'category': 'Services/Field Service',
-    'summary': 'Kanban, Dashboard, and Coordinator Tools for GEP OHS Workforce Management',
+    'summary': 'Kanban, Dashboard, Smart Assignment, and Coordinator Tools for GEP OHS Workforce Management',
     'description': """
         GEP OHS Workforce Management - Field Service Module
         ====================================================
@@ -13,6 +13,13 @@
         - Calendar view with partner availability
         - Bulk assignment wizard
         - Advanced filters and search
+
+        Smart Partner Assignment Engine:
+        - AI-powered partner recommendations
+        - Relationship-based scoring (35% weight)
+        - Availability, Performance, Proximity, Workload scoring
+        - Top 2 partner recommendations for quick decisions
+        - Auto-tracking of partner-client relationships
 
         Part of the GEP OHS Workforce Management System.
     """,
@@ -27,8 +34,11 @@
     'data': [
         'security/ir.model.access.csv',
         'wizard/visit_assign_wizard_views.xml',
+        'wizard/smart_assign_wizard_views.xml',
+        'views/partner_relationship_views.xml',
         'views/visit_fsm_views.xml',
         'views/gantt_views.xml',
+        'views/visit_form_extension.xml',
         'views/dashboard_views.xml',
         'views/menu.xml',
     ],
