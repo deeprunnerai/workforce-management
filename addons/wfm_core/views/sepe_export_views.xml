@@ -142,31 +142,30 @@
         <field name="name">wfm.sepe.export.wizard.form</field>
         <field name="model">wfm.sepe.export.wizard</field>
         <field name="arch" type="xml">
-            <form string="SEPE Export Wizard">
+            <form string="Create SEPE Export">
                 <group>
                     <group string="Date Range">
                         <field name="date_from"/>
                         <field name="date_to"/>
-                        <field name="include_exported"/>
                     </group>
-                    <group string="Summary">
-                        <field name="visit_count" readonly="1"/>
-                        <field name="total_hours" readonly="1"/>
-                        <field name="total_amount" readonly="1"/>
-                        <field name="currency_id" invisible="1"/>
+                    <group string="Filters (Optional)">
+                        <field name="client_ids" widget="many2many_tags" placeholder="All clients"/>
+                        <field name="partner_ids" widget="many2many_tags" placeholder="All partners"/>
                     </group>
+                </group>
+                <group>
+                    <field name="include_exported"/>
+                    <field name="currency_id" invisible="1"/>
                 </group>
                 <footer>
                     <button name="action_create_export"
-                            string="Generate SEPE Export"
+                            string="Generate Export"
                             type="object"
-                            class="btn-primary"
-                            invisible="visit_count == 0"/>
+                            class="btn-primary"/>
                     <button name="action_preview_visits"
                             string="Preview Visits"
                             type="object"
-                            class="btn-secondary"
-                            invisible="visit_count == 0"/>
+                            class="btn-secondary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
