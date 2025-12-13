@@ -1,6 +1,6 @@
 {
     'name': 'WFM Core',
-    'version': '19.0.1.0.2',
+    'version': '19.0.2.1.0',
     'category': 'Services/Field Service',
     'summary': 'Core models for GEP OHS Workforce Management',
     'description': """
@@ -12,6 +12,8 @@
         - Installations (physical locations/branches)
         - Partners (external OHS professionals)
         - Visits (scheduled OHS service appointments)
+        - SEPE Exports (government compliance reporting)
+        - Billing status tracking
 
         Part of the GEP OHS Workforce Management System.
     """,
@@ -23,17 +25,24 @@
         'contacts',
         'mail',
     ],
+    'external_dependencies': {
+        'python': ['openpyxl'],
+    },
     'data': [
+        'security/wfm_security.xml',
         'security/ir.model.access.csv',
         'data/sequences.xml',
         'data/visit_stages.xml',
         'data/workflow_cron.xml',
+        'data/user_roles.xml',
         'views/partner_views.xml',
         'views/visit_views.xml',
         'views/installation_views.xml',
         'views/installation_service_views.xml',
         'views/contract_service_views.xml',
         'views/contract_views.xml',
+        'views/sepe_export_views.xml',
+        'views/billing_dashboard_views.xml',
         'views/workflow_views.xml',
         'views/menu.xml',
     ],

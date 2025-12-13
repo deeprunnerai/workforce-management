@@ -22,24 +22,12 @@
                 <field name="coordinator_id"/>
             </xpath>
 
-            <!-- Add Recommendations section before notes - only when NO partner assigned -->
+            <!-- Hidden fields for recommendations (kept for compatibility) -->
             <xpath expr="//field[@name='notes']" position="before">
-                <separator string="Partner Recommendations" invisible="partner_id"/>
-                <!-- AI Recommendation display (shown after clicking Ask AI) -->
-                <field name="ai_recommendation_html" nolabel="1" readonly="1"
-                       invisible="partner_id or not ai_recommendation_html"/>
-                <!-- Ask AI button - shiny and prominent -->
-                <div invisible="partner_id" class="mb-3">
-                    <button name="action_get_ai_recommendation"
-                            string="🤖 Ask AI for Recommendation"
-                            type="object"
-                            class="btn-primary o_wow_btn"/>
-                    <span class="ms-2 text-muted small">Get Claude AI analysis of candidates</span>
-                </div>
-                <field name="recommendation_html" nolabel="1" readonly="1"
-                       invisible="partner_id"/>
                 <field name="recommended_partner_ids" invisible="1"/>
                 <field name="ai_recommendation" invisible="1"/>
+                <field name="ai_recommendation_html" invisible="1"/>
+                <field name="recommendation_html" invisible="1"/>
             </xpath>
         </field>
     </record>

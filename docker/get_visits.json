@@ -1,0 +1,18 @@
+{
+  "jsonrpc": "2.0",
+  "method": "call",
+  "params": {
+    "service": "object",
+    "method": "execute_kw",
+    "args": [
+      "odoo_deeprunner",
+      2,
+      "AdminSecure2025",
+      "wfm.visit",
+      "search_read",
+      [[["partner_id", "=", 107]]],
+      {"fields": ["name", "client_id", "installation_id", "visit_date", "stage_id"], "limit": 10}
+    ]
+  },
+  "id": 1
+}

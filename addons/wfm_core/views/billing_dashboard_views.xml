@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Billing Dashboard - Visits by Billing Status -->
+
+    <!-- Action: Not Billed Visits -->
+    <record id="action_visits_not_billed" model="ir.actions.act_window">
+        <field name="name">Not Billed Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'done'), ('billing_status', '=', 'not_billed')]</field>
+        <field name="context">{'search_default_not_billed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No visits pending billing
+            </p>
+            <p>
+                Completed visits that haven't been exported to SEPE yet will appear here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action: Invoiced Visits -->
+    <record id="action_visits_invoiced" model="ir.actions.act_window">
+        <field name="name">Invoiced Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('billing_status', '=', 'invoiced')]</field>
+        <field name="context">{'search_default_invoiced': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No invoiced visits
+            </p>
+            <p>
+                Visits that have been invoiced to clients will appear here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action: Client Paid Visits -->
+    <record id="action_visits_client_paid" model="ir.actions.act_window">
+        <field name="name">Client Paid Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('billing_status', '=', 'client_paid')]</field>
+        <field name="context">{'search_default_client_paid': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No visits awaiting partner payment
+            </p>
+            <p>
+                Visits where the client has paid but the partner hasn't been paid yet will appear here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action: Settled Visits -->
+    <record id="action_visits_settled" model="ir.actions.act_window">
+        <field name="name">Settled Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('billing_status', '=', 'settled')]</field>
+        <field name="context">{'search_default_settled': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No settled visits
+            </p>
+            <p>
+                Fully settled visits (partner paid) will appear here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action: All Billing (grouped by billing status) -->
+    <record id="action_billing_overview" model="ir.actions.act_window">
+        <field name="name">Billing Overview</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('state', '=', 'done')]</field>
+        <field name="context">{'search_default_group_billing': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No completed visits
+            </p>
+            <p>
+                Complete visits to see them in the billing overview.
+            </p>
+        </field>
+    </record>
+</odoo>

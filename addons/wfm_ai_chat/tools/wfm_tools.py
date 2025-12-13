@@ -943,3 +943,522 @@ class WfmToolExecutor(models.AbstractModel):
             }
         except Exception as e:
             return {'error': str(e)}
+
+    # ==================== SEPE Export Tools ====================
+
+    def _tool_wfm_list_sepe_exports(self, args):
+        """List SEPE export batches."""
+        SepeExport = self.env['wfm.sepe.export']
+        domain = []
+
+        if args.get('state'):
+            domain.append(('state', '=', args['state']))
+
+        if args.get('date_from'):
+            domain.append(('date_from', '>=', args['date_from']))
+
+        if args.get('date_to'):
+            domain.append(('date_to', '<=', args['date_to']))
+
+        limit = args.get('limit', 10)
+        exports = SepeExport.search(domain, limit=limit, order='create_date desc')
+
+        result = []
+        for exp in exports:
+            result.append({
+                'id': exp.id,
+                'name': exp.name,
+                'date_from': exp.date_from.strftime('%d/%m/%Y') if exp.date_from else '',
+                'date_to': exp.date_to.strftime('%d/%m/%Y') if exp.date_to else '',
+                'visit_count': exp.visit_count,
+                'total_hours': round(exp.total_hours, 1),
+                'total_amount': round(exp.total_amount, 2),
+                'state': exp.state,
+                'state_label': dict(SepeExport._fields['state'].selection).get(exp.state, exp.state),
+                'export_date': exp.export_date.strftime('%d/%m/%Y %H:%M') if exp.export_date else None,
+                'exported_by': exp.exported_by.name if exp.exported_by else None,
+            })
+
+        return {
+            'count': len(result),
+            'exports': result
+        }
+
+    def _tool_wfm_create_sepe_export(self, args):
+        """Create a new SEPE export batch."""
+        if not args.get('date_from') or not args.get('date_to'):
+            return {'error': 'Both date_from and date_to are required'}
+
+        SepeExport = self.env['wfm.sepe.export']
+        Visit = self.env['wfm.visit']
+
+        # Find completed, unexported visits in date range
+        domain = [
+            ('visit_date', '>=', args['date_from']),
+            ('visit_date', '<=', args['date_to']),
+            ('state', '=', 'done'),
+        ]
+
+        if not args.get('include_exported', False):
+            domain.append(('sepe_exported', '=', False))
+
+        visits = Visit.search(domain)
+
+        if not visits:
+            return {
+                'error': 'No completed visits found for the selected date range',
+                'date_from': args['date_from'],
+                'date_to': args['date_to'],
+            }
+
+        try:
+            export = SepeExport.create({
+                'date_from': args['date_from'],
+                'date_to': args['date_to'],
+                'visit_ids': [(6, 0, visits.ids)],
+            })
+
+            # Generate Excel if requested
+            if args.get('generate_excel', True):
+                export.action_generate_excel()
+
+            return {
+                'success': True,
+                'message': f"Created SEPE export {export.name} with {len(visits)} visits",
+                'export': {
+                    'id': export.id,
+                    'name': export.name,
+                    'visit_count': export.visit_count,
+                    'total_hours': round(export.total_hours, 1),
+                    'total_amount': round(export.total_amount, 2),
+                    'state': export.state,
+                }
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_get_sepe_export(self, args):
+        """Get details of a specific SEPE export."""
+        if not args.get('export_id') and not args.get('name'):
+            return {'error': 'Either export_id or name is required'}
+
+        SepeExport = self.env['wfm.sepe.export']
+
+        if args.get('export_id'):
+            export = SepeExport.browse(args['export_id'])
+        else:
+            export = SepeExport.search([('name', '=', args['name'])], limit=1)
+
+        if not export or not export.exists():
+            return {'error': 'SEPE export not found'}
+
+        # Get visit summary by client
+        client_summary = {}
+        for visit in export.visit_ids:
+            client_name = visit.client_id.name
+            if client_name not in client_summary:
+                client_summary[client_name] = {'count': 0, 'hours': 0, 'amount': 0}
+            client_summary[client_name]['count'] += 1
+            client_summary[client_name]['hours'] += visit.duration
+            client_summary[client_name]['amount'] += visit.partner_payment_amount
+
+        return {
+            'id': export.id,
+            'name': export.name,
+            'date_from': export.date_from.strftime('%d/%m/%Y') if export.date_from else '',
+            'date_to': export.date_to.strftime('%d/%m/%Y') if export.date_to else '',
+            'visit_count': export.visit_count,
+            'total_hours': round(export.total_hours, 1),
+            'total_amount': round(export.total_amount, 2),
+            'state': export.state,
+            'state_label': dict(SepeExport._fields['state'].selection).get(export.state, export.state),
+            'export_date': export.export_date.strftime('%d/%m/%Y %H:%M') if export.export_date else None,
+            'exported_by': export.exported_by.name if export.exported_by else None,
+            'submitted_date': export.submitted_date.strftime('%d/%m/%Y %H:%M') if export.submitted_date else None,
+            'has_file': bool(export.export_file),
+            'filename': export.export_filename,
+            'by_client': client_summary,
+        }
+
+    def _tool_wfm_submit_sepe_export(self, args):
+        """Mark SEPE export as submitted to SEPE."""
+        if not args.get('export_id'):
+            return {'error': 'export_id is required'}
+
+        SepeExport = self.env['wfm.sepe.export']
+        export = SepeExport.browse(args['export_id'])
+
+        if not export.exists():
+            return {'error': f"SEPE export {args['export_id']} not found"}
+
+        if export.state != 'exported':
+            return {'error': f"Export must be in 'exported' state. Current state: {export.state}"}
+
+        try:
+            export.action_submit_to_sepe()
+            return {
+                'success': True,
+                'message': f"SEPE export {export.name} marked as submitted",
+                'export_name': export.name,
+                'visit_count': export.visit_count,
+                'visits_billing_status': 'invoiced',
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    # ==================== Billing Tools ====================
+
+    def _tool_wfm_billing_stats(self, args):
+        """Get billing dashboard statistics."""
+        Visit = self.env['wfm.visit']
+
+        # Get counts by billing status
+        not_billed = Visit.search([
+            ('state', '=', 'done'),
+            ('billing_status', '=', 'not_billed')
+        ])
+        invoiced = Visit.search([('billing_status', '=', 'invoiced')])
+        client_paid = Visit.search([('billing_status', '=', 'client_paid')])
+        settled = Visit.search([('billing_status', '=', 'settled')])
+
+        # Calculate totals
+        not_billed_amount = sum(not_billed.mapped('partner_payment_amount'))
+        invoiced_amount = sum(invoiced.mapped('partner_payment_amount'))
+        client_paid_amount = sum(client_paid.mapped('partner_payment_amount'))
+        settled_amount = sum(settled.mapped('partner_payment_amount'))
+
+        # SEPE export stats
+        SepeExport = self.env['wfm.sepe.export']
+        draft_exports = SepeExport.search_count([('state', '=', 'draft')])
+        exported = SepeExport.search_count([('state', '=', 'exported')])
+        submitted = SepeExport.search_count([('state', '=', 'submitted')])
+
+        return {
+            'billing': {
+                'not_billed': {
+                    'count': len(not_billed),
+                    'hours': round(sum(not_billed.mapped('duration')), 1),
+                    'amount': round(not_billed_amount, 2),
+                },
+                'invoiced': {
+                    'count': len(invoiced),
+                    'hours': round(sum(invoiced.mapped('duration')), 1),
+                    'amount': round(invoiced_amount, 2),
+                },
+                'client_paid': {
+                    'count': len(client_paid),
+                    'hours': round(sum(client_paid.mapped('duration')), 1),
+                    'amount': round(client_paid_amount, 2),
+                },
+                'settled': {
+                    'count': len(settled),
+                    'hours': round(sum(settled.mapped('duration')), 1),
+                    'amount': round(settled_amount, 2),
+                },
+            },
+            'sepe_exports': {
+                'draft': draft_exports,
+                'exported': exported,
+                'submitted': submitted,
+            },
+            'totals': {
+                'pending_amount': round(not_billed_amount + invoiced_amount + client_paid_amount, 2),
+                'settled_amount': round(settled_amount, 2),
+            }
+        }
+
+    def _tool_wfm_update_billing_status(self, args):
+        """Update billing status of visits."""
+        if not args.get('visit_ids') and not args.get('visit_id'):
+            return {'error': 'Either visit_ids or visit_id is required'}
+
+        if not args.get('billing_status'):
+            return {'error': 'billing_status is required'}
+
+        valid_statuses = ['not_billed', 'invoiced', 'client_paid', 'settled']
+        if args['billing_status'] not in valid_statuses:
+            return {'error': f"Invalid billing_status. Must be one of: {', '.join(valid_statuses)}"}
+
+        Visit = self.env['wfm.visit']
+
+        visit_ids = args.get('visit_ids') or [args['visit_id']]
+        visits = Visit.browse(visit_ids)
+
+        if not visits.exists():
+            return {'error': 'No valid visits found'}
+
+        vals = {'billing_status': args['billing_status']}
+        if args.get('invoice_reference'):
+            vals['invoice_reference'] = args['invoice_reference']
+
+        try:
+            visits.write(vals)
+            return {
+                'success': True,
+                'message': f"Updated {len(visits)} visit(s) to billing status: {args['billing_status']}",
+                'visit_count': len(visits),
+                'new_status': args['billing_status'],
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_list_unbilled_visits(self, args):
+        """List visits pending billing."""
+        Visit = self.env['wfm.visit']
+        domain = [
+            ('state', '=', 'done'),
+            ('billing_status', '=', 'not_billed'),
+        ]
+
+        if args.get('client_id'):
+            domain.append(('client_id', '=', args['client_id']))
+
+        if args.get('partner_id'):
+            domain.append(('partner_id', '=', args['partner_id']))
+
+        if args.get('date_from'):
+            domain.append(('visit_date', '>=', args['date_from']))
+
+        if args.get('date_to'):
+            domain.append(('visit_date', '<=', args['date_to']))
+
+        if args.get('not_exported'):
+            domain.append(('sepe_exported', '=', False))
+
+        limit = args.get('limit', 20)
+        visits = Visit.search(domain, limit=limit, order='visit_date desc')
+
+        result = []
+        for v in visits:
+            result.append({
+                'id': v.id,
+                'reference': v.name,
+                'client': v.client_id.name,
+                'installation': v.installation_id.name,
+                'partner': v.partner_id.name if v.partner_id else 'N/A',
+                'date': v.visit_date.strftime('%d/%m/%Y') if v.visit_date else '',
+                'duration': round(v.duration, 1),
+                'amount': round(v.partner_payment_amount, 2),
+                'sepe_exported': v.sepe_exported,
+            })
+
+        total_amount = sum(v.partner_payment_amount for v in visits)
+
+        return {
+            'count': len(result),
+            'total_amount': round(total_amount, 2),
+            'visits': result
+        }
+
+    # ==================== Partner Referral Tools ====================
+
+    def _tool_wfm_list_referrals(self, args):
+        """List partner referrals."""
+        Referral = self.env['wfm.partner.referral']
+        domain = []
+
+        if args.get('state'):
+            domain.append(('state', '=', args['state']))
+
+        if args.get('referring_partner_id'):
+            domain.append(('referring_partner_id', '=', args['referring_partner_id']))
+
+        if args.get('coordinator_id'):
+            domain.append(('coordinator_id', '=', args['coordinator_id']))
+
+        if args.get('specialty'):
+            domain.append(('candidate_specialty', '=', args['specialty']))
+
+        limit = args.get('limit', 10)
+        referrals = Referral.search(domain, limit=limit, order='create_date desc')
+
+        result = []
+        for r in referrals:
+            result.append({
+                'id': r.id,
+                'reference': r.name,
+                'candidate_name': r.candidate_name,
+                'candidate_email': r.candidate_email,
+                'candidate_phone': r.candidate_phone or '',
+                'specialty': r.candidate_specialty,
+                'specialty_label': dict(Referral._fields['candidate_specialty'].selection).get(
+                    r.candidate_specialty, r.candidate_specialty),
+                'city': r.candidate_city or '',
+                'referred_by': r.referring_partner_id.name,
+                'state': r.state,
+                'state_label': dict(Referral._fields['state'].selection).get(r.state, r.state),
+                'coordinator': r.coordinator_id.name if r.coordinator_id else None,
+                'submitted_date': r.submitted_date.strftime('%d/%m/%Y') if r.submitted_date else None,
+            })
+
+        return {
+            'count': len(result),
+            'referrals': result
+        }
+
+    def _tool_wfm_get_referral(self, args):
+        """Get detailed information about a referral."""
+        if not args.get('referral_id') and not args.get('reference'):
+            return {'error': 'Either referral_id or reference is required'}
+
+        Referral = self.env['wfm.partner.referral']
+
+        if args.get('referral_id'):
+            referral = Referral.browse(args['referral_id'])
+        else:
+            referral = Referral.search([('name', '=', args['reference'])], limit=1)
+
+        if not referral or not referral.exists():
+            return {'error': 'Referral not found'}
+
+        return {
+            'id': referral.id,
+            'reference': referral.name,
+            'candidate': {
+                'name': referral.candidate_name,
+                'email': referral.candidate_email,
+                'phone': referral.candidate_phone or '',
+                'specialty': referral.candidate_specialty,
+                'city': referral.candidate_city or '',
+                'bachelors': referral.candidate_bachelors or '',
+                'masters': referral.candidate_masters or '',
+                'phd': referral.candidate_phd or '',
+                'experience': referral.candidate_experience or '',
+                'certifications': referral.candidate_certifications or '',
+            },
+            'referred_by': {
+                'id': referral.referring_partner_id.id,
+                'name': referral.referring_partner_id.name,
+            },
+            'referral_reason': referral.referral_reason or '',
+            'state': referral.state,
+            'state_label': dict(Referral._fields['state'].selection).get(referral.state, referral.state),
+            'coordinator': referral.coordinator_id.name if referral.coordinator_id else None,
+            'review_notes': referral.review_notes or '',
+            'rejection_reason': referral.rejection_reason if referral.state == 'rejected' else None,
+            'meeting': {
+                'date': referral.meeting_date.strftime('%d/%m/%Y %H:%M') if referral.meeting_date else None,
+                'location': referral.meeting_location or '',
+            } if referral.state in ('accepted', 'meeting_scheduled') else None,
+            'has_resume': bool(referral.candidate_resume),
+        }
+
+    def _tool_wfm_update_referral(self, args):
+        """Update referral status or details."""
+        if not args.get('referral_id'):
+            return {'error': 'referral_id is required'}
+
+        Referral = self.env['wfm.partner.referral']
+        referral = Referral.browse(args['referral_id'])
+
+        if not referral.exists():
+            return {'error': f"Referral {args['referral_id']} not found"}
+
+        action = args.get('action')
+
+        try:
+            if action == 'start_review':
+                referral.action_start_review()
+                return {
+                    'success': True,
+                    'message': f"Started review of referral {referral.name}",
+                    'referral_name': referral.name,
+                    'new_state': referral.state,
+                }
+
+            elif action == 'accept':
+                if args.get('meeting_date'):
+                    referral.write({
+                        'meeting_date': args['meeting_date'],
+                        'meeting_location': args.get('meeting_location', ''),
+                    })
+                referral.action_accept()
+                return {
+                    'success': True,
+                    'message': f"Accepted referral {referral.name}. Meeting invitation sent.",
+                    'referral_name': referral.name,
+                    'candidate_name': referral.candidate_name,
+                }
+
+            elif action == 'reject':
+                if args.get('rejection_reason'):
+                    referral.write({'rejection_reason': args['rejection_reason']})
+                referral.action_reject()
+                return {
+                    'success': True,
+                    'message': f"Rejected referral {referral.name}",
+                    'referral_name': referral.name,
+                }
+
+            else:
+                # Just update fields
+                vals = {}
+                if args.get('review_notes'):
+                    vals['review_notes'] = args['review_notes']
+                if args.get('meeting_date'):
+                    vals['meeting_date'] = args['meeting_date']
+                if args.get('meeting_location'):
+                    vals['meeting_location'] = args['meeting_location']
+
+                if vals:
+                    referral.write(vals)
+                    return {
+                        'success': True,
+                        'message': f"Updated referral {referral.name}",
+                        'updated_fields': list(vals.keys()),
+                    }
+                else:
+                    return {'error': 'No action or fields to update provided'}
+
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_referral_stats(self, args):
+        """Get referral program statistics."""
+        Referral = self.env['wfm.partner.referral']
+
+        # Get counts by state
+        draft = Referral.search_count([('state', '=', 'draft')])
+        submitted = Referral.search_count([('state', '=', 'submitted')])
+        under_review = Referral.search_count([('state', '=', 'under_review')])
+        accepted = Referral.search_count([('state', '=', 'accepted')])
+        rejected = Referral.search_count([('state', '=', 'rejected')])
+        meeting_scheduled = Referral.search_count([('state', '=', 'meeting_scheduled')])
+
+        # Get counts by specialty
+        physicians = Referral.search_count([('candidate_specialty', '=', 'physician')])
+        engineers = Referral.search_count([('candidate_specialty', '=', 'safety_engineer')])
+        health_scientists = Referral.search_count([('candidate_specialty', '=', 'health_scientist')])
+
+        # Top referrers
+        top_referrers = []
+        partner_counts = {}
+        for ref in Referral.search([('state', '!=', 'draft')]):
+            partner_name = ref.referring_partner_id.name
+            partner_counts[partner_name] = partner_counts.get(partner_name, 0) + 1
+
+        sorted_partners = sorted(partner_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        for partner_name, count in sorted_partners:
+            top_referrers.append({'partner': partner_name, 'referrals': count})
+
+        return {
+            'by_state': {
+                'draft': draft,
+                'submitted': submitted,
+                'under_review': under_review,
+                'accepted': accepted,
+                'rejected': rejected,
+                'meeting_scheduled': meeting_scheduled,
+            },
+            'by_specialty': {
+                'physicians': physicians,
+                'safety_engineers': engineers,
+                'health_scientists': health_scientists,
+            },
+            'totals': {
+                'total': draft + submitted + under_review + accepted + rejected + meeting_scheduled,
+                'pending_review': submitted + under_review,
+                'success_rate': f"{(accepted + meeting_scheduled) / max(1, accepted + rejected + meeting_scheduled) * 100:.1f}%",
+            },
+            'top_referrers': top_referrers,
+        }
