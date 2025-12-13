@@ -1,8 +1,10 @@
 # AI Chat Integration for WFM Odoo
 
+**Status: Implemented** - Module `wfm_ai_chat` created
+
 ## Overview
 
-Integrate an LLM-powered conversational assistant into Odoo's built-in chat interface. Users (coordinators, admins, partners) can interact naturally with the system to query data and perform actions without navigating complex menus.
+Integrate an LLM-powered conversational assistant into Odoo's built-in chat interface via OdooBot. Users (coordinators, admins, partners) can interact naturally with the system to query data and perform actions without navigating complex menus.
 
 ## Architecture
 
@@ -10,31 +12,55 @@ Integrate an LLM-powered conversational assistant into Odoo's built-in chat inte
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         Odoo Frontend                                │
 │                    (Built-in Discuss/Chat UI)                        │
+│                         OdooBot Chat                                 │
 └─────────────────────┬───────────────────────────────────────────────┘
-                      │ HTTP POST /api/ai-chat
+                      │ User sends message to OdooBot
                       ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    wfm_ai_chat Module (Odoo)                         │
-│  - HTTP Controller receives messages                                 │
-│  - Formats context (user role, current view, etc.)                   │
-│  - Calls LiteLLM Proxy                                               │
+│  - Overrides mail.bot._get_answer()                                  │
+│  - Intercepts messages when user is in 'idle' state                  │
+│  - Calls LiteLLM Proxy via OpenAI-compatible API                     │
 └─────────────────────┬───────────────────────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      LiteLLM Proxy                                   │
-│                 (claude-3-5-haiku-20241022)                          │
-│  - Receives prompt + tool definitions                                │
+│              https://prod.litellm.deeprunner.ai                      │
+│                 (claude-3-5-haiku-latest)                            │
+│  - Receives system prompt + user message + tool definitions          │
 │  - Returns tool calls or text response                               │
 └─────────────────────┬───────────────────────────────────────────────┘
                       │ Tool calls
                       ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    Tool Executor (Python)                            │
-│  - WFM-specific tools (visits, partners, clients)                    │
+│                 WfmToolExecutor (Python)                             │
+│  - wfm_list_visits, wfm_get_visit                                    │
+│  - wfm_list_partners, wfm_list_clients                               │
+│  - wfm_assign_partner, wfm_update_visit                              │
+│  - wfm_dashboard_stats                                               │
 │  - Executes Odoo ORM operations                                      │
-│  - Returns structured results                                        │
+│  - Returns structured results to LLM                                 │
 └─────────────────────────────────────────────────────────────────────┘
+```
+
+## Module Structure
+
+```
+addons/wfm_ai_chat/
+├── __init__.py
+├── __manifest__.py
+├── models/
+│   ├── __init__.py
+│   ├── mail_bot.py          # Overrides OdooBot
+│   └── llm_client.py        # LiteLLM API client
+├── tools/
+│   ├── __init__.py
+│   └── wfm_tools.py         # Tool executor
+├── security/
+│   └── ir.model.access.csv
+└── data/
+    └── ir_config_parameter.xml
 ```
 
 ## What Users Can Do
@@ -223,11 +249,68 @@ Integrate an LLM-powered conversational assistant into Odoo's built-in chat inte
 | **WhatsApp Bot** | Already have Twilio | Limited UI, security concerns |
 | **VS Code / CLI** | Developer-friendly | Not for non-technical users |
 
+## Installation & Configuration
+
+### 1. Install the module
+
+```bash
+# Copy to addons
+cp -r addons/wfm_ai_chat /opt/odoo/addons/
+
+# Install Python dependency
+pip install openai
+
+# Restart Odoo
+docker restart odoo
+```
+
+### 2. Install via Odoo UI
+
+1. Go to Apps
+2. Update Apps List
+3. Search for "WFM AI Chat"
+4. Click Install
+
+### 3. Configure API Key
+
+Set the LiteLLM API key in Odoo:
+
+```bash
+# Via Odoo shell
+odoo shell
+>>> env['ir.config_parameter'].set_param('wfm_ai_chat.litellm_api_key', 'sk-YOUR-API-KEY')
+>>> env.cr.commit()
+```
+
+Or via Settings > Technical > System Parameters:
+- Key: `wfm_ai_chat.litellm_api_key`
+- Value: `sk-nJE8QNo249xmGq1KMFJAIw`
+
+### 4. Start chatting
+
+1. Open Discuss
+2. Click on OdooBot in Direct Messages
+3. Type any question about visits, partners, or clients
+
+## Implemented Tools
+
+| Tool | Status | Description |
+|------|--------|-------------|
+| `wfm_list_visits` | Done | Filter by date, state, partner, client |
+| `wfm_get_visit` | Done | Get single visit details |
+| `wfm_list_partners` | Done | Filter by specialty, city, availability |
+| `wfm_list_clients` | Done | Search clients by name |
+| `wfm_assign_partner` | Done | Assign partner (triggers notification) |
+| `wfm_update_visit` | Done | Update date, time, notes |
+| `wfm_dashboard_stats` | Done | Aggregate statistics |
+
 ## Next Steps
 
-1. Create `wfm_ai_chat` Odoo module skeleton
-2. Implement HTTP controller for chat endpoint
-3. Add tool definitions (Python dict → LLM function calling)
-4. Build tool executor with permission checks
-5. Test with coordinator persona
+1. ~~Create `wfm_ai_chat` Odoo module skeleton~~ Done
+2. ~~Implement mail.bot override~~ Done
+3. ~~Add tool definitions (LLM function calling)~~ Done
+4. ~~Build tool executor with Odoo ORM~~ Done
+5. Deploy to production and test
 6. Add conversation memory (session-based)
+7. Implement additional tools (create visit, cancel visit)
+8. Add role-based tool restrictions
