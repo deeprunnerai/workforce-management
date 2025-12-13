@@ -32,7 +32,36 @@
                         </group>
                     </group>
 
-                    <separator string="AI Recommendations (Top 2)"/>
+                    <!-- Ask AI Section - PROMINENT -->
+                    <separator string="🤖 Claude AI Recommendation"/>
+                    <div class="mb-3">
+                        <button name="action_get_ai_recommendation"
+                                string="🤖 Ask Claude for Best Partner"
+                                type="object"
+                                class="btn-primary o_wow_btn"
+                                invisible="ai_recommended_partner_id"/>
+                        <span class="ms-2 text-muted small" invisible="ai_recommended_partner_id">
+                            Get intelligent analysis from Claude AI
+                        </span>
+                    </div>
+
+                    <!-- AI Recommendation Display (after clicking Ask AI) -->
+                    <field name="ai_recommendation_html" nolabel="1" readonly="1"
+                           invisible="not ai_recommendation_html"/>
+                    <field name="ai_recommended_partner_id" invisible="1"/>
+                    <field name="ai_confidence" invisible="1"/>
+
+                    <!-- Assign AI Recommendation Button -->
+                    <div class="mb-3" invisible="not ai_recommended_partner_id">
+                        <button name="action_assign_ai_recommendation"
+                                type="object"
+                                class="btn-success btn-lg">
+                            <i class="fa fa-magic me-2"/>
+                            ✓ Assign Claude's Pick
+                        </button>
+                    </div>
+
+                    <separator string="Rule-Based Recommendations (Top 2)"/>
 
                     <!-- Recommendations Display -->
                     <field name="recommendations_html" class="oe_read_only" nolabel="1"/>
@@ -44,7 +73,7 @@
                             <field name="recommendation_1_score" invisible="1"/>
                             <button name="action_assign_recommendation_1"
                                     type="object"
-                                    class="btn-success btn-lg w-100 mb-2"
+                                    class="btn-outline-success w-100 mb-2"
                                     invisible="not recommendation_1_id">
                                 <i class="fa fa-check me-2"/>
                                 Assign #1: <field name="recommendation_1_id" readonly="1" class="d-inline"/>
@@ -55,7 +84,7 @@
                             <field name="recommendation_2_score" invisible="1"/>
                             <button name="action_assign_recommendation_2"
                                     type="object"
-                                    class="btn-info btn-lg w-100 mb-2"
+                                    class="btn-outline-info w-100 mb-2"
                                     invisible="not recommendation_2_id">
                                 <i class="fa fa-check me-2"/>
                                 Assign #2: <field name="recommendation_2_id" readonly="1" class="d-inline"/>

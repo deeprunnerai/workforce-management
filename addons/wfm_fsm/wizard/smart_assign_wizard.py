@@ -86,6 +86,22 @@ class WfmSmartAssignWizard(models.TransientModel):
         sanitize=False
     )
 
+    # AI recommendation fields
+    ai_recommended_partner_id = fields.Many2one(
+        'res.partner',
+        string='AI Recommended Partner',
+        help='Partner recommended by Claude AI'
+    )
+    ai_recommendation_html = fields.Html(
+        string='AI Recommendation',
+        sanitize=False
+    )
+    ai_confidence = fields.Selection([
+        ('high', 'High'),
+        ('medium', 'Medium'),
+        ('low', 'Low'),
+    ], string='AI Confidence')
+
     def _default_visit_id(self):
         """Get visit from context."""
         active_id = self.env.context.get('active_id')
@@ -265,6 +281,86 @@ class WfmSmartAssignWizard(models.TransientModel):
 
         html += '</div>'
         return html
+
+    def action_get_ai_recommendation(self):
+        """Get AI-powered recommendation from Claude."""
+        self.ensure_one()
+
+        if not self.visit_id:
+            raise UserError(_('No visit selected.'))
+
+        # Get rule-based candidates first
+        engine = self.env['wfm.assignment.engine']
+        candidates = engine.get_recommended_partners(self.visit_id.id, limit=5)
+
+        if not candidates:
+            raise UserError(_('No available partners found for this visit.'))
+
+        # Get AI analysis from Claude
+        ai_engine = self.env['wfm.ai.retention.engine'].create({})
+        result = ai_engine.get_ai_partner_recommendation(self.visit_id.id, candidates)
+
+        if result.get('success'):
+            # Find the recommended partner by name
+            recommended_name = result.get('recommended_partner', '')
+            recommended_partner = None
+
+            for c in candidates:
+                if c['partner_name'] == recommended_name:
+                    recommended_partner = self.env['res.partner'].browse(c['partner_id'])
+                    break
+
+            # If not found by exact name, use the first candidate
+            if not recommended_partner:
+                recommended_partner = self.env['res.partner'].browse(candidates[0]['partner_id'])
+
+            confidence = result.get('confidence', 'medium')
+            confidence_color = {
+                'high': 'success',
+                'medium': 'warning',
+                'low': 'danger'
+            }.get(confidence, 'secondary')
+
+            reasoning = result.get('reasoning', 'No reasoning provided')
+            concerns = result.get('concerns')
+
+            ai_html = f'''
+            <div class="alert alert-{confidence_color} mb-3" style="border-left: 4px solid;">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="h4 mb-0 me-2">🤖</span>
+                    <strong class="h5 mb-0">Claude Recommends: {recommended_partner.name}</strong>
+                    <span class="badge bg-{confidence_color} ms-2">{confidence.upper()}</span>
+                </div>
+                <p class="mb-2">{reasoning}</p>
+                {f'<div class="alert alert-light py-2 px-3 mb-0"><strong>⚠️ Note:</strong> {concerns}</div>' if concerns else ''}
+            </div>
+            '''
+
+            self.write({
+                'ai_recommended_partner_id': recommended_partner.id,
+                'ai_recommendation_html': ai_html,
+                'ai_confidence': confidence,
+            })
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': '🤖 AI Analysis Complete',
+                    'message': f'Claude recommends: {recommended_partner.name}',
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+        else:
+            raise UserError(_(f'AI Analysis Failed: {result.get("error", "Unknown error")}'))
+
+    def action_assign_ai_recommendation(self):
+        """Assign the AI-recommended partner."""
+        self.ensure_one()
+        if not self.ai_recommended_partner_id:
+            raise UserError(_('No AI recommendation available. Click "Ask AI" first.'))
+        return self._assign_partner(self.ai_recommended_partner_id)
 
     def action_assign_recommendation_1(self):
         """Assign the top recommended partner."""

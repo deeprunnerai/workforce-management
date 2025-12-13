@@ -32,6 +32,17 @@ class WfmVisitFsm(models.Model):
         sanitize=False
     )
 
+    # AI recommendation cache
+    ai_recommendation = fields.Text(
+        string='AI Recommendation',
+        help='Cached AI recommendation from Claude'
+    )
+    ai_recommendation_html = fields.Html(
+        string='AI Recommendation Display',
+        help='HTML display of AI recommendation',
+        sanitize=False
+    )
+
     @api.depends('client_id', 'installation_id', 'visit_date')
     def _compute_recommended_partners(self):
         """Compute recommended partners using assignment engine."""
@@ -39,12 +50,12 @@ class WfmVisitFsm(models.Model):
         for visit in self:
             if visit.id and visit.client_id:
                 try:
-                    recommendations = engine.get_recommended_partners(visit.id, limit=2)
-                    partner_ids = [r['partner_id'] for r in recommendations]
+                    recommendations = engine.get_recommended_partners(visit.id, limit=5)
+                    partner_ids = [r['partner_id'] for r in recommendations[:2]]
                     visit.recommended_partner_ids = [(6, 0, partner_ids)]
 
                     if recommendations:
-                        visit.recommendation_html = self._build_recommendation_table(recommendations)
+                        visit.recommendation_html = self._build_recommendation_table(recommendations[:2])
                     else:
                         visit.recommendation_html = '<p class="text-muted">No recommendations available</p>'
                 except Exception:
@@ -53,6 +64,81 @@ class WfmVisitFsm(models.Model):
             else:
                 visit.recommended_partner_ids = [(5, 0, 0)]
                 visit.recommendation_html = '<p class="text-muted">Save visit to see recommendations</p>'
+
+    def action_get_ai_recommendation(self):
+        """Get AI-powered recommendation from Claude."""
+        self.ensure_one()
+
+        # Get rule-based candidates first
+        engine = self.env['wfm.assignment.engine']
+        candidates = engine.get_recommended_partners(self.id, limit=5)
+
+        if not candidates:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'No Candidates',
+                    'message': 'No available partners found for this visit',
+                    'type': 'warning',
+                }
+            }
+
+        # Get AI analysis
+        ai_engine = self.env['wfm.ai.retention.engine'].create({})
+        result = ai_engine.get_ai_partner_recommendation(self.id, candidates)
+
+        if result.get('success'):
+            # Build AI recommendation HTML
+            confidence = result.get('confidence', 'medium')
+            confidence_color = {
+                'high': 'success',
+                'medium': 'warning',
+                'low': 'danger'
+            }.get(confidence, 'secondary')
+
+            recommended_partner = result.get('recommended_partner', 'Unknown')
+            reasoning = result.get('reasoning', 'No reasoning provided')
+            concerns = result.get('concerns')
+            summary = result.get('summary', reasoning)
+
+            ai_html = f'''
+            <div class="alert alert-{confidence_color} mb-3" style="border-left: 4px solid;">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="h4 mb-0 me-2">🤖</span>
+                    <strong class="h5 mb-0">AI Recommends: {recommended_partner}</strong>
+                    <span class="badge bg-{confidence_color} ms-2">{confidence.upper()}</span>
+                </div>
+                <p class="mb-2" style="font-size: 14px;">{reasoning}</p>
+                {f'<div class="alert alert-light py-2 px-3 mb-0"><strong>⚠️ Note:</strong> {concerns}</div>' if concerns else ''}
+            </div>
+            '''
+
+            # Store AI recommendation in stored field
+            self.write({
+                'ai_recommendation': summary,
+                'ai_recommendation_html': ai_html
+            })
+
+            # Return action to reload the form to show updated AI HTML
+            return {
+                'type': 'ir.actions.act_window',
+                'res_model': 'wfm.visit',
+                'res_id': self.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+        else:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'AI Analysis Failed',
+                    'message': result.get('error', 'Unknown error'),
+                    'type': 'danger',
+                    'sticky': True,
+                }
+            }
 
     def _get_health_status(self, partner_id):
         """Get health status for a partner (if any concerns exist).

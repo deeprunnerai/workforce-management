@@ -59,4 +59,13 @@
               parent="wfm_core.menu_wfm_clients_parent"
               action="action_wfm_contract_timeline"
               sequence="40"/>
+
+    <!-- ============================================ -->
+    <!-- PARTNER REFERRALS (Coordinator Management)  -->
+    <!-- ============================================ -->
+    <menuitem id="menu_partner_referrals"
+              name="Partner Referrals"
+              parent="wfm_core.menu_wfm_root"
+              action="action_referral_coordinator"
+              sequence="60"/>
 </odoo>
