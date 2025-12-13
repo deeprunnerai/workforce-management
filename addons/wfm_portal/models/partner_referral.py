@@ -180,9 +180,9 @@ class PartnerReferral(models.Model):
         # Get coordinator emails from wfm_coordinator group
         coordinator_emails = ''
         coordinator_group = self.env.ref('wfm_portal.group_wfm_coordinator', raise_if_not_found=False)
-        if coordinator_group and coordinator_group.users:
+        if coordinator_group and coordinator_group.user_ids:
             coordinator_emails = ','.join(
-                user.email for user in coordinator_group.users if user.email
+                user.email for user in coordinator_group.user_ids if user.email
             )
         if not coordinator_emails:
             coordinator_emails = self.env.company.email or 'admin@gepgroup.gr'
