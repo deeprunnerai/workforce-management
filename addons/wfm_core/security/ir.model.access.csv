@@ -6,4 +6,4 @@ access_wfm_contract_user,wfm.contract.user,model_wfm_contract,base.group_user,1,
 access_wfm_contract_service_user,wfm.contract.service.user,model_wfm_contract_service,base.group_user,1,1,1,1
 access_wfm_installation_service_user,wfm.installation.service.user,model_wfm_installation_service,base.group_user,1,1,1,1
 access_wfm_workflow_user,wfm.workflow.user,model_wfm_workflow,base.group_user,1,1,1,1
-access_wfm_workflow_log_user,wfm.workflow.log.user,model_wfm_workflow_log,base.group_user,1,0,0,0
+access_wfm_workflow_log_user,wfm.workflow.log.user,model_wfm_workflow_log,base.group_user,1,1,1,0
