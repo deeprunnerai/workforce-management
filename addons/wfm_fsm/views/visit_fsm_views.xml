@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Visit Kanban View -->
+    <record id="wfm_visit_kanban" model="ir.ui.view">
+        <field name="name">wfm.visit.kanban</field>
+        <field name="model">wfm.visit</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id"
+                    class="o_kanban_small_column"
+                    records_draggable="1"
+                    group_create="0">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="color"/>
+                <field name="stage_id"/>
+                <field name="state"/>
+                <field name="partner_id"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="installation_address"/>
+                <field name="visit_date"/>
+                <field name="is_overdue"/>
+                <templates>
+                    <t t-name="menu">
+                        <a t-if="widget.editable" role="menuitem" type="edit" class="dropdown-item">Edit</a>
+                        <a t-if="widget.deletable" role="menuitem" type="delete" class="dropdown-item">Delete</a>
+                        <ul class="oe_kanban_colorpicker" data-field="color"/>
+                    </t>
+                    <t t-name="card">
+                        <!-- Header: Reference + Overdue Badge -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong><field name="name"/></strong>
+                            <span t-if="record.is_overdue.raw_value" class="badge text-bg-danger">Overdue</span>
+                        </div>
+
+                        <!-- Client -->
+                        <div class="mb-1">
+                            <field name="client_id"/>
+                        </div>
+
+                        <!-- Installation with Address -->
+                        <div class="text-muted small mb-1">
+                            <span class="fa fa-map-marker me-1" title="Location"></span>
+                            <field name="installation_id"/>
+                        </div>
+                        <div t-if="record.installation_address.value" class="text-muted small mb-2" style="margin-left: 18px;">
+                            <t t-esc="record.installation_address.value"/>
+                        </div>
+
+                        <!-- Visit Date -->
+                        <div class="mb-2">
+                            <span class="fa fa-calendar me-1" title="Date"></span>
+                            <field name="visit_date"/>
+                        </div>
+
+                        <!-- Footer: Partner + State -->
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <div>
+                                <t t-if="record.partner_id.raw_value">
+                                    <field name="partner_id" widget="many2one_avatar_user"/>
+                                </t>
+                                <t t-else="">
+                                    <span class="text-muted small">Unassigned</span>
+                                </t>
+                            </div>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'done'"
+                                   decoration-warning="state == 'in_progress'"
+                                   decoration-info="state in ('assigned', 'confirmed')"
+                                   decoration-danger="state == 'cancelled'"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Visit Calendar View -->
+    <record id="wfm_visit_calendar" model="ir.ui.view">
+        <field name="name">wfm.visit.calendar</field>
+        <field name="model">wfm.visit</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+            <calendar string="Visit Schedule"
+                      date_start="visit_date"
+                      color="partner_id"
+                      mode="month"
+                      event_open_popup="1"
+                      quick_create="0">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="partner_id" filters="1"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Visit Search View -->
+    <record id="wfm_visit_search" model="ir.ui.view">
+        <field name="name">wfm.visit.search</field>
+        <field name="model">wfm.visit</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+            <search string="Search Visits">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="installation_id"/>
+                <field name="partner_id"/>
+                <separator/>
+                <filter string="Today" name="today"
+                        domain="[('visit_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="This Week" name="this_week"
+                        domain="[('visit_date', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                                 ('visit_date', '&lt;=', (context_today() + relativedelta(days=6-context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Assigned" name="assigned" domain="[('state', '=', 'assigned')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="In Progress" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Completed" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Unassigned" name="unassigned"
+                        domain="[('partner_id', '=', False)]"/>
+                <filter string="Overdue" name="overdue"
+                        domain="[('is_overdue', '=', True)]"/>
+                <separator/>
+                <filter string="Stage" name="group_by_stage" context="{'group_by': 'stage_id'}"/>
+                <filter string="Partner" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                <filter string="Client" name="group_by_client" context="{'group_by': 'client_id'}"/>
+                <filter string="Date" name="group_by_date" context="{'group_by': 'visit_date:day'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Pipeline Action -->
+    <record id="action_visit_pipeline" model="ir.actions.act_window">
+        <field name="name">Visit Pipeline</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">kanban,list,calendar,form</field>
+        <field name="search_view_id" ref="wfm_visit_search"/>
+        <field name="context">{'search_default_group_by_stage': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No visits yet
+            </p>
+            <p>Create your first visit to get started.</p>
+        </field>
+    </record>
+
+    <!-- Today's Visits Action -->
+    <record id="action_visits_today" model="ir.actions.act_window">
+        <field name="name">Today's Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="wfm_visit_search"/>
+        <field name="domain">[('visit_date', '=', context_today().strftime('%Y-%m-%d'))]</field>
+    </record>
+
+    <!-- Unassigned Visits Action -->
+    <record id="action_visits_unassigned" model="ir.actions.act_window">
+        <field name="name">Unassigned Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="wfm_visit_search"/>
+        <field name="domain">[('partner_id', '=', False), ('state', '=', 'draft')]</field>
+    </record>
+
+    <!-- Overdue Visits Action -->
+    <record id="action_visits_overdue" model="ir.actions.act_window">
+        <field name="name">Overdue Visits</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="wfm_visit_search"/>
+        <field name="domain">[('is_overdue', '=', True)]</field>
+    </record>
+
+    <!-- Calendar Action -->
+    <record id="action_visit_calendar" model="ir.actions.act_window">
+        <field name="name">Visit Calendar</field>
+        <field name="res_model">wfm.visit</field>
+        <field name="view_mode">calendar,kanban,list,form</field>
+        <field name="search_view_id" ref="wfm_visit_search"/>
+    </record>
+</odoo>

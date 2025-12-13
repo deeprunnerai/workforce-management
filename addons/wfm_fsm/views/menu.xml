@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Dashboard Client Action -->
+    <record id="action_dashboard" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">wfm_fsm.dashboard</field>
+    </record>
+
+    <!-- Coordinator Menu -->
+    <menuitem id="menu_coordinator"
+              name="Coordinator"
+              parent="wfm_core.menu_wfm_operations"
+              sequence="5"/>
+
+    <!-- Dashboard -->
+    <menuitem id="menu_dashboard"
+              name="Dashboard"
+              parent="menu_coordinator"
+              action="action_dashboard"
+              sequence="10"/>
+
+    <!-- Pipeline -->
+    <menuitem id="menu_pipeline"
+              name="Pipeline"
+              parent="menu_coordinator"
+              action="action_visit_pipeline"
+              sequence="20"/>
+
+    <!-- Today's Visits -->
+    <menuitem id="menu_today"
+              name="Today"
+              parent="menu_coordinator"
+              action="action_visits_today"
+              sequence="30"/>
+
+    <!-- Calendar -->
+    <menuitem id="menu_calendar"
+              name="Calendar"
+              parent="menu_coordinator"
+              action="action_visit_calendar"
+              sequence="40"/>
+
+    <!-- Unassigned -->
+    <menuitem id="menu_unassigned"
+              name="Unassigned"
+              parent="menu_coordinator"
+              action="action_visits_unassigned"
+              sequence="50"/>
+
+    <!-- Overdue -->
+    <menuitem id="menu_overdue"
+              name="Overdue"
+              parent="menu_coordinator"
+              action="action_visits_overdue"
+              sequence="60"/>
+</odoo>
