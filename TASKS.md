@@ -127,3 +127,118 @@ T1.x (Scaffold) → T2.x (Partner) → T3.x (Installation)
 ### Integration
 - [ ] Visit model has hooks for @PanosAndr notifications
 - [ ] Stage grouping works for @riya-2098 Kanban
+
+---
+---
+
+# Dev B Tasks
+
+**Developer:** Riya ([@riya-2098](https://github.com/riya-2098))
+**Branch:** `dev-b`
+
+---
+
+## Task Breakdown
+
+### Phase 1: wfm_fsm Module Setup ✅
+
+- [x] **T1.1** Create `__manifest__.py` with wfm_core dependency
+- [x] **T1.2** Create `__init__.py` files for package structure
+- [x] **T1.3** Create `ir.model.access.csv` security file
+
+### Phase 2: Kanban Pipeline ✅
+
+- [x] **T2.1** Create visit Kanban view with stage grouping
+- [x] **T2.2** Implement drag-drop stage transitions
+- [x] **T2.3** Add state/stage synchronization in `write()` override
+- [x] **T2.4** Create pipeline action with proper defaults
+- [x] **T2.5** Add kanban card styling (colors, icons)
+
+### Phase 3: Coordinator Dashboard ✅
+
+- [x] **T3.1** Create dashboard client action
+- [x] **T3.2** Implement `get_dashboard_data()` method
+- [x] **T3.3** Add color-coded summary cards (green/yellow/orange/red)
+- [x] **T3.4** Implement `get_visits_action()` for filtered views
+- [x] **T3.5** Create dashboard JavaScript component
+
+### Phase 4: Calendar View ✅
+
+- [x] **T4.1** Create visit calendar view
+- [x] **T4.2** Add calendar action and menu item
+
+### Phase 5: Smart Assignment Engine ✅
+
+- [x] **T5.1** Create `wfm.partner.client.relationship` model:
+  - `partner_id`, `client_id` (Many2one)
+  - `total_visits`, `completed_visits`
+  - `avg_rating`, `on_time_rate`
+  - `relationship_score` (computed)
+  - `first_visit_date`, `last_visit_date`
+- [x] **T5.2** Create `wfm.assignment.engine` model with scoring:
+  - `get_recommended_partners(visit_id, limit=2)`
+  - `assign_partner_to_visit(visit_id, partner_id)`
+  - Relationship score (35%)
+  - Availability score (25%)
+  - Performance score (20%)
+  - Proximity score (10%)
+  - Workload score (10%)
+- [x] **T5.3** Create `wfm.smart.assign.wizard`:
+  - Top 2 recommendations display
+  - One-click assign buttons
+  - Manual selection option
+  - AI reasoning explanation
+
+### Phase 6: Visit Form Extensions ✅
+
+- [x] **T6.1** Add `coordinator_id` field to visit
+- [x] **T6.2** Add `recommendation_html` computed field
+- [x] **T6.3** Add Smart Assign button (visible when no partner)
+- [x] **T6.4** Add recommendation table to form view
+- [x] **T6.5** Hide Smart Assign when partner already assigned
+- [x] **T6.6** Add contextual alerts for AI reasoning
+
+### Phase 7: Menu Structure ✅
+
+- [x] **T7.1** Create Coordinator submenu
+- [x] **T7.2** Add menu items:
+  - Dashboard
+  - Pipeline
+  - Today
+  - Calendar
+  - Unassigned
+  - Overdue
+- [x] **T7.3** Add Partner Relationships under Configuration
+
+### Phase 8: Testing & Validation ✅
+
+- [x] **T8.1** Module installs without errors
+- [x] **T8.2** Kanban drag-drop works correctly
+- [x] **T8.3** Dashboard shows correct counts
+- [x] **T8.4** Smart Assign recommendations appear
+- [x] **T8.5** Wizard assigns partner correctly
+- [x] **T8.6** State/stage sync works on assignment
+
+---
+
+## Acceptance Criteria (Dev B)
+
+### Module Installation
+- [x] wfm_fsm module appears in Apps list
+- [x] Module installs without errors
+- [x] Depends on wfm_core correctly
+
+### Kanban Pipeline
+- [x] Visits grouped by stage
+- [x] Drag-drop changes state
+- [x] Colors reflect status
+
+### Dashboard
+- [x] Color-coded cards display counts
+- [x] Click opens filtered list
+
+### Smart Assignment
+- [x] Top 2 recommendations shown
+- [x] Scores explained with AI reasoning
+- [x] One-click assign works
+- [x] Relationship updated on completion

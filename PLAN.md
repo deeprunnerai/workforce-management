@@ -141,3 +141,156 @@ addons/wfm_core/
 - [ ] Stage changes work correctly
 - [ ] Seed data loads without errors
 - [ ] Access rights allow CRUD for admin users
+
+---
+---
+
+# Dev B Implementation Plan
+
+## Assignment Overview
+
+**Developer:** Riya ([@riya-2098](https://github.com/riya-2098))
+**Branch:** `dev-b`
+**Deliverables:** Coordinator Dashboard, Kanban Pipeline, Smart Assignment Engine
+
+---
+
+## Scope
+
+### In Scope
+1. **wfm_fsm addon** - Field Service Management features
+2. **Features:**
+   - Coordinator Dashboard with color-coded cards
+   - Visit Kanban Pipeline with drag-drop stages
+   - Calendar view for visits
+   - Smart Partner Assignment Engine (AI-powered recommendations)
+   - Partner-Client Relationship tracking
+3. **Models:**
+   - `wfm.partner.client.relationship` - Relationship history
+   - `wfm.assignment.engine` - Scoring algorithm
+   - `wfm.smart.assign.wizard` - Assignment wizard UI
+
+### Out of Scope (Other Devs)
+- Core data models (@gauravdr - dev-a)
+- Partner portal (@PanosAndr)
+- WhatsApp integration (@PanosAndr)
+
+---
+
+## Technical Approach
+
+### 1. Module Structure
+```
+addons/wfm_fsm/
+├── __manifest__.py
+├── __init__.py
+├── models/
+│   ├── __init__.py
+│   ├── visit_fsm.py           # Visit extensions (coordinator, overdue, recommendations)
+│   ├── partner_relationship.py # Partner-Client relationship tracking
+│   └── assignment_engine.py    # AI scoring algorithm
+├── wizard/
+│   ├── __init__.py
+│   ├── visit_assign_wizard.py
+│   ├── visit_assign_wizard_views.xml
+│   ├── smart_assign_wizard.py
+│   └── smart_assign_wizard_views.xml
+├── views/
+│   ├── visit_fsm_views.xml     # Kanban, Calendar views
+│   ├── visit_form_extension.xml # Form extensions
+│   ├── partner_relationship_views.xml
+│   ├── dashboard_views.xml
+│   └── menu.xml
+├── security/
+│   └── ir.model.access.csv
+└── static/src/
+    └── js/dashboard.js
+```
+
+### 2. Smart Assignment Engine
+
+#### Scoring Algorithm (100 points total)
+| Factor | Weight | Max Points | Logic |
+|--------|--------|------------|-------|
+| Relationship | 35% | 35 | Prior visits to this client |
+| Availability | 25% | 25 | No conflicts on visit date |
+| Performance | 20% | 20 | Completion rate, ratings |
+| Proximity | 10% | 10 | Same city as installation |
+| Workload | 10% | 10 | Balanced assignments |
+
+#### Key Methods
+- `get_recommended_partners(visit_id, limit=2)` - Returns top N recommendations
+- `assign_partner_to_visit(visit_id, partner_id)` - Assigns and updates state
+- `_compute_relationship_score()` - Based on visit history
+- `_compute_availability_score()` - Check schedule conflicts
+- `_compute_performance_score()` - Based on ratings/completion
+- `_compute_proximity_score()` - City matching
+- `_compute_workload_score()` - Assignment balance
+
+### 3. Dashboard Color Codes
+| Color | State | Meaning |
+|-------|-------|---------|
+| Green | done | Completed visits |
+| Yellow | assigned/confirmed | Upcoming visits (future date) |
+| Orange | in_progress | Active visits |
+| Red | draft/assigned (past date) | Overdue/needs attention |
+
+---
+
+## Implementation Order
+
+### Phase 1: Core FSM Features ✅
+1. Visit Kanban pipeline with stage grouping
+2. Drag-drop stage transitions
+3. State/stage synchronization
+4. Calendar view
+
+### Phase 2: Coordinator Dashboard ✅
+1. Color-coded summary cards
+2. Click-through to filtered lists
+3. Today's visits quick view
+
+### Phase 3: Smart Assignment Engine ✅
+1. Partner-Client relationship model
+2. Assignment engine with scoring
+3. Smart Assign wizard
+4. Form view recommendations
+
+---
+
+## Dependencies
+
+### From wfm_core (Dev A)
+- `wfm.visit` model
+- `wfm.visit.stage` model
+- `res.partner` with `is_wfm_partner`, `is_wfm_client`
+- `wfm.installation` model
+
+### Odoo Built-in
+- `web` - Dashboard client action
+- `mail` - Activity tracking
+
+---
+
+## Integration Points (Dev B)
+
+### For @PanosAndr (Portal/WhatsApp)
+- Assignment triggers notification via `action_assign()` method
+- Relationship data available for partner portal display
+
+---
+
+## Files Created (Dev B)
+
+| File | Purpose |
+|------|---------|
+| `models/visit_fsm.py` | Visit extensions with recommendations |
+| `models/partner_relationship.py` | Relationship tracking model |
+| `models/assignment_engine.py` | AI scoring algorithm |
+| `wizard/smart_assign_wizard.py` | Assignment wizard logic |
+| `wizard/smart_assign_wizard_views.xml` | Wizard form view |
+| `views/visit_form_extension.xml` | Smart Assign button + recommendations |
+| `views/partner_relationship_views.xml` | Relationship list/form views |
+| `views/visit_fsm_views.xml` | Kanban, calendar, list views |
+| `views/dashboard_views.xml` | Dashboard client action |
+| `views/menu.xml` | Coordinator menu items |

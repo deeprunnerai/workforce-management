@@ -16,39 +16,6 @@ Client pays GEP → GEP pays Partner → GEP keeps margin
 
 ---
 
-## Documentation Maintenance (IMPORTANT)
-
-**All developers MUST keep documentation up to date.** Update these files after completing tasks:
-
-| File | Purpose | Update When |
-|------|---------|-------------|
-| `STATUS.md` | Project progress, branch status, KPIs | After each deployment, data change, or milestone |
-| `CLAUDE.md` | Technical context, models, roadmap | After adding models, features, or architecture changes |
-| `CHANGELOG.md` | Version history | After each merge to main |
-| `TASKS.md` | Task tracking | After completing or starting tasks |
-
-### Update Checklist (Run after each work session)
-```bash
-# 1. Update STATUS.md with current progress
-# 2. Update CHANGELOG.md if merging to main
-# 3. Commit and push documentation
-git add *.md && git commit -m "docs: update project status" && git push
-
-# 4. Sync all branches
-for branch in dev-a dev-b dev-c; do
-  git checkout $branch && git merge main --no-edit && git push origin $branch
-done
-git checkout main
-```
-
-### Documentation Rules
-1. **STATUS.md** - Update module status, data counts, branch commits after EVERY deployment
-2. **CLAUDE.md** - Update data models section when adding/modifying models
-3. **Keep branches synced** - Always sync dev-a, dev-b, dev-c with main after merging
-4. **Timestamp updates** - Add "Last Updated" date at bottom of STATUS.md
-
----
-
 ## Key Terminology
 
 | Term | Greek | Definition |
@@ -63,11 +30,9 @@ git checkout main
 ### Data Hierarchy
 ```
 Client (Company)
-  ├── Contract (Agreement with client)
-  │     └── Contract Service (OHS service type + hours)
-  │           └── Installation Service (Partner assigned to installation)
-  │                 └── Visit (Scheduled appointment)
   └── Installation (Branch/Location)
+        └── Contract Service (OHS service type)
+              └── Visit (Scheduled appointment)
 ```
 
 ---
@@ -123,12 +88,12 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 
 ### Custom Addons (use `wfm_*` prefix)
 
-| Module | Purpose | Status | Branch |
-|--------|---------|--------|--------|
-| `wfm_core` | Data models, business logic | ✅ Deployed | main |
-| `wfm_fsm` | Field Service Management (Kanban, dashboard) | ✅ Deployed | main |
-| `wfm_portal` | Partner self-service portal | 📋 In Progress | dev-a |
-| `wfm_whatsapp` | Twilio WhatsApp integration | 📋 Planned | dev-c |
+| Module | Purpose | Status |
+|--------|---------|--------|
+| `wfm_core` | Data models, business logic | ✅ Deployed |
+| `wfm_fsm` | Field Service Management (Kanban, dashboard, Smart Assignment) | ✅ In Development |
+| `wfm_portal` | Partner self-service portal | 📋 Planned |
+| `wfm_whatsapp` | Twilio WhatsApp integration | 📋 Planned |
 
 ---
 
@@ -145,37 +110,6 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 - `address`, `city`, `postal_code`
 - `employee_count` - Integer
 - `installation_type` - Selection (office/warehouse/factory/retail/construction)
-
-### wfm.contract
-- `name`, `code` - Contract name and auto-generated code (CON prefix)
-- `client_id` - Many2one to client
-- `start_date`, `end_date` - Contract period
-- `is_indefinite` - Boolean for open-ended contracts
-- `contract_value`, `currency_id` - Financial terms
-- `characterization` - Selection (main/secondary/amendment)
-- `state` - Selection (draft/active/expired/cancelled)
-- `service_ids` - One2many to contract services
-
-### wfm.contract.service
-- `code` - Auto-generated code (SVC prefix)
-- `contract_id` - Many2one to contract
-- `client_id` - Related from contract
-- `service_type` - Selection (physician/safety_engineer)
-- `start_date`, `end_date` - Service period
-- `assigned_hours`, `price_per_hour` - Hourly services
-- `quantity`, `price_per_unit` - Fixed services
-- `state` - Selection (draft/active/completed/cancelled)
-- `installation_service_ids` - One2many to installation services
-
-### wfm.installation.service
-- `code` - Auto-generated code (ISVC prefix)
-- `contract_service_id` - Many2one to contract service
-- `installation_id` - Many2one to installation
-- `partner_id` - Many2one to assigned partner
-- `assigned_hours`, `programmed_hours`, `completed_hours`, `remaining_hours`
-- `start_date`, `end_date` - Assignment period
-- `state` - Selection (draft/assigned/in_progress/completed/cancelled)
-- `visit_ids` - One2many to visits
 
 ### wfm.partner (extends res.partner)
 - `is_wfm_partner` - Boolean flag
@@ -196,6 +130,41 @@ ssh gaurav-vm "cd /opt/odoo/workforce-management && git pull origin dev-a && cp 
 3. Confirmed (sequence=30)
 4. In Progress (sequence=40)
 5. Completed (sequence=50)
+
+### wfm.partner.client.relationship (NEW - wfm_fsm)
+- `partner_id` - Many2one to partner
+- `client_id` - Many2one to client
+- `total_visits`, `completed_visits` - Visit statistics
+- `avg_rating`, `on_time_rate` - Performance metrics
+- `relationship_score` - Computed (0-100) based on history
+- `first_visit_date`, `last_visit_date` - Timeline
+
+### wfm.assignment.engine (NEW - wfm_fsm)
+- Scoring algorithm for partner recommendations
+- Weights: Relationship 35%, Availability 25%, Performance 20%, Proximity 10%, Workload 10%
+- Methods: `get_recommended_partners()`, `assign_partner_to_visit()`
+
+---
+
+## Smart Partner Assignment (wfm_fsm)
+
+**Purpose:** AI-powered partner recommendations prioritizing relationship continuity.
+
+### Scoring Weights
+| Factor | Weight | Logic |
+|--------|--------|-------|
+| Relationship | 35% | Prior visit history with client (TOP PRIORITY) |
+| Availability | 25% | Schedule conflicts on visit date |
+| Performance | 20% | Completion rate, ratings |
+| Proximity | 10% | Same city as installation |
+| Workload | 10% | Current assignment balance |
+
+### Usage Flow
+1. Coordinator opens draft visit (no partner assigned)
+2. Recommendation table shows Top 2 partners with AI reasoning
+3. Click "Smart Assign" button to open wizard
+4. Wizard shows detailed score breakdown
+5. One-click assign from recommendations or manual selection
 
 ---
 
@@ -334,7 +303,7 @@ Use Greek test data (company names, addresses, partner names).
 ## Out of Scope (Phase 1)
 
 - SEPE export automation
-- AI assignment suggestions
+- ~~AI assignment suggestions~~ ✅ Implemented in wfm_fsm
 - Availability calendar
 - Visit report submission
 - Payment/accounting integration
@@ -366,66 +335,3 @@ Use Greek test data (company names, addresses, partner names).
 - SEPE export automation
 - Billing integration
 - Partner payments
-
----
-
-## Development Roadmap
-
-### dev-a: Partner Portal (wfm_portal)
-
-**Goal:** Self-service portal for external partners to view assignments, confirm visits, and submit reports.
-
-**Features:**
-1. **Partner Dashboard**
-   - View assigned visits (calendar + list)
-   - Upcoming visits summary
-   - Hours completed vs assigned
-
-2. **Visit Management**
-   - Accept/decline visit assignments
-   - Confirm attendance
-   - Mark visit as started/completed
-   - Submit visit notes
-
-3. **Schedule View**
-   - Monthly/weekly calendar
-   - Filter by client/installation
-   - Export to iCal
-
-4. **Notifications**
-   - View notification history
-   - Mark as read/unread
-
-**Technical:**
-- Extends `portal` module
-- Uses `website` for frontend
-- Access rules for partner-only data
-
-### dev-c: WhatsApp Integration (wfm_whatsapp)
-
-**Goal:** Automated WhatsApp notifications via Twilio when visits are assigned or updated.
-
-**Features:**
-1. Send notification on partner assignment
-2. Send 24h reminder before visit
-3. Send confirmation request
-4. Handle partner responses
-
-**Technical:**
-- Twilio WhatsApp Business API
-- Webhook for incoming messages
-- Message templates for Greek language
-
----
-
-## Current Data Summary
-
-| Entity | Count |
-|--------|-------|
-| Clients | 10 |
-| Installations | 50 |
-| Partners | 100 |
-| Contracts | 17 (10 active, 3 draft, 2 expired, 2 cancelled) |
-| Contract Services | 20 |
-| Installation Services | 100 |
-| Visits | 200 |
