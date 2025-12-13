@@ -18,9 +18,10 @@ class WhatsAppWebhook(http.Controller):
     Supported commands:
     - ACCEPT / YES / OK - Confirm assigned visit
     - DENY / NO / CANCEL - Decline assigned visit
-    - /help - Get help information
-    - /visits - List upcoming visits
-    - /status - Check visit status
+    - help - Get help information
+    - visits - List upcoming visits
+    - visit N - Get details for visit N
+    - status - Check visit status
     """
 
     @http.route('/whatsapp/webhook', type='http', auth='public',
@@ -138,22 +139,22 @@ class WhatsAppWebhook(http.Controller):
         message_raw = message.strip()
         message = message_raw.upper()
 
-        # Handle /help command
-        if message in ['/HELP', 'HELP', '?']:
+        # Handle help command
+        if message in ['HELP', '?']:
             return self._handle_help(env, partner)
 
-        # Handle /visits command
-        if message in ['/VISITS', 'VISITS', '/UPCOMING']:
+        # Handle visits command
+        if message in ['VISITS', 'UPCOMING']:
             return self._handle_visits_list(env, partner)
 
-        # Handle /visit N command (e.g., /visit 1, /visit 2)
-        if message.startswith('/VISIT ') or message.startswith('VISIT '):
+        # Handle visit N command (e.g., visit 1, visit 2)
+        if message.startswith('VISIT '):
             parts = message.split()
             if len(parts) >= 2 and parts[1].isdigit():
                 return self._handle_visit_detail(env, partner, int(parts[1]))
 
-        # Handle /status command
-        if message in ['/STATUS', 'STATUS']:
+        # Handle status command
+        if message in ['STATUS']:
             return self._handle_status(env, partner)
 
         # Handle ACCEPT variations
@@ -168,7 +169,7 @@ class WhatsAppWebhook(http.Controller):
         return self._handle_unknown(env, partner, message)
 
     def _handle_help(self, env, partner):
-        """Handle /help command."""
+        """Handle help command."""
         return """🏥 *GEP OHS Partner Help*
 
 Available commands:
@@ -178,20 +179,20 @@ Available commands:
 • DENY - Decline the assigned visit
 
 📊 *Information:*
-• /visits - See your upcoming visits
-• /visit 1 - Get details of visit #1
-• /status - Check current visit status
-• /help - Show this help message
+• visits - See your upcoming visits
+• visit 1 - Get details of visit #1
+• status - Check current visit status
+• help - Show this help message
 
 💡 *Tips:*
 • Reply ACCEPT or DENY after receiving an assignment
-• Use /visit 1, /visit 2 etc. for full details with map
+• Use visit 1, visit 2 etc. for full details with map
 • Contact your coordinator for schedule changes
 
 Need assistance? Contact GEP support."""
 
     def _handle_visits_list(self, env, partner):
-        """Handle /visits command - list upcoming visits."""
+        """Handle visits command - list upcoming visits."""
         Visit = env['wfm.visit'].sudo()
 
         visits = Visit.search([
@@ -214,7 +215,7 @@ Need assistance? Contact GEP support."""
             response += f"   🏢 {visit.client_id.name or 'N/A'}\n\n"
 
         response += "━━━━━━━━━━━━━━━━━━━━━\n"
-        response += "💡 Reply */visit 1* for full details with map"
+        response += "💡 Reply *visit 1* for full details with map"
 
         return response
 
@@ -243,7 +244,7 @@ Need assistance? Contact GEP support."""
         return f"https://www.google.com/maps/search/?api=1&query={encoded_address}"
 
     def _handle_visit_detail(self, env, partner, visit_number):
-        """Handle /visit N command - show detailed visit info."""
+        """Handle visit N command - show detailed visit info."""
         Visit = env['wfm.visit'].sudo()
 
         visits = Visit.search([
@@ -255,7 +256,7 @@ Need assistance? Contact GEP support."""
             return "📋 You have no upcoming visits assigned."
 
         if visit_number < 1 or visit_number > len(visits):
-            return f"❌ Invalid visit number. You have {len(visits)} upcoming visit(s).\n\nUse /visits to see the list."
+            return f"❌ Invalid visit number. You have {len(visits)} upcoming visit(s).\n\nType *visits* to see the list."
 
         visit = visits[visit_number - 1]
 
@@ -320,7 +321,7 @@ Reply *ACCEPT* to confirm or *DENY* to decline."""
         return response
 
     def _handle_status(self, env, partner):
-        """Handle /status command - show current assignment status."""
+        """Handle status command - show current assignment status."""
         Visit = env['wfm.visit'].sudo()
 
         # Find most recent assigned visit
@@ -346,7 +347,7 @@ Reply *ACCEPT* to confirm or *DENY* to decline."""
 Your visit is confirmed. See you there!"""
 
         if not visit:
-            return "📋 No pending visits require your attention.\n\nType /visits to see your schedule."
+            return "📋 No pending visits require your attention.\n\nType *visits* to see your schedule."
 
         return f"""⏳ *Visit Status: AWAITING CONFIRMATION*
 
@@ -367,7 +368,7 @@ Reply *ACCEPT* to confirm or *DENY* to decline."""
         ], order='create_date desc', limit=1)
 
         if not visit:
-            return "ℹ️ No pending visit assignments found.\n\nType /visits to see your schedule."
+            return "ℹ️ No pending visit assignments found.\n\nType *visits* to see your schedule."
 
         try:
             # Confirm the visit
@@ -411,7 +412,7 @@ See you there! Safe travels. 🚗"""
         ], order='create_date desc', limit=1)
 
         if not visit:
-            return "ℹ️ No pending visit assignments found.\n\nType /visits to see your schedule."
+            return "ℹ️ No pending visit assignments found.\n\nType *visits* to see your schedule."
 
         try:
             # Reset the assignment (remove partner, back to draft)
@@ -452,7 +453,7 @@ If this was a mistake, please contact your coordinator immediately."""
 Reply with:
 • *ACCEPT* - To confirm a visit
 • *DENY* - To decline a visit
-• */help* - For more options"""
+• *help* - For more options"""
 
     @http.route('/whatsapp/status', type='http', auth='public',
                 methods=['POST'], csrf=False)
