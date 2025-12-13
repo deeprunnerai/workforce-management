@@ -9,11 +9,11 @@
     </data>
 
     <data noupdate="1">
-        <!-- Partners can read and update visits assigned to them -->
+        <!-- Partners can read and update visits assigned to them (excludes Draft) -->
         <record id="wfm_visit_rule_partner" model="ir.rule">
             <field name="name">WFM Partner: Own Visits Only</field>
             <field name="model_id" ref="wfm_core.model_wfm_visit"/>
-            <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+            <field name="domain_force">[('partner_id', '=', user.partner_id.id), ('state', '!=', 'draft')]</field>
             <field name="groups" eval="[(4, ref('wfm_portal.group_wfm_partner'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
