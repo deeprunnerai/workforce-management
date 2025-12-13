@@ -29,10 +29,12 @@
         'python': ['openpyxl'],
     },
     'data': [
+        'security/wfm_security.xml',
         'security/ir.model.access.csv',
         'data/sequences.xml',
         'data/visit_stages.xml',
         'data/workflow_cron.xml',
+        'data/user_roles.xml',
         'views/partner_views.xml',
         'views/visit_views.xml',
         'views/installation_views.xml',

@@ -8,15 +8,18 @@
 
     <!-- ============================================ -->
     <!-- DASHBOARD (direct link, sequence 10)        -->
+    <!-- Admin + Coordinator                         -->
     <!-- ============================================ -->
     <menuitem id="menu_dashboard"
               name="Dashboard"
               parent="wfm_core.menu_wfm_root"
               action="action_dashboard"
+              groups="wfm_core.group_wfm_admin,wfm_core.group_wfm_coordinator"
               sequence="10"/>
 
     <!-- ============================================ -->
     <!-- VISITS SUB-ITEMS                            -->
+    <!-- Admin + Coordinator                         -->
     <!-- ============================================ -->
     <menuitem id="menu_visits_kanban"
               name="Kanban"
@@ -44,6 +47,7 @@
 
     <!-- ============================================ -->
     <!-- PARTNERS TIMELINE                           -->
+    <!-- Admin + Coordinator                         -->
     <!-- ============================================ -->
     <menuitem id="menu_partners_timeline"
               name="Timeline"
@@ -53,6 +57,7 @@
 
     <!-- ============================================ -->
     <!-- CLIENTS TIMELINE                            -->
+    <!-- Admin ONLY (inherits from parent)           -->
     <!-- ============================================ -->
     <menuitem id="menu_clients_timeline"
               name="Timeline"
@@ -62,10 +67,23 @@
 
     <!-- ============================================ -->
     <!-- PARTNER REFERRALS (Coordinator Management)  -->
+    <!-- Admin + Coordinator                         -->
     <!-- ============================================ -->
     <menuitem id="menu_partner_referrals"
               name="Partner Referrals"
               parent="wfm_core.menu_wfm_root"
               action="action_referral_coordinator"
+              groups="wfm_core.group_wfm_admin,wfm_core.group_wfm_coordinator"
               sequence="60"/>
+
+    <!-- ============================================ -->
+    <!-- PARTNER HEALTH (Churn Dashboard)            -->
+    <!-- Admin + Coordinator                         -->
+    <!-- ============================================ -->
+    <menuitem id="menu_partner_health"
+              name="Partner Health"
+              parent="wfm_core.menu_wfm_partners_parent"
+              action="action_partner_health_dashboard"
+              groups="wfm_core.group_wfm_admin,wfm_core.group_wfm_coordinator"
+              sequence="50"/>
 </odoo>
