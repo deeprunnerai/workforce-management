@@ -593,11 +593,17 @@
 
     <!-- ===== MENU ITEMS ===== -->
 
-    <!-- Partner Retention at root level (same as Operations, Configuration) -->
-    <menuitem id="menu_partner_retention"
-              name="Partner Retention"
+    <!-- Analysis - Main menu at root level -->
+    <menuitem id="menu_analysis"
+              name="Analysis"
               parent="wfm_core.menu_wfm_root"
               sequence="50"/>
+
+    <!-- Partner Retention Sub-Menu -->
+    <menuitem id="menu_partner_retention"
+              name="Partner Retention"
+              parent="menu_analysis"
+              sequence="10"/>
 
     <!-- Retention Tickets -->
     <menuitem id="menu_retention_tickets"
@@ -620,11 +626,11 @@
               action="action_partner_interventions"
               sequence="30"/>
 
-    <!-- Analytics -->
+    <!-- Churn Analytics - Direct under Analysis -->
     <menuitem id="menu_churn_analytics"
               name="Churn Analytics"
-              parent="menu_partner_retention"
+              parent="menu_analysis"
               action="action_churn_dashboard"
-              sequence="40"/>
+              sequence="20"/>
 
 </odoo>

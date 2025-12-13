@@ -73,6 +73,26 @@
               sequence="35"/>
 
     <!-- ============================================ -->
+    <!-- AUTOMATION DROPDOWN (sequence 80)           -->
+    <!-- ============================================ -->
+    <menuitem id="menu_wfm_automation"
+              name="Automation"
+              parent="menu_wfm_root"
+              sequence="80"/>
+
+    <menuitem id="menu_wfm_workflows"
+              name="Workflows"
+              parent="menu_wfm_automation"
+              action="wfm_workflow_action"
+              sequence="10"/>
+
+    <menuitem id="menu_wfm_workflow_logs"
+              name="Execution Logs"
+              parent="menu_wfm_automation"
+              action="wfm_workflow_log_action"
+              sequence="20"/>
+
+    <!-- ============================================ -->
     <!-- CONFIG DROPDOWN (sequence 90)               -->
     <!-- ============================================ -->
     <menuitem id="menu_wfm_config"

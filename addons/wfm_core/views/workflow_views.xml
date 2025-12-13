@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Workflow List View -->
+    <record id="wfm_workflow_view_list" model="ir.ui.view">
+        <field name="name">wfm.workflow.list</field>
+        <field name="model">wfm.workflow</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'paused'" decoration-danger="state == 'error'">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="schedule_type"/>
+                <field name="cron_description"/>
+                <field name="last_run"/>
+                <field name="next_run"/>
+                <field name="run_count"/>
+                <field name="success_rate" widget="progressbar"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'active'"
+                       decoration-warning="state == 'paused'"
+                       decoration-danger="state == 'error'"
+                       decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Workflow Form View -->
+    <record id="wfm_workflow_view_form" model="ir.ui.view">
+        <field name="name">wfm.workflow.form</field>
+        <field name="model">wfm.workflow</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_activate" string="Activate"
+                            type="object" class="btn-primary"
+                            invisible="state == 'active'"/>
+                    <button name="action_pause" string="Pause"
+                            type="object"
+                            invisible="state != 'active'"/>
+                    <button name="action_run_now" string="Run Now"
+                            type="object" class="btn-secondary"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,active,paused"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_logs" type="object"
+                                class="oe_stat_button" icon="fa-history">
+                            <field name="log_count" widget="statinfo" string="Logs"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Workflow Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Agent Configuration">
+                            <field name="description" placeholder="Describe what this workflow does..."/>
+                            <field name="prompt" widget="text" placeholder="Enter the natural language instructions for the AI agent..."/>
+                        </group>
+                        <group string="Schedule">
+                            <field name="schedule_type"/>
+                            <field name="interval_number"
+                                   invisible="schedule_type != 'interval'"/>
+                            <field name="interval_type"
+                                   invisible="schedule_type != 'interval'"/>
+                            <field name="cron_expression"
+                                   invisible="schedule_type != 'cron'"
+                                   placeholder="0 9 * * * (daily at 9AM)"/>
+                            <field name="cron_description" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Execution Settings">
+                            <field name="max_tool_calls"/>
+                            <field name="timeout_minutes"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Statistics">
+                            <field name="last_run"/>
+                            <field name="next_run"/>
+                            <field name="run_count"/>
+                            <field name="success_count"/>
+                            <field name="fail_count"/>
+                            <field name="success_rate" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Recent Logs" name="logs">
+                            <field name="log_ids" readonly="1">
+                                <list limit="10" decoration-success="status == 'success'" decoration-danger="status == 'failed'">
+                                    <field name="started_at"/>
+                                    <field name="duration_seconds"/>
+                                    <field name="status" widget="badge"/>
+                                    <field name="tool_call_count"/>
+                                    <field name="error"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Workflow Action -->
+    <record id="wfm_workflow_action" model="ir.actions.act_window">
+        <field name="name">Workflows</field>
+        <field name="res_model">wfm.workflow</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first autonomous workflow
+            </p>
+            <p>
+                Workflows let you automate recurring tasks using AI.
+                Define what you want to happen in natural language and set a schedule.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============= Workflow Log Views ============= -->
+
+    <!-- Log List View -->
+    <record id="wfm_workflow_log_view_list" model="ir.ui.view">
+        <field name="name">wfm.workflow.log.list</field>
+        <field name="model">wfm.workflow.log</field>
+        <field name="arch" type="xml">
+            <list decoration-success="status == 'success'"
+                  decoration-danger="status == 'failed'"
+                  decoration-warning="status == 'timeout'"
+                  decoration-muted="status == 'cancelled'">
+                <field name="workflow_name"/>
+                <field name="started_at"/>
+                <field name="duration_seconds" string="Duration (s)"/>
+                <field name="status" widget="badge"/>
+                <field name="tool_call_count"/>
+                <field name="tokens_total"/>
+                <field name="error" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Log Form View -->
+    <record id="wfm_workflow_log_view_form" model="ir.ui.view">
+        <field name="name">wfm.workflow.log.form</field>
+        <field name="model">wfm.workflow.log</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Execution Info">
+                            <field name="workflow_id"/>
+                            <field name="started_at"/>
+                            <field name="ended_at"/>
+                            <field name="duration_seconds"/>
+                            <field name="status"/>
+                        </group>
+                        <group string="Resource Usage">
+                            <field name="tool_call_count"/>
+                            <field name="tokens_input"/>
+                            <field name="tokens_output"/>
+                            <field name="tokens_total"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Prompt" name="prompt">
+                            <field name="prompt_used" readonly="1"/>
+                        </page>
+                        <page string="Result" name="result">
+                            <field name="result" readonly="1"/>
+                        </page>
+                        <page string="Tool Calls" name="tools">
+                            <field name="tool_calls" readonly="1" widget="text"/>
+                        </page>
+                        <page string="Error" name="error"
+                              invisible="not error">
+                            <field name="error" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Log Search View -->
+    <record id="wfm_workflow_log_view_search" model="ir.ui.view">
+        <field name="name">wfm.workflow.log.search</field>
+        <field name="model">wfm.workflow.log</field>
+        <field name="arch" type="xml">
+            <search string="Workflow Logs">
+                <field name="workflow_id"/>
+                <field name="status"/>
+                <filter string="Success" name="filter_success"
+                        domain="[('status', '=', 'success')]"/>
+                <filter string="Failed" name="filter_failed"
+                        domain="[('status', '=', 'failed')]"/>
+                <filter string="Running" name="filter_running"
+                        domain="[('status', '=', 'running')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Log Action -->
+    <record id="wfm_workflow_log_action" model="ir.actions.act_window">
+        <field name="name">Workflow Logs</field>
+        <field name="res_model">wfm.workflow.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="wfm_workflow_log_view_search"/>
+        <field name="context">{}</field>
+    </record>
+</odoo>

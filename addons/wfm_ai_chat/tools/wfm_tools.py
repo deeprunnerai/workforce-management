@@ -453,3 +453,493 @@ class WfmToolExecutor(models.AbstractModel):
             'count': len(result),
             'messages': result
         }
+
+    # ==================== Workflow Tools ====================
+
+    def _tool_wfm_create_workflow(self, args):
+        """Create a new autonomous workflow."""
+        if not args.get('name') or not args.get('prompt'):
+            return {'error': 'Both name and prompt are required'}
+
+        Workflow = self.env['wfm.workflow']
+
+        vals = {
+            'name': args['name'],
+            'prompt': args['prompt'],
+        }
+
+        if args.get('description'):
+            vals['description'] = args['description']
+
+        if args.get('schedule_type'):
+            vals['schedule_type'] = args['schedule_type']
+
+        if args.get('interval_number'):
+            vals['interval_number'] = args['interval_number']
+
+        if args.get('interval_type'):
+            vals['interval_type'] = args['interval_type']
+
+        if args.get('cron_expression'):
+            vals['cron_expression'] = args['cron_expression']
+
+        try:
+            workflow = Workflow.create(vals)
+            return {
+                'success': True,
+                'message': f"Created workflow '{workflow.name}' (ID: {workflow.id})",
+                'workflow': {
+                    'id': workflow.id,
+                    'name': workflow.name,
+                    'state': workflow.state,
+                    'schedule_type': workflow.schedule_type,
+                    'cron_description': workflow.cron_description,
+                }
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_list_workflows(self, args):
+        """List existing workflows."""
+        Workflow = self.env['wfm.workflow']
+        domain = []
+
+        if args.get('state'):
+            domain.append(('state', '=', args['state']))
+
+        limit = args.get('limit', 10)
+        workflows = Workflow.search(domain, limit=limit, order='sequence, name')
+
+        result = []
+        for w in workflows:
+            result.append({
+                'id': w.id,
+                'name': w.name,
+                'description': w.description or '',
+                'state': w.state,
+                'schedule_type': w.schedule_type,
+                'cron_description': w.cron_description or '',
+                'last_run': w.last_run.strftime('%d/%m/%Y %H:%M') if w.last_run else None,
+                'next_run': w.next_run.strftime('%d/%m/%Y %H:%M') if w.next_run else None,
+                'run_count': w.run_count,
+                'success_rate': f"{w.success_rate:.0f}%",
+            })
+
+        return {
+            'count': len(result),
+            'workflows': result
+        }
+
+    def _tool_wfm_update_workflow(self, args):
+        """Update an existing workflow."""
+        if not args.get('workflow_id'):
+            return {'error': 'workflow_id is required'}
+
+        Workflow = self.env['wfm.workflow']
+        workflow = Workflow.browse(args['workflow_id'])
+
+        if not workflow.exists():
+            return {'error': f"Workflow {args['workflow_id']} not found"}
+
+        vals = {}
+        if args.get('name'):
+            vals['name'] = args['name']
+        if args.get('prompt'):
+            vals['prompt'] = args['prompt']
+        if args.get('schedule_type'):
+            vals['schedule_type'] = args['schedule_type']
+        if args.get('interval_number'):
+            vals['interval_number'] = args['interval_number']
+        if args.get('interval_type'):
+            vals['interval_type'] = args['interval_type']
+        if args.get('cron_expression'):
+            vals['cron_expression'] = args['cron_expression']
+
+        # Handle state changes via action methods
+        state = args.get('state')
+        if state == 'active' and workflow.state != 'active':
+            workflow.action_activate()
+        elif state == 'paused' and workflow.state == 'active':
+            workflow.action_pause()
+
+        if vals:
+            workflow.write(vals)
+
+        return {
+            'success': True,
+            'message': f"Updated workflow '{workflow.name}'",
+            'workflow': {
+                'id': workflow.id,
+                'name': workflow.name,
+                'state': workflow.state,
+                'schedule_type': workflow.schedule_type,
+                'cron_description': workflow.cron_description,
+            }
+        }
+
+    def _tool_wfm_run_workflow(self, args):
+        """Manually trigger a workflow."""
+        if not args.get('workflow_id'):
+            return {'error': 'workflow_id is required'}
+
+        Workflow = self.env['wfm.workflow']
+        workflow = Workflow.browse(args['workflow_id'])
+
+        if not workflow.exists():
+            return {'error': f"Workflow {args['workflow_id']} not found"}
+
+        try:
+            workflow.action_run_now()
+            return {
+                'success': True,
+                'message': f"Triggered workflow '{workflow.name}'",
+                'workflow_id': workflow.id,
+                'workflow_name': workflow.name,
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_workflow_logs(self, args):
+        """Get execution logs for a workflow."""
+        WorkflowLog = self.env['wfm.workflow.log']
+        domain = []
+
+        if args.get('workflow_id'):
+            domain.append(('workflow_id', '=', args['workflow_id']))
+
+        if args.get('status'):
+            domain.append(('status', '=', args['status']))
+
+        limit = args.get('limit', 10)
+        logs = WorkflowLog.search(domain, limit=limit, order='started_at desc')
+
+        result = []
+        for log in logs:
+            result.append({
+                'id': log.id,
+                'workflow': log.workflow_id.name,
+                'started_at': log.started_at.strftime('%d/%m/%Y %H:%M') if log.started_at else None,
+                'ended_at': log.ended_at.strftime('%d/%m/%Y %H:%M') if log.ended_at else None,
+                'duration_seconds': log.duration_seconds,
+                'status': log.status,
+                'tool_call_count': log.tool_call_count,
+                'tokens_total': log.tokens_total,
+                'error': log.error if log.status == 'failed' else None,
+                'result_preview': (log.result[:200] + '...') if log.result and len(log.result) > 200 else log.result,
+            })
+
+        return {
+            'count': len(result),
+            'logs': result
+        }
+
+    # ==================== Churn Analysis Tools ====================
+
+    def _tool_wfm_list_at_risk_partners(self, args):
+        """List partners at risk of churning."""
+        PartnerHealth = self.env['wfm.partner.health']
+        domain = []
+
+        # Filter by risk level
+        risk_level = args.get('risk_level')
+        if risk_level:
+            domain.append(('risk_level', '=', risk_level))
+        else:
+            # Default: show high and critical risk
+            domain.append(('risk_level', 'in', ['high', 'critical']))
+
+        # Filter by ticket state
+        ticket_state = args.get('ticket_state')
+        if ticket_state:
+            domain.append(('ticket_state', '=', ticket_state))
+
+        # Filter by assigned coordinator
+        if args.get('my_tickets'):
+            domain.append(('assigned_coordinator_id', '=', self.env.uid))
+
+        limit = args.get('limit', 20)
+        health_records = PartnerHealth.search(domain, limit=limit, order='churn_risk_score desc')
+
+        result = []
+        for h in health_records:
+            result.append({
+                'id': h.id,
+                'partner_id': h.partner_id.id,
+                'partner_name': h.partner_id.name,
+                'specialty': h.partner_id.specialty if hasattr(h.partner_id, 'specialty') else None,
+                'risk_score': round(h.churn_risk_score, 1),
+                'risk_level': h.risk_level,
+                'ticket_state': h.ticket_state,
+                'assigned_to': h.assigned_coordinator_id.name if h.assigned_coordinator_id else None,
+                'days_since_last_visit': h.days_since_last_visit,
+                'visits_declined_30d': h.visits_declined_30d,
+                'risk_trend': h.risk_trend,
+            })
+
+        return {
+            'count': len(result),
+            'at_risk_partners': result,
+            'summary': {
+                'critical': len([r for r in result if r['risk_level'] == 'critical']),
+                'high': len([r for r in result if r['risk_level'] == 'high']),
+            }
+        }
+
+    def _tool_wfm_get_partner_health(self, args):
+        """Get detailed churn risk analysis for a partner."""
+        if not args.get('partner_id') and not args.get('health_id'):
+            return {'error': 'Either partner_id or health_id is required'}
+
+        PartnerHealth = self.env['wfm.partner.health']
+
+        if args.get('health_id'):
+            health = PartnerHealth.browse(args['health_id'])
+        else:
+            health = PartnerHealth.search([
+                ('partner_id', '=', args['partner_id'])
+            ], order='computed_date desc', limit=1)
+
+        if not health or not health.exists():
+            return {'error': 'No health record found for this partner'}
+
+        # Get score breakdown
+        score_breakdown = {
+            'decline_rate': {
+                'score': round(health.decline_rate_score, 1),
+                'max': 30,
+                'detail': f"{health.visits_declined_30d or 0} visits declined out of {health.visits_assigned_30d or 0} assigned"
+            },
+            'volume_change': {
+                'score': round(health.volume_change_score, 1),
+                'max': 25,
+                'detail': f"Last 30d: {health.visits_last_30d or 0}, Previous 30d: {health.visits_previous_30d or 0}"
+            },
+            'inactivity': {
+                'score': round(health.inactivity_score, 1),
+                'max': 20,
+                'detail': f"{health.days_since_last_visit or 0} days since last visit"
+            },
+            'payment_issues': {
+                'score': round(health.payment_issue_score, 1),
+                'max': 15,
+                'detail': f"{health.payment_complaints or 0} payment complaints"
+            },
+            'negative_feedback': {
+                'score': round(health.feedback_score, 1),
+                'max': 10,
+                'detail': f"{health.negative_feedback_count or 0} negative feedback items"
+            },
+        }
+
+        return {
+            'health_id': health.id,
+            'partner': {
+                'id': health.partner_id.id,
+                'name': health.partner_id.name,
+                'phone': health.partner_id.phone or '',
+                'email': health.partner_id.email or '',
+            },
+            'computed_date': health.computed_date.strftime('%d/%m/%Y') if health.computed_date else None,
+            'risk_score': round(health.churn_risk_score, 1),
+            'risk_level': health.risk_level,
+            'risk_trend': health.risk_trend,
+            'score_breakdown': score_breakdown,
+            'ticket': {
+                'state': health.ticket_state,
+                'assigned_to': health.assigned_coordinator_id.name if health.assigned_coordinator_id else None,
+                'planned_action': health.planned_action,
+            },
+            'ai_advice': health.ai_advice_text or None,
+        }
+
+    def _tool_wfm_log_retention_action(self, args):
+        """Log a retention intervention/action for a partner."""
+        if not args.get('health_id') or not args.get('intervention_type'):
+            return {'error': 'Both health_id and intervention_type are required'}
+
+        PartnerHealth = self.env['wfm.partner.health']
+        Intervention = self.env['wfm.partner.intervention']
+
+        health = PartnerHealth.browse(args['health_id'])
+        if not health.exists():
+            return {'error': f"Health record {args['health_id']} not found"}
+
+        valid_types = ['call', 'whatsapp', 'email', 'meeting', 'bonus', 'workload']
+        if args['intervention_type'] not in valid_types:
+            return {'error': f"Invalid intervention_type. Must be one of: {', '.join(valid_types)}"}
+
+        # Create intervention record
+        intervention_vals = {
+            'health_id': health.id,
+            'partner_id': health.partner_id.id,
+            'intervention_type': args['intervention_type'],
+            'notes': args.get('notes', ''),
+            'coordinator_id': self.env.uid,
+        }
+
+        if args.get('outcome'):
+            valid_outcomes = ['positive', 'neutral', 'negative', 'pending']
+            if args['outcome'] in valid_outcomes:
+                intervention_vals['outcome'] = args['outcome']
+
+        try:
+            intervention = Intervention.create(intervention_vals)
+
+            # Update ticket state to in_progress if it was open
+            if health.ticket_state == 'open':
+                health.write({'ticket_state': 'in_progress'})
+
+            return {
+                'success': True,
+                'message': f"Logged {args['intervention_type']} intervention for {health.partner_id.name}",
+                'intervention_id': intervention.id,
+                'partner_name': health.partner_id.name,
+                'ticket_state': health.ticket_state,
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_resolve_retention_ticket(self, args):
+        """Resolve a retention ticket with outcome."""
+        if not args.get('health_id') or not args.get('outcome'):
+            return {'error': 'Both health_id and outcome are required'}
+
+        PartnerHealth = self.env['wfm.partner.health']
+        health = PartnerHealth.browse(args['health_id'])
+
+        if not health.exists():
+            return {'error': f"Health record {args['health_id']} not found"}
+
+        valid_outcomes = ['retained', 'churned', 'false_alarm']
+        if args['outcome'] not in valid_outcomes:
+            return {'error': f"Invalid outcome. Must be one of: {', '.join(valid_outcomes)}"}
+
+        try:
+            health.write({
+                'ticket_state': 'resolved',
+                'resolution_outcome': args['outcome'],
+                'resolution_notes': args.get('notes', ''),
+                'resolution_date': fields.Datetime.now(),
+            })
+
+            return {
+                'success': True,
+                'message': f"Resolved ticket for {health.partner_id.name} as {args['outcome']}",
+                'partner_name': health.partner_id.name,
+                'outcome': args['outcome'],
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_churn_dashboard_stats(self, args):
+        """Get churn analysis dashboard statistics."""
+        PartnerHealth = self.env['wfm.partner.health']
+
+        # Get counts by risk level
+        critical = PartnerHealth.search_count([('risk_level', '=', 'critical')])
+        high = PartnerHealth.search_count([('risk_level', '=', 'high')])
+        medium = PartnerHealth.search_count([('risk_level', '=', 'medium')])
+        low = PartnerHealth.search_count([('risk_level', '=', 'low')])
+
+        # Get ticket stats
+        open_tickets = PartnerHealth.search_count([
+            ('ticket_state', '=', 'open'),
+            ('risk_level', 'in', ['high', 'critical'])
+        ])
+        in_progress = PartnerHealth.search_count([('ticket_state', '=', 'in_progress')])
+        resolved_retained = PartnerHealth.search_count([
+            ('resolution_outcome', '=', 'retained')
+        ])
+        resolved_churned = PartnerHealth.search_count([
+            ('resolution_outcome', '=', 'churned')
+        ])
+
+        # Get trend data
+        improving = PartnerHealth.search_count([('risk_trend', '=', 'improving')])
+        declining = PartnerHealth.search_count([('risk_trend', '=', 'declining')])
+
+        # Calculate retention rate
+        total_resolved = resolved_retained + resolved_churned
+        retention_rate = (resolved_retained / total_resolved * 100) if total_resolved > 0 else 0
+
+        return {
+            'risk_distribution': {
+                'critical': critical,
+                'high': high,
+                'medium': medium,
+                'low': low,
+                'total_at_risk': critical + high,
+            },
+            'tickets': {
+                'open': open_tickets,
+                'in_progress': in_progress,
+                'resolved_retained': resolved_retained,
+                'resolved_churned': resolved_churned,
+            },
+            'trends': {
+                'improving': improving,
+                'declining': declining,
+            },
+            'retention_rate': f"{retention_rate:.1f}%",
+        }
+
+    def _tool_wfm_get_ai_retention_strategy(self, args):
+        """Get AI-powered retention strategy for a partner."""
+        if not args.get('health_id'):
+            return {'error': 'health_id is required'}
+
+        PartnerHealth = self.env['wfm.partner.health']
+        AIEngine = self.env['wfm.ai.retention.engine']
+
+        health = PartnerHealth.browse(args['health_id'])
+        if not health.exists():
+            return {'error': f"Health record {args['health_id']} not found"}
+
+        try:
+            # Call the AI retention engine
+            engine = AIEngine.search([], limit=1) or AIEngine.create({'name': 'Default'})
+            result = engine.generate_retention_strategy(health)
+
+            if result.get('error'):
+                return {'error': result['error']}
+
+            # Store the advice on the health record
+            if result.get('advice'):
+                health.write({'ai_advice_text': result['advice']})
+
+            return {
+                'success': True,
+                'partner_name': health.partner_id.name,
+                'risk_level': health.risk_level,
+                'risk_score': round(health.churn_risk_score, 1),
+                'ai_strategy': result.get('advice', ''),
+                'recommended_action': result.get('recommended_action', ''),
+                'whatsapp_message': result.get('whatsapp_message', ''),
+                'urgency': result.get('urgency', 'medium'),
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+    def _tool_wfm_run_churn_computation(self, args):
+        """Trigger churn risk computation for all partners."""
+        PartnerHealth = self.env['wfm.partner.health']
+
+        try:
+            # Call the cron method to compute health for all partners
+            PartnerHealth._cron_compute_partner_health()
+
+            # Get summary
+            critical = PartnerHealth.search_count([('risk_level', '=', 'critical')])
+            high = PartnerHealth.search_count([('risk_level', '=', 'high')])
+
+            return {
+                'success': True,
+                'message': 'Churn risk computation completed for all partners',
+                'summary': {
+                    'critical_risk': critical,
+                    'high_risk': high,
+                    'total_at_risk': critical + high,
+                }
+            }
+        except Exception as e:
+            return {'error': str(e)}

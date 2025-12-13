@@ -61,6 +61,18 @@ You have access to these tools to interact with the WFM system:
 - wfm_send_whatsapp: Send a custom WhatsApp message to a partner
 - wfm_send_visit_notification: Send predefined WhatsApp notification (assignment/confirmation/reminder/cancellation)
 - wfm_list_whatsapp_messages: List WhatsApp message history
+- wfm_create_workflow: Create an autonomous workflow that runs on a schedule
+- wfm_list_workflows: List existing workflows
+- wfm_update_workflow: Update a workflow's prompt or schedule
+- wfm_run_workflow: Manually trigger a workflow now
+- wfm_workflow_logs: Get execution logs for a workflow
+- wfm_list_at_risk_partners: List partners at risk of churning (high/critical risk)
+- wfm_get_partner_health: Get detailed churn risk analysis for a partner
+- wfm_log_retention_action: Log a retention intervention (call, email, meeting, etc.)
+- wfm_resolve_retention_ticket: Resolve a retention ticket with outcome
+- wfm_churn_dashboard_stats: Get churn analysis dashboard statistics
+- wfm_get_ai_retention_strategy: Get AI-powered retention strategy for a partner
+- wfm_run_churn_computation: Trigger churn risk computation for all partners
 
 Guidelines:
 1. Always be helpful and concise
@@ -331,6 +343,308 @@ When responding:
                         }
                     }
                 }
+            },
+            # Workflow Tools
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_create_workflow",
+                    "description": "Create an autonomous workflow that runs on a schedule. Workflows execute AI agents to perform automated tasks.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Name of the workflow"
+                            },
+                            "prompt": {
+                                "type": "string",
+                                "description": "Natural language instructions for the AI agent to execute"
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Brief description of what the workflow does"
+                            },
+                            "schedule_type": {
+                                "type": "string",
+                                "enum": ["manual", "interval", "cron"],
+                                "description": "How the workflow is scheduled: manual (run on demand), interval (every X minutes/hours/days), cron (cron expression)"
+                            },
+                            "interval_number": {
+                                "type": "integer",
+                                "description": "For interval schedules: how many units between runs"
+                            },
+                            "interval_type": {
+                                "type": "string",
+                                "enum": ["minutes", "hours", "days", "weeks"],
+                                "description": "For interval schedules: the time unit"
+                            },
+                            "cron_expression": {
+                                "type": "string",
+                                "description": "For cron schedules: cron expression (e.g., '0 9 * * *' for daily at 9AM)"
+                            }
+                        },
+                        "required": ["name", "prompt"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_list_workflows",
+                    "description": "List existing autonomous workflows",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "state": {
+                                "type": "string",
+                                "enum": ["draft", "active", "paused", "error"],
+                                "description": "Filter by workflow state"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of workflows to return (default 10)"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_update_workflow",
+                    "description": "Update an existing workflow's configuration",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "workflow_id": {
+                                "type": "integer",
+                                "description": "Workflow ID to update"
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "New name for the workflow"
+                            },
+                            "prompt": {
+                                "type": "string",
+                                "description": "New prompt/instructions for the AI agent"
+                            },
+                            "state": {
+                                "type": "string",
+                                "enum": ["active", "paused"],
+                                "description": "Activate or pause the workflow"
+                            },
+                            "schedule_type": {
+                                "type": "string",
+                                "enum": ["manual", "interval", "cron"],
+                                "description": "New schedule type"
+                            },
+                            "interval_number": {
+                                "type": "integer",
+                                "description": "New interval number"
+                            },
+                            "interval_type": {
+                                "type": "string",
+                                "enum": ["minutes", "hours", "days", "weeks"],
+                                "description": "New interval type"
+                            },
+                            "cron_expression": {
+                                "type": "string",
+                                "description": "New cron expression"
+                            }
+                        },
+                        "required": ["workflow_id"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_run_workflow",
+                    "description": "Manually trigger a workflow to run now",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "workflow_id": {
+                                "type": "integer",
+                                "description": "Workflow ID to run"
+                            }
+                        },
+                        "required": ["workflow_id"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_workflow_logs",
+                    "description": "Get execution logs for a workflow",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "workflow_id": {
+                                "type": "integer",
+                                "description": "Workflow ID to get logs for"
+                            },
+                            "status": {
+                                "type": "string",
+                                "enum": ["running", "success", "failed", "timeout", "cancelled"],
+                                "description": "Filter by execution status"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of logs to return (default 10)"
+                            }
+                        }
+                    }
+                }
+            },
+            # Churn Analysis Tools
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_list_at_risk_partners",
+                    "description": "List partners at risk of churning. By default shows high and critical risk partners.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "risk_level": {
+                                "type": "string",
+                                "enum": ["low", "medium", "high", "critical"],
+                                "description": "Filter by specific risk level"
+                            },
+                            "ticket_state": {
+                                "type": "string",
+                                "enum": ["open", "in_progress", "resolved", "closed"],
+                                "description": "Filter by retention ticket state"
+                            },
+                            "my_tickets": {
+                                "type": "boolean",
+                                "description": "Only show tickets assigned to current user"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of partners to return (default 20)"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_get_partner_health",
+                    "description": "Get detailed churn risk analysis for a specific partner, including score breakdown",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "partner_id": {
+                                "type": "integer",
+                                "description": "Partner ID to get health data for"
+                            },
+                            "health_id": {
+                                "type": "integer",
+                                "description": "Health record ID (alternative to partner_id)"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_log_retention_action",
+                    "description": "Log a retention intervention/action for a partner (call, email, meeting, etc.)",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "health_id": {
+                                "type": "integer",
+                                "description": "Health record ID for the partner"
+                            },
+                            "intervention_type": {
+                                "type": "string",
+                                "enum": ["call", "whatsapp", "email", "meeting", "bonus", "workload"],
+                                "description": "Type of intervention performed"
+                            },
+                            "notes": {
+                                "type": "string",
+                                "description": "Notes about the intervention"
+                            },
+                            "outcome": {
+                                "type": "string",
+                                "enum": ["positive", "neutral", "negative", "pending"],
+                                "description": "Outcome of the intervention"
+                            }
+                        },
+                        "required": ["health_id", "intervention_type"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_resolve_retention_ticket",
+                    "description": "Resolve a retention ticket with outcome (retained, churned, or false alarm)",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "health_id": {
+                                "type": "integer",
+                                "description": "Health record ID to resolve"
+                            },
+                            "outcome": {
+                                "type": "string",
+                                "enum": ["retained", "churned", "false_alarm"],
+                                "description": "Resolution outcome"
+                            },
+                            "notes": {
+                                "type": "string",
+                                "description": "Resolution notes"
+                            }
+                        },
+                        "required": ["health_id", "outcome"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_churn_dashboard_stats",
+                    "description": "Get churn analysis dashboard statistics: risk distribution, ticket counts, retention rate",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {}
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_get_ai_retention_strategy",
+                    "description": "Get AI-powered retention strategy and personalized WhatsApp message for a partner",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "health_id": {
+                                "type": "integer",
+                                "description": "Health record ID to generate strategy for"
+                            }
+                        },
+                        "required": ["health_id"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "wfm_run_churn_computation",
+                    "description": "Trigger churn risk computation for all partners. Updates health records with new risk scores.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {}
+                    }
+                }
             }
         ]
 
@@ -396,7 +710,7 @@ When responding:
                 'tool_calls': []
             }
 
-    def chat_with_tools(self, message, conversation_history=None, max_rounds=3):
+    def chat_with_tools(self, message, conversation_history=None, max_rounds=5):
         """
         Complete chat interaction with automatic tool execution.
 

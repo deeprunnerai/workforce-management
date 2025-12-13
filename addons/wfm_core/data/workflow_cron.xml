@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Workflow Runner - Checks and executes due workflows -->
+        <record id="ir_cron_workflow_runner" model="ir.cron">
+            <field name="name">WFM: Run Scheduled Workflows</field>
+            <field name="model_id" ref="model_wfm_workflow"/>
+            <field name="state">code</field>
+            <field name="code">model.run_scheduled_workflows()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+            <field name="priority">5</field>
+        </record>
+
+        <!-- Log Cleanup - Removes old execution logs -->
+        <record id="ir_cron_workflow_log_cleanup" model="ir.cron">
+            <field name="name">WFM: Cleanup Old Workflow Logs</field>
+            <field name="model_id" ref="model_wfm_workflow_log"/>
+            <field name="state">code</field>
+            <field name="code">model.cleanup_old_logs(days=30)</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active">True</field>
+            <field name="priority">100</field>
+        </record>
+    </data>
+</odoo>
