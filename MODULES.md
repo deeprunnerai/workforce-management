@@ -6,10 +6,11 @@ Complete list of custom Odoo 19 modules developed for the GEP OHS Workforce Mana
 
 | Module | Version | Status | Description |
 |--------|---------|--------|-------------|
-| `wfm_core` | 19.0.1.0.0 | Production | Core data models, workflows |
-| `wfm_fsm` | 19.0.2.0.0 | Production | Kanban, Dashboard, Smart Assignment |
+| `wfm_core` | 19.0.2.1.0 | Production | Core models, SEPE, billing, workflows |
+| `wfm_fsm` | 19.0.4.0.0 | Production | Dashboard, Smart Assignment, Churn Analysis |
 | `wfm_portal` | 19.0.1.0.0 | Production | Partner self-service backend |
 | `wfm_whatsapp` | 19.0.1.0.0 | Production | Twilio WhatsApp integration |
+| `wfm_ai_chat` | 19.0.1.0.0 | Production | AI Chat with LLM tools |
 | `web_timeline` | 19.0.1.0.0 | Production | OCA Timeline view (dependency) |
 
 ## Dependency Graph
@@ -23,7 +24,7 @@ Complete list of custom Odoo 19 modules developed for the GEP OHS Workforce Mana
            │               │               │
            ▼               ▼               ▼
     ┌────────────┐  ┌────────────┐  ┌────────────┐
-    │  wfm_fsm   │  │ wfm_portal │  │    ...     │
+    │  wfm_fsm   │  │ wfm_portal │  │wfm_ai_chat │
     └──────┬─────┘  └────────────┘  └────────────┘
            │
            ▼
@@ -49,6 +50,9 @@ Complete list of custom Odoo 19 modules developed for the GEP OHS Workforce Mana
 | `wfm.contract.service` | Services in contracts | `contract_id`, `service_type`, `annual_hours` |
 | `wfm.visit` | OHS visit appointments | `client_id`, `installation_id`, `partner_id`, `visit_date`, `state` |
 | `wfm.visit.stage` | Kanban stages | `name`, `sequence`, `fold` |
+| `wfm.sepe.export` | SEPE export records | `name`, `date_from`, `date_to`, `state`, `file_data` |
+| `wfm.workflow` | Autonomous workflows | `name`, `trigger_model`, `trigger_field`, `action_type` |
+| `wfm.workflow.log` | Workflow execution logs | `workflow_id`, `record_id`, `status`, `error_message` |
 
 ### Visit States
 
@@ -68,20 +72,26 @@ wfm_core/
 │   ├── contract.py          # Contract model
 │   ├── contract_service.py
 │   ├── visit.py             # Main visit model
-│   └── visit_stage.py       # Kanban stages
+│   ├── visit_stage.py       # Kanban stages
+│   ├── sepe_export.py       # SEPE exports
+│   ├── workflow.py          # Autonomous workflows
+│   └── workflow_log.py      # Execution logs
+├── wizard/
+│   ├── sepe_export_wizard.py
+│   └── sepe_export_wizard_views.xml
 ├── views/
 │   ├── partner_views.xml
 │   ├── installation_views.xml
-│   ├── installation_service_views.xml
 │   ├── contract_views.xml
-│   ├── contract_service_views.xml
 │   ├── visit_views.xml
+│   ├── sepe_export_views.xml
+│   ├── billing_dashboard_views.xml
+│   ├── workflow_views.xml
 │   └── menu.xml
 ├── data/
-│   ├── sequences.xml        # Visit number sequence (VISIT/00001)
-│   └── visit_stages.xml     # Default stages
-├── demo/
-│   └── demo_data.xml        # Sample data
+│   ├── sequences.xml
+│   ├── visit_stages.xml
+│   └── workflow_cron.xml
 └── security/
     └── ir.model.access.csv
 ```
@@ -99,6 +109,9 @@ wfm_core/
 | `wfm.visit` (ext) | Extended for Kanban | `kanban_state`, `color`, dashboard helpers |
 | `wfm.partner.client.relationship` | Tracks partner-client history | `partner_id`, `client_id`, `total_visits`, `relationship_score` |
 | `wfm.assignment.engine` | Smart assignment algorithm | Scoring methods |
+| `wfm.partner.health` | Partner churn risk | `partner_id`, `health_score`, `risk_level`, `decline_rate` |
+| `wfm.partner.intervention` | Retention actions | `partner_id`, `intervention_type`, `notes`, `outcome` |
+| `wfm.ai.retention.engine` | AI retention strategies | Strategy generation methods |
 
 ### Smart Assignment Engine
 
@@ -112,9 +125,19 @@ AI-powered partner recommendations with weighted scoring:
 | Proximity | 10% | Same city as installation |
 | Workload | 10% | Current assignment balance |
 
-**Key Methods:**
-- `get_recommended_partners(visit_id, limit=2)` - Returns top partners with scores
-- `assign_partner_to_visit(visit_id, partner_id)` - Assign and notify
+### Churn Analysis
+
+Partner health scoring factors:
+
+| Factor | Description |
+|--------|-------------|
+| Decline Rate | Ratio of declined visits |
+| Volume Change | Month-over-month visit changes |
+| Inactivity | Days since last visit |
+| Cancellations | Cancellation ratio |
+| Rating Trend | Performance rating changes |
+
+Risk levels: `low` (70+), `medium` (50-69), `high` (30-49), `critical` (<30)
 
 ### Wizards
 
@@ -122,13 +145,6 @@ AI-powered partner recommendations with weighted scoring:
 |--------|---------|
 | `wfm.visit.assign.wizard` | Bulk assign partners to multiple visits |
 | `wfm.smart.assign.wizard` | Show recommendations, one-click assign |
-
-### Dashboard
-
-Custom OWL component showing:
-- 4 color-coded cards (Draft, Assigned, In Progress, Completed)
-- Click-through to filtered visit list
-- Real-time counts
 
 ### Files
 
@@ -138,17 +154,17 @@ wfm_fsm/
 │   ├── visit_fsm.py           # Visit extensions
 │   ├── partner_relationship.py # Relationship tracking
 │   ├── assignment_engine.py    # Smart assignment
-│   └── dashboard.py           # Dashboard data
+│   ├── dashboard.py           # Dashboard data
+│   ├── partner_health.py      # Churn risk scoring
+│   ├── partner_intervention.py # Retention actions
+│   └── ai_retention_engine.py # AI strategies
 ├── views/
-│   ├── visit_fsm_views.xml    # Enhanced Kanban
-│   ├── gantt_views.xml        # Timeline view
+│   ├── visit_fsm_views.xml
 │   ├── partner_relationship_views.xml
-│   ├── visit_form_extension.xml  # Recommendations table
+│   ├── churn_dashboard_views.xml
 │   ├── dashboard_views.xml
 │   └── menu.xml
 ├── wizard/
-│   ├── visit_assign_wizard.py
-│   ├── visit_assign_wizard_views.xml
 │   ├── smart_assign_wizard.py
 │   └── smart_assign_wizard_views.xml
 └── static/src/
@@ -190,12 +206,12 @@ wfm_portal/
 ├── models/
 │   └── partner_availability.py
 ├── views/
-│   ├── wfm_portal_views.xml      # Partner visit list
-│   ├── wfm_availability_views.xml # Availability calendar
-│   ├── wfm_profile_views.xml     # Profile management
-│   └── wfm_portal_menus.xml      # Partner menu
+│   ├── wfm_portal_views.xml
+│   ├── wfm_availability_views.xml
+│   ├── wfm_profile_views.xml
+│   └── wfm_portal_menus.xml
 └── security/
-    ├── wfm_portal_security.xml   # Groups and rules
+    ├── wfm_portal_security.xml
     └── ir.model.access.csv
 ```
 
@@ -221,8 +237,6 @@ wfm_portal/
 
 ### WhatsApp Commands
 
-Partners can interact via WhatsApp:
-
 | Command | Action |
 |---------|--------|
 | `ACCEPT` / `YES` | Confirm latest assigned visit |
@@ -234,35 +248,15 @@ Partners can interact via WhatsApp:
 | `status` | Check current assignment status |
 | `help` | Show available commands |
 
-### Wizards
-
-| Wizard | Purpose |
-|--------|---------|
-| `wfm.whatsapp.compose` | Send custom WhatsApp message |
-
-### Message Templates
-
-| Template | Trigger |
-|----------|---------|
-| `visit_assignment` | Partner assigned to visit |
-| `visit_reminder_24h` | 24 hours before visit |
-| `visit_cancelled` | Visit cancelled |
-
-### Scheduled Actions
-
-| Action | Schedule |
-|--------|----------|
-| `Send 24h Reminders` | Daily at 9:00 AM |
-
 ### Files
 
 ```
 wfm_whatsapp/
 ├── models/
-│   ├── whatsapp_message.py    # Message log
-│   └── visit_whatsapp.py      # Visit notification triggers
+│   ├── whatsapp_message.py
+│   └── visit_whatsapp.py
 ├── controllers/
-│   └── webhook.py             # Twilio webhook handler
+│   └── webhook.py
 ├── views/
 │   ├── whatsapp_message_views.xml
 │   └── visit_whatsapp_views.xml
@@ -272,6 +266,69 @@ wfm_whatsapp/
 └── data/
     ├── message_templates.xml
     └── scheduled_actions.xml
+```
+
+---
+
+## wfm_ai_chat - AI Chat Integration
+
+**Purpose:** Natural language interface using LLM with WFM-specific tools.
+
+### Models
+
+| Model | Description | Key Fields |
+|-------|-------------|------------|
+| `wfm.chat.session` | Chat conversation | `user_id`, `messages`, `context` |
+| `wfm.llm.client` | LLM API client | Tool execution methods |
+
+### Available Tools
+
+#### Visit Management
+| Tool | Description |
+|------|-------------|
+| `wfm_list_visits` | Query visits with filters |
+| `wfm_get_visit` | Single visit details |
+| `wfm_create_visit` | Create new visit |
+| `wfm_update_visit` | Update visit fields |
+| `wfm_assign_partner` | Assign partner to visit |
+
+#### Partner Management
+| Tool | Description |
+|------|-------------|
+| `wfm_list_partners` | Query partners |
+| `wfm_partner_availability` | Check availability |
+| `wfm_recommendations` | Get assignment suggestions |
+
+#### Churn Analysis
+| Tool | Description |
+|------|-------------|
+| `wfm_list_at_risk_partners` | Partners at risk of churning |
+| `wfm_get_partner_health` | Detailed churn risk analysis |
+| `wfm_log_retention_action` | Log retention intervention |
+| `wfm_resolve_retention_ticket` | Resolve retention ticket |
+| `wfm_churn_dashboard_stats` | Dashboard statistics |
+| `wfm_get_ai_retention_strategy` | AI-powered retention strategy |
+| `wfm_run_churn_computation` | Trigger churn risk computation |
+
+#### Dashboard
+| Tool | Description |
+|------|-------------|
+| `wfm_dashboard_data` | Aggregate statistics |
+| `wfm_send_whatsapp` | Send WhatsApp message |
+
+### Files
+
+```
+wfm_ai_chat/
+├── models/
+│   ├── chat_session.py
+│   └── llm_client.py
+├── tools/
+│   └── wfm_tools.py
+├── views/
+│   └── chat_views.xml
+└── data/
+    └── system_prompt.xml
 ```
 
 ---
@@ -303,6 +360,7 @@ cp -r addons/wfm_core /opt/odoo/addons/
 cp -r addons/wfm_fsm /opt/odoo/addons/
 cp -r addons/wfm_portal /opt/odoo/addons/
 cp -r addons/wfm_whatsapp /opt/odoo/addons/
+cp -r addons/wfm_ai_chat /opt/odoo/addons/
 cp -r addons/web_timeline /opt/odoo/addons/
 
 # Restart Odoo
@@ -313,7 +371,7 @@ docker restart odoo
 
 ```bash
 # In Odoo container
-odoo -d deeprunner -u wfm_core,wfm_fsm,wfm_whatsapp --stop-after-init
+odoo -d deeprunner -u wfm_core,wfm_fsm,wfm_ai_chat --stop-after-init
 ```
 
 ---
@@ -326,4 +384,12 @@ Required for `wfm_whatsapp`:
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_WHATSAPP_NUMBER=+14155238886
+```
+
+Required for `wfm_ai_chat`:
+
+```bash
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# Or compatible API endpoint
+LLM_API_BASE=https://api.openai.com/v1
 ```
