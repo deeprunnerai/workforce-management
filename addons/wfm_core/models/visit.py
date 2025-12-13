@@ -131,6 +131,75 @@ class WfmVisit(models.Model):
 
     active = fields.Boolean(default=True)
 
+    # ===================
+    # Billing Fields (SEPE Automation)
+    # ===================
+    billing_status = fields.Selection([
+        ('not_billed', 'Not Billed'),
+        ('invoiced', 'Invoiced'),
+        ('client_paid', 'Client Paid'),
+        ('settled', 'Settled'),
+    ], string='Billing Status', default='not_billed', tracking=True)
+
+    # Invoice reference (text field for now, can link to account.move later)
+    invoice_reference = fields.Char(
+        string='Invoice Reference',
+        help='Reference to the client invoice for this visit'
+    )
+
+    partner_payment_amount = fields.Monetary(
+        string='Partner Payment',
+        compute='_compute_partner_payment',
+        store=True,
+        currency_field='currency_id',
+        help='Amount to pay the partner for this visit'
+    )
+
+    currency_id = fields.Many2one(
+        'res.currency',
+        default=lambda self: self.env.company.currency_id
+    )
+
+    sepe_exported = fields.Boolean(
+        default=False,
+        string='SEPE Exported',
+        help='Whether this visit has been exported to SEPE'
+    )
+    sepe_export_date = fields.Datetime(
+        readonly=True,
+        string='SEPE Export Date',
+        help='When this visit was exported to SEPE'
+    )
+
+    @api.depends('duration', 'partner_id', 'partner_id.hourly_rate')
+    def _compute_partner_payment(self):
+        for visit in self:
+            hourly_rate = visit.partner_id.hourly_rate if visit.partner_id else 0.0
+            visit.partner_payment_amount = visit.duration * hourly_rate
+
+    @api.model
+    def _get_billing_dashboard_data(self):
+        """Return billing statistics for dashboard."""
+        not_billed = self.search([
+            ('state', '=', 'done'),
+            ('billing_status', '=', 'not_billed')
+        ])
+        invoiced = self.search([('billing_status', '=', 'invoiced')])
+        client_paid = self.search([('billing_status', '=', 'client_paid')])
+        settled = self.search([('billing_status', '=', 'settled')])
+
+        return {
+            'not_billed_count': len(not_billed),
+            'not_billed_hours': sum(not_billed.mapped('duration')),
+            'not_billed_amount': sum(not_billed.mapped('partner_payment_amount')),
+            'invoiced_count': len(invoiced),
+            'invoiced_amount': sum(invoiced.mapped('partner_payment_amount')),
+            'client_paid_count': len(client_paid),
+            'client_paid_amount': sum(client_paid.mapped('partner_payment_amount')),
+            'settled_count': len(settled),
+            'settled_amount': sum(settled.mapped('partner_payment_amount')),
+        }
+
     @api.model
     def _get_default_stage(self):
         """Get the first stage by sequence."""
