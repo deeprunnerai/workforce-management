@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Extend Visit Form to add WhatsApp features -->
+    <!-- Extend Visit Form to add WhatsApp button -->
     <record id="wfm_visit_form_whatsapp" model="ir.ui.view">
         <field name="name">wfm.visit.form.whatsapp</field>
         <field name="model">wfm.visit</field>
         <field name="inherit_id" ref="wfm_core.view_wfm_visit_form"/>
         <field name="priority">30</field>
         <field name="arch" type="xml">
-            <!-- Add WhatsApp button in header -->
+            <!-- Add WhatsApp button in header after action_assign button -->
             <xpath expr="//header/button[@name='action_assign']" position="after">
                 <button name="action_open_whatsapp_composer"
                         string="Send WhatsApp"
@@ -15,22 +15,6 @@
                         class="btn-success"
                         icon="fa-whatsapp"
                         invisible="not partner_id"/>
-            </xpath>
-
-            <!-- Add WhatsApp stat button -->
-            <xpath expr="//div[@name='button_box']" position="inside">
-                <button name="action_view_whatsapp_messages"
-                        type="object"
-                        class="oe_stat_button"
-                        icon="fa-whatsapp"
-                        invisible="whatsapp_count == 0">
-                    <field name="whatsapp_count" widget="statinfo" string="Messages"/>
-                </button>
-            </xpath>
-
-            <!-- Add hidden field for count -->
-            <xpath expr="//field[@name='notes']" position="after">
-                <field name="whatsapp_message_ids" invisible="1"/>
             </xpath>
         </field>
     </record>

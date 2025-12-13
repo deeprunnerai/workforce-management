@@ -21,7 +21,7 @@ class WfmWhatsAppCompose(models.TransientModel):
         readonly=True
     )
     partner_phone = fields.Char(
-        related='partner_id.mobile',
+        related='partner_id.phone',
         string='Phone',
         readonly=True
     )

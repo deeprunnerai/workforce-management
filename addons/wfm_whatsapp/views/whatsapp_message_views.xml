@@ -68,25 +68,7 @@
         <field name="arch" type="xml">
             <search string="Search Messages">
                 <field name="partner_id"/>
-                <field name="visit_id"/>
                 <field name="phone"/>
-                <separator/>
-                <filter string="Sent" name="filter_sent" domain="[('status', '=', 'sent')]"/>
-                <filter string="Failed" name="filter_failed" domain="[('status', '=', 'failed')]"/>
-                <filter string="Pending" name="filter_pending" domain="[('status', '=', 'pending')]"/>
-                <separator/>
-                <filter string="Assignment" name="filter_assignment" domain="[('message_type', '=', 'assignment')]"/>
-                <filter string="Reminder" name="filter_reminder" domain="[('message_type', '=', 'reminder')]"/>
-                <filter string="Custom" name="filter_custom" domain="[('message_type', '=', 'custom')]"/>
-                <separator/>
-                <filter string="Today" name="filter_today" domain="[('sent_at', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
-                <separator/>
-                <group expand="0" string="Group By">
-                    <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
-                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
-                    <filter string="Type" name="group_type" context="{'group_by': 'message_type'}"/>
-                    <filter string="Date" name="group_date" context="{'group_by': 'sent_at:day'}"/>
-                </group>
             </search>
         </field>
     </record>
@@ -96,8 +78,6 @@
         <field name="name">WhatsApp Messages</field>
         <field name="res_model">wfm.whatsapp.message</field>
         <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="wfm_whatsapp_message_search"/>
-        <field name="context">{'search_default_filter_today': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No WhatsApp messages yet

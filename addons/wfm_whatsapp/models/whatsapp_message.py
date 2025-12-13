@@ -200,11 +200,11 @@ class WfmWhatsAppMessage(models.Model):
         else:
             partner = partner_id
 
-        if not partner.phone and not partner.mobile:
+        # Get phone (mobile field may not exist in all Odoo configs)
+        phone = getattr(partner, 'mobile', None) or partner.phone
+        if not phone:
             _logger.warning(f"Partner {partner.name} has no phone number")
             return False
-
-        phone = partner.mobile or partner.phone
 
         # Create message record
         message = self.create({
