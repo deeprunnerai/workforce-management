@@ -212,3 +212,64 @@
         letter-spacing: 0.5px;
     }
 }
+
+/* AI Advice Button - Eye-catching with shimmer */
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes pulse-border {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.5),
+                    0 0 10px rgba(118, 75, 162, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(102, 126, 234, 0.7),
+                    0 0 20px rgba(118, 75, 162, 0.5);
+    }
+}
+
+/* The WOW button - shiny and attractive */
+.o_wow_btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    animation: pulse-border 2s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease !important;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.4) 50%,
+            transparent 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 2.5s linear infinite;
+    }
+
+    &:hover {
+        transform: scale(1.02) !important;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.6) !important;
+    }
+
+    i.fa-magic {
+        margin-right: 6px;
+    }
+}

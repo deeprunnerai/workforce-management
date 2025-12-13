@@ -54,6 +54,43 @@ class WfmVisitFsm(models.Model):
                 visit.recommended_partner_ids = [(5, 0, 0)]
                 visit.recommendation_html = '<p class="text-muted">Save visit to see recommendations</p>'
 
+    def _get_retention_one_liner(self, partner_id):
+        """Get a one-liner retention status for a partner (if any open ticket exists).
+
+        This doesn't affect the scoring, just provides coordinator awareness.
+
+        Returns:
+            HTML string with alert (or empty string if no issue)
+        """
+        # Look for any open/in_progress retention tickets for this partner
+        health = self.env['wfm.partner.health'].search([
+            ('partner_id', '=', partner_id),
+            ('ticket_state', 'in', ['open', 'in_progress']),
+            ('risk_level', 'in', ['high', 'critical']),
+        ], order='churn_risk_score desc', limit=1)
+
+        if not health:
+            return ''
+
+        # Build one-liner based on risk level and status
+        risk_emoji = '🔴' if health.risk_level == 'critical' else '🟠'
+        risk_label = 'Critical' if health.risk_level == 'critical' else 'High Risk'
+
+        # Build reason based on highest score component
+        reason = ''
+        if health.decline_rate_score >= 15:
+            reason = f"declined {health.visits_declined_30d} visits"
+        elif health.inactivity_score >= 10:
+            reason = f"inactive {health.days_since_last_visit}d"
+        elif health.volume_change_score >= 15:
+            reason = "activity drop"
+        elif health.payment_issue_score >= 5:
+            reason = "payment concerns"
+        else:
+            reason = f"score {health.churn_risk_score:.0f}/100"
+
+        return f'{risk_emoji} {risk_label}: {reason}'
+
     def _build_recommendation_table(self, recommendations):
         """Build a clear table showing partner recommendations with AI reasoning."""
         # Check if any partner has relationship history
@@ -85,7 +122,8 @@ class WfmVisitFsm(models.Model):
                     <th style="width: 5%;">#</th>
                     <th style="width: 25%;">Partner</th>
                     <th style="width: 10%;">Score</th>
-                    <th style="width: 60%;">Why AI Recommends</th>
+                    <th style="width: 45%;">Why Recommended</th>
+                    <th style="width: 15%;">Retention</th>
                 </tr>
             </thead>
             <tbody>
@@ -138,12 +176,18 @@ class WfmVisitFsm(models.Model):
             row_class = 'table-success' if i == 1 else ''
             rank_badge = 'bg-success' if i == 1 else 'bg-info'
 
+            # Get retention one-liner for this partner
+            retention_note = self._get_retention_one_liner(rec['partner_id'])
+            if not retention_note:
+                retention_note = '<span class="text-muted">✓ OK</span>'
+
             html += f'''
                 <tr class="{row_class}">
                     <td><span class="badge {rank_badge}">{i}</span></td>
                     <td><strong>{rec['partner_name']}</strong></td>
                     <td><strong>{rec['total_score']:.0f}</strong>/100</td>
                     <td>{" • ".join(reasons) if reasons else "Best available option"}</td>
+                    <td style="font-size: 11px;">{retention_note}</td>
                 </tr>
             '''
 
