@@ -65,6 +65,10 @@
 - [x] Visit assignment wizard
 - [x] Color-coded status cards
 - [x] Dashboard statistics API
+- [x] Timeline views (Calendar-based)
+  - Visits Timeline (by partner)
+  - Services Timeline (by partner)
+  - Contracts Timeline (by client)
 
 ---
 
@@ -93,10 +97,10 @@
 
 | Branch | Commit | Status |
 |--------|--------|--------|
-| main | `0af7314` | ✅ Up to date |
-| dev-a | `0af7314` | ✅ Synced |
-| dev-b | `0af7314` | ✅ Synced |
-| dev-c | `0af7314` | ✅ Synced |
+| main | `4277261` | ✅ Up to date |
+| dev-a | `4277261` | ✅ Synced |
+| dev-b | `4277261` | ✅ Synced |
+| dev-c | `4277261` | ✅ Synced |
 
 ---
 
@@ -166,4 +170,4 @@ _None_
 
 ---
 
-**Last Updated:** 2025-12-13 01:55 UTC
+**Last Updated:** 2025-12-13 02:30 UTC
