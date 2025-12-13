@@ -321,17 +321,34 @@ class WfmSmartAssignWizard(models.TransientModel):
                 'low': 'danger'
             }.get(confidence, 'secondary')
 
-            reasoning = result.get('reasoning', 'No reasoning provided')
+            # Get reasoning - check multiple possible keys
+            reasoning = result.get('reasoning') or result.get('summary') or result.get('raw_response', '')
+            if not reasoning or reasoning == 'No reasoning provided':
+                # Build reasoning from candidate data
+                for c in candidates:
+                    if c['partner_name'] == recommended_name or c['partner_id'] == recommended_partner.id:
+                        reasons = []
+                        if c.get('relationship_score', 0) > 0:
+                            reasons.append(f"Has history with client ({c.get('relationship_details', '')})")
+                        if c.get('availability_score', 0) >= 20:
+                            reasons.append("Fully available")
+                        if c.get('performance_score', 0) >= 15:
+                            reasons.append("Strong performance record")
+                        if c.get('proximity_score', 0) >= 8:
+                            reasons.append("Same city location")
+                        reasoning = '. '.join(reasons) if reasons else f"Best available match with score {c['total_score']}/100"
+                        break
+
             concerns = result.get('concerns')
 
             ai_html = f'''
             <div class="alert alert-{confidence_color} mb-3" style="border-left: 4px solid;">
                 <div class="d-flex align-items-center mb-2">
                     <span class="h4 mb-0 me-2">🤖</span>
-                    <strong class="h5 mb-0">Claude Recommends: {recommended_partner.name}</strong>
+                    <strong class="h5 mb-0">AI Recommends: {recommended_partner.name}</strong>
                     <span class="badge bg-{confidence_color} ms-2">{confidence.upper()}</span>
                 </div>
-                <p class="mb-2">{reasoning}</p>
+                <p class="mb-2" style="font-size: 14px;">{reasoning}</p>
                 {f'<div class="alert alert-light py-2 px-3 mb-0"><strong>⚠️ Note:</strong> {concerns}</div>' if concerns else ''}
             </div>
             '''
