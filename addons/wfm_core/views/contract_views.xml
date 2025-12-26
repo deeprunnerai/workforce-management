@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Contract Form View -->
+    <!-- Contract Form View with State-Based Content -->
     <record id="view_wfm_contract_form" model="ir.ui.view">
         <field name="name">wfm.contract.form</field>
         <field name="model">wfm.contract</field>
@@ -18,6 +18,7 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,active,expired"/>
                 </header>
                 <sheet>
+                    <!-- Button Box (visible in all states) -->
                     <div class="oe_button_box" name="button_box">
                         <button name="%(wfm_core.action_wfm_contract_services)d" type="action"
                                 class="oe_stat_button" icon="fa-list"
@@ -25,6 +26,8 @@
                             <field name="service_count" widget="statinfo" string="Services"/>
                         </button>
                     </div>
+
+                    <!-- Title (visible in all states) -->
                     <div class="oe_title">
                         <label for="code"/>
                         <h1>
@@ -32,41 +35,233 @@
                         </h1>
                         <label for="name"/>
                         <h2>
-                            <field name="name" placeholder="Contract Name"/>
+                            <field name="name" placeholder="Contract Name" readonly="state != 'draft'"/>
                         </h2>
                     </div>
-                    <group>
-                        <group string="Client">
-                            <field name="client_id"/>
-                            <field name="characterization"/>
+
+                    <!-- ============================================== -->
+                    <!-- DRAFT STATE: Editable Form View                -->
+                    <!-- ============================================== -->
+                    <div invisible="state != 'draft'">
+                        <group>
+                            <group string="Client">
+                                <field name="client_id"/>
+                                <field name="characterization"/>
+                            </group>
+                            <group string="Dates">
+                                <field name="start_date"/>
+                                <field name="is_indefinite"/>
+                                <field name="end_date" invisible="is_indefinite"/>
+                                <field name="signed_date_aade"/>
+                            </group>
                         </group>
-                        <group string="Dates">
-                            <field name="start_date"/>
-                            <field name="is_indefinite"/>
-                            <field name="end_date" invisible="is_indefinite"/>
-                            <field name="signed_date_aade"/>
+                        <group>
+                            <group string="Financial">
+                                <field name="contract_value"/>
+                                <field name="currency_id" groups="base.group_multi_currency"/>
+                            </group>
                         </group>
-                    </group>
-                    <group>
-                        <group string="Financial">
-                            <field name="contract_value"/>
-                            <field name="currency_id" groups="base.group_multi_currency"/>
+                        <notebook>
+                            <page string="Services" name="services">
+                                <field name="service_ids">
+                                    <list editable="bottom">
+                                        <field name="code" readonly="1"/>
+                                        <field name="service_type"/>
+                                        <field name="start_date"/>
+                                        <field name="end_date"/>
+                                        <field name="assigned_hours"/>
+                                        <field name="price_per_hour"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- ACTIVE STATE: Statistics Dashboard View        -->
+                    <!-- ============================================== -->
+                    <div invisible="state != 'active'">
+                        <!-- Summary Cards Row -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="alert alert-success" role="alert">
+                                    <strong>Contract Active</strong> - Started on <field name="start_date" readonly="1" class="d-inline"/>
+                                    <span invisible="is_indefinite"> | Ends on <field name="end_date" readonly="1" class="d-inline"/> | <strong><field name="days_remaining" readonly="1" class="d-inline"/> days remaining</strong></span>
+                                    <span invisible="not is_indefinite"> | <strong>Indefinite Contract</strong></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statistics Cards -->
+                        <group string="Contract Performance">
+                            <group>
+                                <div class="o_kanban_primary_bottom">
+                                    <field name="total_visits" class="o_stat_value"/>
+                                    <span class="o_stat_text">Total Visits</span>
+                                </div>
+                                <div class="o_kanban_primary_bottom">
+                                    <field name="completed_visits" class="o_stat_value"/>
+                                    <span class="o_stat_text">Completed</span>
+                                </div>
+                                <div class="o_kanban_primary_bottom">
+                                    <field name="pending_visits" class="o_stat_value"/>
+                                    <span class="o_stat_text">Pending</span>
+                                </div>
+                            </group>
+                            <group>
+                                <div class="o_kanban_primary_bottom">
+                                    <field name="completion_rate" widget="percentage" class="o_stat_value"/>
+                                    <span class="o_stat_text">Completion Rate</span>
+                                </div>
+                                <div class="o_kanban_primary_bottom">
+                                    <field name="total_hours" class="o_stat_value"/>
+                                    <span class="o_stat_text">Total Hours</span>
+                                </div>
+                                <div class="o_kanban_primary_bottom">
+                                    <field name="utilization_rate" widget="percentage" class="o_stat_value"/>
+                                    <span class="o_stat_text">Utilization</span>
+                                </div>
+                            </group>
                         </group>
-                    </group>
-                    <notebook>
-                        <page string="Services" name="services">
-                            <field name="service_ids">
-                                <list>
-                                    <field name="code"/>
-                                    <field name="service_type"/>
-                                    <field name="start_date"/>
-                                    <field name="end_date"/>
-                                    <field name="assigned_hours"/>
-                                    <field name="price_per_hour"/>
-                                </list>
-                            </field>
-                        </page>
-                    </notebook>
+
+                        <!-- Financial Stats -->
+                        <group string="Financial Overview">
+                            <group>
+                                <field name="contract_value" readonly="1"/>
+                                <field name="total_revenue" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="assigned_hours" readonly="1"/>
+                                <field name="days_active" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Client Info (Read-only) -->
+                        <group string="Contract Details">
+                            <group>
+                                <field name="client_id" readonly="1"/>
+                                <field name="characterization" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="activation_date" readonly="1"/>
+                                <field name="is_indefinite" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Services Summary -->
+                        <notebook>
+                            <page string="Active Services" name="active_services">
+                                <field name="service_ids" readonly="1">
+                                    <list>
+                                        <field name="code"/>
+                                        <field name="service_type"/>
+                                        <field name="start_date"/>
+                                        <field name="end_date"/>
+                                        <field name="assigned_hours"/>
+                                        <field name="revenue"/>
+                                        <field name="state" widget="badge"
+                                               decoration-success="state == 'active'"
+                                               decoration-info="state == 'draft'"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- EXPIRED STATE: Timeline/History View           -->
+                    <!-- ============================================== -->
+                    <div invisible="state != 'expired'">
+                        <!-- Expired Banner -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="alert alert-secondary" role="alert">
+                                    <strong>Contract Expired</strong> -
+                                    Was active from <field name="activation_date" readonly="1" class="d-inline"/>
+                                    to <field name="expiration_date" readonly="1" class="d-inline"/>
+                                    (<field name="days_active" readonly="1" class="d-inline"/> days total)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Final Statistics Summary -->
+                        <group string="Final Contract Summary">
+                            <group>
+                                <field name="client_id" readonly="1"/>
+                                <field name="contract_value" readonly="1"/>
+                                <field name="total_revenue" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="total_visits" readonly="1"/>
+                                <field name="completed_visits" readonly="1"/>
+                                <field name="total_hours" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Timeline -->
+                        <group string="Contract Timeline">
+                            <group>
+                                <field name="start_date" readonly="1" string="Contract Start"/>
+                                <field name="activation_date" readonly="1" string="Activated On"/>
+                            </group>
+                            <group>
+                                <field name="end_date" readonly="1" string="Planned End"/>
+                                <field name="expiration_date" readonly="1" string="Expired On"/>
+                            </group>
+                        </group>
+
+                        <!-- Performance Metrics -->
+                        <group string="Performance Metrics">
+                            <group>
+                                <field name="completion_rate" widget="percentage" readonly="1"/>
+                                <field name="utilization_rate" widget="percentage" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="assigned_hours" readonly="1"/>
+                                <field name="characterization" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Historical Services -->
+                        <notebook>
+                            <page string="Service History" name="service_history">
+                                <field name="service_ids" readonly="1">
+                                    <list decoration-muted="state == 'cancelled'">
+                                        <field name="code"/>
+                                        <field name="service_type"/>
+                                        <field name="start_date"/>
+                                        <field name="end_date"/>
+                                        <field name="assigned_hours"/>
+                                        <field name="revenue"/>
+                                        <field name="state" widget="badge"
+                                               decoration-success="state == 'completed'"
+                                               decoration-muted="state == 'cancelled'"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- CANCELLED STATE: Basic Info View               -->
+                    <!-- ============================================== -->
+                    <div invisible="state != 'cancelled'">
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Contract Cancelled</strong> - This contract has been cancelled and is no longer active.
+                        </div>
+                        <group string="Contract Information">
+                            <group>
+                                <field name="client_id" readonly="1"/>
+                                <field name="characterization" readonly="1"/>
+                                <field name="contract_value" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="start_date" readonly="1"/>
+                                <field name="end_date" readonly="1"/>
+                            </group>
+                        </group>
+                    </div>
+
                 </sheet>
                 <chatter/>
             </form>
@@ -107,6 +302,7 @@
                 <field name="client_id"/>
                 <filter string="Active" name="active_contracts" domain="[('state', '=', 'active')]"/>
                 <filter string="Draft" name="draft_contracts" domain="[('state', '=', 'draft')]"/>
+                <filter string="Expired" name="expired_contracts" domain="[('state', '=', 'expired')]"/>
                 <filter string="Indefinite" name="indefinite" domain="[('is_indefinite', '=', True)]"/>
                 <separator/>
                 <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
