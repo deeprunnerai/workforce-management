@@ -143,7 +143,7 @@
                                 <field name="characterization" readonly="1"/>
                             </group>
                             <group>
-                                <field name="activation_date" readonly="1"/>
+                                <field name="start_date" readonly="1" string="Started"/>
                                 <field name="is_indefinite" readonly="1"/>
                             </group>
                         </group>
@@ -177,8 +177,8 @@
                             <div class="col-12">
                                 <div class="alert alert-secondary" role="alert">
                                     <strong>Contract Expired</strong> -
-                                    Was active from <field name="activation_date" readonly="1" class="d-inline"/>
-                                    to <field name="expiration_date" readonly="1" class="d-inline"/>
+                                    Was active from <field name="start_date" readonly="1" class="d-inline"/>
+                                    to <field name="end_date" readonly="1" class="d-inline"/>
                                     (<field name="days_active" readonly="1" class="d-inline"/> days total)
                                 </div>
                             </div>
@@ -202,11 +202,11 @@
                         <group string="Contract Timeline">
                             <group>
                                 <field name="start_date" readonly="1" string="Contract Start"/>
-                                <field name="activation_date" readonly="1" string="Activated On"/>
+                                <field name="signed_date_aade" readonly="1" string="AADE Registration"/>
                             </group>
                             <group>
-                                <field name="end_date" readonly="1" string="Planned End"/>
-                                <field name="expiration_date" readonly="1" string="Expired On"/>
+                                <field name="end_date" readonly="1" string="Contract End"/>
+                                <field name="days_active" readonly="1" string="Total Days"/>
                             </group>
                         </group>
 

@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 550">
+  <!-- Title -->
+  <text x="625" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">Architecture Comparison: SAP HANA vs ERPx10</text>
+
+  <!-- ==================== SAP HANA (Left Side) ==================== -->
+  <rect x="20" y="50" width="580" height="480" fill="#f0f0f0" stroke="#999" stroke-width="2" rx="5"/>
+
+  <text x="310" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#333">SAP HANA Server</text>
+
+  <!-- Connection/Session Management -->
+  <rect x="40" y="105" width="540" height="35" fill="#b8d4e8" stroke="#7ab3d4" stroke-width="1" rx="3"/>
+  <text x="310" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#333">Connection / Session Management</text>
+
+  <!-- Index Server -->
+  <rect x="40" y="150" width="540" height="30" fill="#6db3e8" stroke="#4a9cd9" stroke-width="1" rx="3"/>
+  <text x="310" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#fff" font-weight="bold">Index Server</text>
+
+  <!-- Arrow -->
+  <path d="M310 180 L310 195 M305 188 L310 195 L315 188 M305 185 L310 180 L315 185" stroke="#666" stroke-width="2" fill="none"/>
+
+  <!-- Knowledge Graph Engine -->
+  <rect x="40" y="200" width="540" height="315" fill="#e87d3e" stroke="#c45a1a" stroke-width="2" rx="5"/>
+
+  <text x="55" y="225" font-family="Arial, sans-serif" font-size="11" fill="#fff" font-weight="bold">SAP HANA</text>
+  <text x="55" y="238" font-family="Arial, sans-serif" font-size="11" fill="#fff" font-weight="bold">Knowledge</text>
+  <text x="55" y="251" font-family="Arial, sans-serif" font-size="11" fill="#fff" font-weight="bold">Graph</text>
+  <text x="55" y="264" font-family="Arial, sans-serif" font-size="11" fill="#fff" font-weight="bold">Engine</text>
+
+  <!-- Top row -->
+  <rect x="130" y="215" width="90" height="30" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="175" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#333">Parser(s)</text>
+
+  <rect x="230" y="215" width="90" height="30" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="275" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#333">Rewriter</text>
+
+  <rect x="330" y="215" width="90" height="30" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="375" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#333">Planner</text>
+
+  <rect x="430" y="215" width="90" height="30" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="475" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#333">CodeGen</text>
+
+  <!-- Inner blue section -->
+  <rect x="130" y="260" width="440" height="240" fill="#4a7fb5" stroke="#2d5a8a" stroke-width="1" rx="3"/>
+
+  <!-- Row 2 -->
+  <rect x="145" y="275" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="192" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Scheduler</text>
+
+  <rect x="250" y="275" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="297" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Tx Manager</text>
+
+  <rect x="355" y="275" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="402" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Inference</text>
+
+  <rect x="460" y="275" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="507" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Mem Mgmt</text>
+
+  <!-- Row 3 -->
+  <rect x="145" y="320" width="70" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="180" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Comm</text>
+
+  <!-- Storage cylinder -->
+  <ellipse cx="350" cy="335" rx="65" ry="10" fill="#6db3e8" stroke="#4a9cd9" stroke-width="1"/>
+  <rect x="285" y="335" width="130" height="30" fill="#6db3e8" stroke="none"/>
+  <ellipse cx="350" cy="365" rx="65" ry="10" fill="#6db3e8" stroke="#4a9cd9" stroke-width="1"/>
+  <line x1="285" y1="335" x2="285" y2="365" stroke="#4a9cd9" stroke-width="1"/>
+  <line x1="415" y1="335" x2="415" y2="365" stroke="#4a9cd9" stroke-width="1"/>
+  <text x="350" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#333" font-weight="bold">Storage</text>
+
+  <rect x="460" y="320" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="507" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Sys Mgmt</text>
+
+  <!-- Row 4 -->
+  <rect x="145" y="390" width="70" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="180" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">SHACL</text>
+
+  <rect x="460" y="390" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="507" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">UDX</text>
+
+  <!-- Bottom label -->
+  <text x="350" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#fff" font-weight="bold">SAP HANA Database Triple Store</text>
+
+  <!-- ==================== ERPx10 (Right Side) ==================== -->
+  <rect x="650" y="50" width="580" height="480" fill="#f0f0f0" stroke="#999" stroke-width="2" rx="5"/>
+
+  <text x="940" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#333">ERPx10 Server</text>
+
+  <!-- API Gateway -->
+  <rect x="670" y="105" width="540" height="35" fill="#b8d4e8" stroke="#7ab3d4" stroke-width="1" rx="3"/>
+  <text x="940" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#333">API Gateway / Authentication Layer</text>
+
+  <!-- Hybrid Search Index -->
+  <rect x="670" y="150" width="540" height="30" fill="#6db3e8" stroke="#4a9cd9" stroke-width="1" rx="3"/>
+  <text x="940" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#fff" font-weight="bold">Hybrid Search Index (pgvector + Elasticsearch)</text>
+
+  <!-- Arrow -->
+  <path d="M940 180 L940 195 M935 188 L940 195 L945 188 M935 185 L940 180 L945 185" stroke="#666" stroke-width="2" fill="none"/>
+
+  <!-- Intelligence & Context Layer -->
+  <rect x="670" y="200" width="540" height="315" fill="#e87d3e" stroke="#c45a1a" stroke-width="2" rx="5"/>
+
+  <text x="685" y="225" font-family="Arial, sans-serif" font-size="11" fill="#fff" font-weight="bold">ERPx10</text>
+  <text x="685" y="238" font-family="Arial, sans-serif" font-size="11" fill="#fff" font-weight="bold">Intelligence</text>
+  <text x="685" y="251" font-family="Arial, sans-serif" font-size="11" fill="#fff" font-weight="bold">&amp; Context</text>
+  <text x="685" y="264" font-family="Arial, sans-serif" font-size="11" fill="#fff" font-weight="bold">Layer</text>
+
+  <!-- Top row -->
+  <rect x="760" y="215" width="90" height="30" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="805" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#333">Query Parser</text>
+
+  <rect x="860" y="215" width="90" height="30" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="905" y="232" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">Context</text>
+  <text x="905" y="243" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">Enricher</text>
+
+  <rect x="960" y="215" width="90" height="30" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="1005" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#333">Tool Planner</text>
+
+  <rect x="1060" y="215" width="90" height="30" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="1105" y="232" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">Response</text>
+  <text x="1105" y="243" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">Generator</text>
+
+  <!-- Inner blue section -->
+  <rect x="760" y="260" width="440" height="240" fill="#4a7fb5" stroke="#2d5a8a" stroke-width="1" rx="3"/>
+
+  <!-- Row 2 -->
+  <rect x="775" y="275" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="822" y="292" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#fff">Workflow</text>
+  <text x="822" y="302" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#fff">Engine</text>
+
+  <rect x="880" y="275" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="927" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Odoo ORM</text>
+
+  <rect x="985" y="275" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="1032" y="292" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#fff">LLM Inference</text>
+  <text x="1032" y="302" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#fff">(LiteLLM)</text>
+
+  <rect x="1090" y="275" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="1137" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Cache Mgr</text>
+
+  <!-- Row 3 -->
+  <rect x="775" y="320" width="70" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="810" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Notify</text>
+
+  <!-- Storage cylinder -->
+  <ellipse cx="980" cy="335" rx="65" ry="10" fill="#6db3e8" stroke="#4a9cd9" stroke-width="1"/>
+  <rect x="915" y="335" width="130" height="30" fill="#6db3e8" stroke="none"/>
+  <ellipse cx="980" cy="365" rx="65" ry="10" fill="#6db3e8" stroke="#4a9cd9" stroke-width="1"/>
+  <line x1="915" y1="335" x2="915" y2="365" stroke="#4a9cd9" stroke-width="1"/>
+  <line x1="1045" y1="335" x2="1045" y2="365" stroke="#4a9cd9" stroke-width="1"/>
+  <text x="980" y="352" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333" font-weight="bold">Context Store</text>
+
+  <rect x="1090" y="320" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="1137" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Admin</text>
+
+  <!-- Row 4 -->
+  <rect x="775" y="390" width="70" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="810" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#fff">Validation</text>
+
+  <rect x="1090" y="390" width="95" height="30" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="1137" y="407" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#fff">Tool</text>
+  <text x="1137" y="417" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#fff">Executor</text>
+
+  <!-- Bottom label -->
+  <text x="980" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#fff" font-weight="bold">PostgreSQL + pgvector (Entity &amp; Vector Store)</text>
+
+  <!-- ==================== Mapping Lines ==================== -->
+  <!-- Dotted lines connecting equivalent components -->
+  <line x1="600" y1="122" x2="650" y2="122" stroke="#666" stroke-width="1" stroke-dasharray="5,3"/>
+  <line x1="600" y1="165" x2="650" y2="165" stroke="#666" stroke-width="1" stroke-dasharray="5,3"/>
+  <line x1="570" y1="230" x2="680" y2="230" stroke="#666" stroke-width="1" stroke-dasharray="5,3"/>
+  <line x1="570" y1="350" x2="680" y2="350" stroke="#666" stroke-width="1" stroke-dasharray="5,3"/>
+  <line x1="570" y1="475" x2="680" y2="475" stroke="#666" stroke-width="1" stroke-dasharray="5,3"/>
+</svg>

@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500">
+  <!-- Background -->
+  <rect x="10" y="10" width="580" height="480" fill="#f0f0f0" stroke="#999" stroke-width="2" rx="5"/>
+
+  <!-- Title -->
+  <text x="300" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">ERPx10 Server</text>
+
+  <!-- Connection/Session Management -->
+  <rect x="30" y="65" width="540" height="40" fill="#b8d4e8" stroke="#7ab3d4" stroke-width="1" rx="3"/>
+  <text x="300" y="92" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">API Gateway / Authentication Layer</text>
+
+  <!-- Hybrid Search Index -->
+  <rect x="30" y="115" width="540" height="35" fill="#6db3e8" stroke="#4a9cd9" stroke-width="1" rx="3"/>
+  <text x="300" y="138" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#fff" font-weight="bold">Hybrid Search Index (pgvector + Elasticsearch)</text>
+
+  <!-- Arrow between Index and Engine -->
+  <path d="M300 150 L300 170 M295 160 L300 170 L305 160 M295 155 L300 150 L305 155" stroke="#666" stroke-width="2" fill="none"/>
+
+  <!-- Intelligence & Context Layer (orange section) -->
+  <rect x="30" y="175" width="540" height="295" fill="#e87d3e" stroke="#c45a1a" stroke-width="2" rx="5"/>
+
+  <!-- Label for Intelligence Layer -->
+  <text x="45" y="205" font-family="Arial, sans-serif" font-size="12" fill="#fff" font-weight="bold">ERPx10</text>
+  <text x="45" y="220" font-family="Arial, sans-serif" font-size="12" fill="#fff" font-weight="bold">Intelligence</text>
+  <text x="45" y="235" font-family="Arial, sans-serif" font-size="12" fill="#fff" font-weight="bold">&amp; Context</text>
+  <text x="45" y="250" font-family="Arial, sans-serif" font-size="12" fill="#fff" font-weight="bold">Layer</text>
+
+  <!-- Top row boxes (Parser, Rewriter, Planner, CodeGen equivalents) -->
+  <rect x="130" y="195" width="100" height="35" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="180" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">Query Parser</text>
+
+  <rect x="240" y="195" width="100" height="35" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="290" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">Context Enricher</text>
+
+  <rect x="350" y="195" width="100" height="35" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="400" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">Tool Planner</text>
+
+  <rect x="460" y="195" width="100" height="35" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
+  <text x="510" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">Response Gen</text>
+
+  <!-- Inner blue section -->
+  <rect x="130" y="245" width="430" height="210" fill="#4a7fb5" stroke="#2d5a8a" stroke-width="1" rx="3"/>
+
+  <!-- Second row boxes -->
+  <rect x="145" y="260" width="95" height="35" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="192" y="283" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#fff">Workflow Engine</text>
+
+  <rect x="250" y="260" width="95" height="35" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="297" y="283" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#fff">Odoo ORM</text>
+
+  <rect x="355" y="260" width="95" height="35" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="402" y="283" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#fff">LLM Inference</text>
+
+  <rect x="460" y="260" width="85" height="35" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="502" y="283" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#fff">Cache Mgr</text>
+
+  <!-- Third row boxes -->
+  <rect x="145" y="305" width="70" height="35" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="180" y="328" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#fff">Notify</text>
+
+  <!-- Storage cylinder -->
+  <ellipse cx="340" cy="325" rx="70" ry="12" fill="#6db3e8" stroke="#4a9cd9" stroke-width="1"/>
+  <rect x="270" y="325" width="140" height="35" fill="#6db3e8" stroke="none"/>
+  <ellipse cx="340" cy="360" rx="70" ry="12" fill="#6db3e8" stroke="#4a9cd9" stroke-width="1"/>
+  <line x1="270" y1="325" x2="270" y2="360" stroke="#4a9cd9" stroke-width="1"/>
+  <line x1="410" y1="325" x2="410" y2="360" stroke="#4a9cd9" stroke-width="1"/>
+  <text x="340" y="348" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333" font-weight="bold">Context Store</text>
+
+  <rect x="460" y="305" width="85" height="35" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="502" y="328" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#fff">Admin</text>
+
+  <!-- Fourth row boxes -->
+  <rect x="145" y="385" width="70" height="35" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="180" y="408" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#fff">Validation</text>
+
+  <rect x="460" y="385" width="85" height="35" fill="#2d5a8a" stroke="#1a3d5c" stroke-width="1" rx="3"/>
+  <text x="502" y="408" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#fff">Tool Executor</text>
+
+  <!-- Bottom label -->
+  <text x="340" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#fff" font-weight="bold">PostgreSQL + pgvector (Entity &amp; Vector Store)</text>
+</svg>

@@ -152,16 +152,6 @@ class WfmContract(models.Model):
         store=False
     )
 
-    # Timeline fields (for expired state view)
-    activation_date = fields.Date(
-        string='Activation Date',
-        help='Date when contract was activated'
-    )
-    expiration_date = fields.Date(
-        string='Actual Expiration Date',
-        help='Actual date when contract expired'
-    )
-
     @api.depends('service_ids')
     def _compute_service_count(self):
         for contract in self:
@@ -180,16 +170,10 @@ class WfmContract(models.Model):
             self.end_date = False
 
     def action_activate(self):
-        self.write({
-            'state': 'active',
-            'activation_date': date.today()
-        })
+        self.write({'state': 'active'})
 
     def action_expire(self):
-        self.write({
-            'state': 'expired',
-            'expiration_date': date.today()
-        })
+        self.write({'state': 'expired'})
 
     def action_cancel(self):
         self.write({'state': 'cancelled'})
