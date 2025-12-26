@@ -155,12 +155,10 @@ class WfmContract(models.Model):
     # Timeline fields (for expired state view)
     activation_date = fields.Date(
         string='Activation Date',
-        tracking=True,
         help='Date when contract was activated'
     )
     expiration_date = fields.Date(
         string='Actual Expiration Date',
-        tracking=True,
         help='Actual date when contract expired'
     )
 
